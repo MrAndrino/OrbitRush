@@ -1,16 +1,15 @@
-import classes from '@/components/button/button.module.css'
+import styles from '@/components/button/button.module.css'
 
 type ButtonProps = {
   children: React.ReactNode;
-  variant: string;
-  color: string;
+  color: 'blue' | 'red' | 'green';
 };
 
-function Button ({ children, variant, color}: ButtonProps) {
-  return(
-    <button className={`${classes[variant]} ${classes[color]} `}>
-      {children}
-    </button>
+function Button({ children, color }: ButtonProps) {
+  return (
+    <div className={styles[color]}>
+      <button>{children}</button>
+    </div>
   )
 }
 
