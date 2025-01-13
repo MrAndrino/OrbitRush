@@ -2,15 +2,16 @@ import styles from '@/components/button/button.module.css'
 import Link from 'next/link';
 
 type ButtonProps = {
+  onClick?: () => void;
   children: React.ReactNode;
   color: 'blue' | 'orange';
   href?: string;
   className?: string;
 };
 
-function Button({ children, color, href, className = '' }: ButtonProps) {
+function Button({ children, color, href, className, onClick}: ButtonProps) {
   const buttonContent = (
-    <button className={`${styles[color]} ${className}`}>
+    <button onClick={onClick} className={`${styles[color]} ${className}`}>
       {children}
     </button>
   )
