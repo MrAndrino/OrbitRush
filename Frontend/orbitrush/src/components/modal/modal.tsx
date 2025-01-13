@@ -11,6 +11,18 @@ interface ModalProps {
 
 const Modal = ({ isOpen, closeModal, children, color, className }: ModalProps) => {
   useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+  
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if ((e.target as HTMLElement).classList.contains(styles['modal-overlay'])) {
         closeModal();

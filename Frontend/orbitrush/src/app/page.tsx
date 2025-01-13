@@ -15,9 +15,10 @@ export default function HomePage() {
 
       {/* Encabezado */}
       <div className="relative bg-[url('/images/OrbitRush-Fondo.png')] bg-cover bg-center">
-        <div className="h-[40vh] select-none">
-          <div className="absolute inset-0 bg-black/55 backdrop-blur-md flex items-center justify-center font-primary text-2xl sm:text-4xl md:text-5xl lg:text-7xl">
-            Orbit Rush!<br />Tu nueva forma de jugar Órbito
+        <div className="h-[45vh] select-none">
+          <div className="absolute inset-0 bg-black/55 backdrop-blur-md flex flex-col items-center justify-center font-primary text-2xl sm:text-4xl md:text-5xl lg:text-6xl">
+            <img src='images/OrbitRush-Title.png' className='h-[15rem]'></img>
+            <p className='pt-[2rem]'>Tu nueva forma de jugar Órbito</p>
           </div>
         </div>
         <Line />
@@ -36,16 +37,36 @@ export default function HomePage() {
       </div>
 
       {/* Modal */}
-      <Modal isOpen={isModalOpen} closeModal={closeModal} color='orange'>
-        <p className="text-4xl">Instrucciones del juego</p>
-        <div className='font-secondary pt-[2rem]'><p>Órbito es un emocionante juego de mesa tridimensional donde los jugadores deben... (explicación).</p>
-        <p>¡Diviértete y disfruta del reto!</p>
-        <p>¡Diviértete y disfruta del reto!</p>
-        <p>¡Diviértete y disfruta del reto!</p>
-        <p>¡Diviértete y disfruta del reto!</p>
-        <p>¡Diviértete y disfruta del reto!</p>
-        <p>¡Diviértete y disfruta del reto!</p></div>
-        
+      <Modal isOpen={isModalOpen} closeModal={closeModal} color='orange' className='max-w-[40%]'>
+        <div className='flex flex-col gap-[2rem] font-secondary'>
+          <p className="text-5xl font-primary">Instrucciones del juego</p>
+          <div className='font-secondary'>
+            <p className="text-3xl font-primary">Objetivo</p>
+            <p>En Órbito, dos jugadores compiten por alinear cuatro fichas de su color en una fila horizontal, vertical o diagonal. El desafío está en anticipar los movimientos del oponente y adaptarse a los giros inesperados del tablero.</p>
+          </div>
+
+          <div className=''>
+            <p className="text-3xl font-primary">Inicio del Juego</p>
+            <p>Al comenzar, el sistema asigna al azar quién juega primero. Cada jugador dispone de un conjunto de fichas de su color y toma turnos para realizar sus movimientos.</p>
+          </div>
+
+          <div className=''>
+            <p className="text-3xl font-primary">Turnos de Juego</p>
+            <p>Durante cada turno, el jugador puede realizar dos acciones:
+              Colocar una ficha en cualquier celda vacía del tablero de 4x4.
+              Activar el mecanismo "Órbito", que mueve todas las fichas del tablero en patrones predefinidos, cambiando sus posiciones.</p>
+          </div>
+
+          <div className=''>
+            <p className="text-3xl font-primary">El Tablero Dinámico</p>
+            <p>El tablero se actualiza automáticamente cuando se activa el mecanismo "Órbito". Las fichas del anillo exterior se desplazan en una dirección, mientras que las del anillo interior lo hacen en la dirección opuesta. Este movimiento puede romper alineaciones o crear nuevas oportunidades estratégicas.</p>
+          </div>
+
+          <div className=''>
+            <p className="text-3xl font-primary">Condiciones de Victoria</p>
+            <p>El primer jugador que logre alinear cuatro fichas de su color gana la partida. En caso de que no haya más movimientos posibles y no se haya alcanzado el objetivo, el juego termina en empate.</p>
+          </div>
+        </div>
       </Modal>
     </div>
   );
