@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\orbitrush.props" />
+</Project>
