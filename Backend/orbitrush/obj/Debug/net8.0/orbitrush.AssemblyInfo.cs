@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("orbitrush")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eebc75d9eaa82f7f0265efbc6928c81ff476bae6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+212a2eb6c4629af5a4f1d0832f4c2c2c238bc562")]
 [assembly: System.Reflection.AssemblyProductAttribute("orbitrush")]
 [assembly: System.Reflection.AssemblyTitleAttribute("orbitrush")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -33,12 +33,12 @@ public class AuthController : ControllerBase
                 throw new ArgumentException("Password is required.");
             }
 
-            if (string.IsNullOrEmpty(request?.Email) && string.IsNullOrEmpty(request?.Name))
+            if (string.IsNullOrEmpty(request.NameLabel))
             {
                 throw new ArgumentException("Either Email or Name must be provided.");
             }
 
-            User user = await _unitOfWork.UserRepository.CheckData(request.Email, request.Name, request.Password);
+            User user = await _unitOfWork.UserRepository.CheckData(request.NameLabel, request.Password);
 
             if (user == null)
             {

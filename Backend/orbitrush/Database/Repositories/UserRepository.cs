@@ -8,27 +8,17 @@ public class UserRepository : Repository<User, int>
 {
     public UserRepository(MyDbContext context) : base(context) { }
 
-    public async Task<User> CheckData(string name, string email, string password)
+    public async Task<User> CheckData(string nameLabel, string password)
     {
         string hashPassword = PasswordHelper.Hash(password);
+        nameLabel = nameLabel.ToLower();
 
-        var user = await GetQueryable()
-         .FirstOrDefaultAsync(user =>
-             (string.IsNullOrEmpty(name) || user.Name == name) &&
-             (string.IsNullOrEmpty(email) || user.Email == email) &&
-             user.HashPassword == hashPassword);
+        User user = await GetQueryable()
+         .Where(user => (user.Name == nameLabel || user.Email == nameLabel) && user.HashPassword == hashPassword)
+         .FirstOrDefaultAsync();
 
-        Console.WriteLine($"user: {user}");
         return user;
     }
-
-
-
-
-
-
-
-
 
 
     //public async Task<bool>
