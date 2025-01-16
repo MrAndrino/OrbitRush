@@ -1,14 +1,14 @@
 "use client";
-
 import React, { useState } from 'react';
+import Button from '../button/button';
 
 type LoginFormProps = {
   onSubmit: (data: { usernameOrEmail: string; password: string }) => void;
 };
 
 function LoginForm({ onSubmit }: LoginFormProps) {
-  const [usernameOrEmail, setUsernameOrEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +37,9 @@ function LoginForm({ onSubmit }: LoginFormProps) {
           required
         />
       </div>
-      <button type="submit">Iniciar Sesión</button>
+      <Button color="blue" type="submit" className='p-2'>
+        Iniciar Sesión
+      </Button>
     </form>
   );
 }

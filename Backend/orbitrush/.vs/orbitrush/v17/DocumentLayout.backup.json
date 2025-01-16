@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\utsug\\Documents\\GitHub\\OrbitRush\\Backend\\orbitrush\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{BDFDF451-81DA-4326-97EE-4BB6A037D70F}|orbitrush.csproj|c:\\users\\utsug\\documents\\github\\orbitrush\\backend\\orbitrush\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BDFDF451-81DA-4326-97EE-4BB6A037D70F}|orbitrush.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{BDFDF451-81DA-4326-97EE-4BB6A037D70F}|orbitrush.csproj|c:\\users\\utsug\\documents\\github\\orbitrush\\backend\\orbitrush\\database\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BDFDF451-81DA-4326-97EE-4BB6A037D70F}|orbitrush.csproj|solutionrelative:database\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BDFDF451-81DA-4326-97EE-4BB6A037D70F}|orbitrush.csproj|c:\\users\\utsug\\documents\\github\\orbitrush\\backend\\orbitrush\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BDFDF451-81DA-4326-97EE-4BB6A037D70F}|orbitrush.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{BDFDF451-81DA-4326-97EE-4BB6A037D70F}|orbitrush.csproj|c:\\users\\utsug\\documents\\github\\orbitrush\\backend\\orbitrush\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -30,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
@@ -73,20 +73,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "UserRepository.cs",
               "DocumentMoniker": "C:\\Users\\utsug\\Documents\\GitHub\\OrbitRush\\Backend\\orbitrush\\Database\\Repositories\\UserRepository.cs",
               "RelativeDocumentMoniker": "Database\\Repositories\\UserRepository.cs",
               "ToolTip": "C:\\Users\\utsug\\Documents\\GitHub\\OrbitRush\\Backend\\orbitrush\\Database\\Repositories\\UserRepository.cs",
               "RelativeToolTip": "Database\\Repositories\\UserRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAArAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-15T20:37:53.661Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "AuthController.cs",
               "DocumentMoniker": "C:\\Users\\utsug\\Documents\\GitHub\\OrbitRush\\Backend\\orbitrush\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "Controllers\\AuthController.cs",

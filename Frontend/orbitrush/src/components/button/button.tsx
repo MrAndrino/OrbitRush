@@ -7,11 +7,12 @@ type ButtonProps = {
   color: 'blue' | 'orange';
   href?: string;
   className?: string;
+  type?: 'button' | 'submit' | 'reset';
 };
 
-function Button({ children, color, href, className, onClick}: ButtonProps) {
+function Button({ children, color, href, className, onClick, type}: ButtonProps) {
   const buttonContent = (
-    <button onClick={onClick} className={`${styles[color]} ${className}`}>
+    <button onClick={onClick} type={type} className={`${styles[color]} ${className}`}>
       {children}
     </button>
   )

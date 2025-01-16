@@ -1,4 +1,5 @@
 .neonBorder {
+  width: 100%;
   position: relative;
   background: linear-gradient(to bottom, rgb(0, 153, 255), rgb(255, 140, 0));
   padding: 2px;
