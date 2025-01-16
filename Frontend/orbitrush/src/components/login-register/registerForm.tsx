@@ -45,60 +45,76 @@ function RegisterForm({ onSubmit }: RegisterFormProps) {
   };
 
   return (
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="profileImage">Imagen de perfil (opcional):</label>
-            <input
-              type="file"
-              id="profileImage"
-              accept="image/*"
-              onChange={handleImageChange}
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label
+          htmlFor="profileImage"
+          className="flex justify-center items-center cursor-pointer w-24 h-24 rounded-full bg-gray-300 text-white relative overflow-hidden m-auto"
+        >
+          {profileImage ? (
+            <img
+              src={URL.createObjectURL(profileImage)}
+              alt="Imagen de perfil"
+              className="w-full h-full object-cover rounded-full "
             />
-          </div>
-          <div>
-            <label htmlFor="username">Apodo:</label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="email">Email:</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="password">Contraseña:</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="confirmPassword">Confirmar Contraseña:</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
-          <Button color="orange" type="submit" className='p-2'>
-            Registrarse
-          </Button>
-        </form>
-      )}
+          ) : (
+            <span className="text-2xl">+</span>
+          )}
+          <input
+            type="file"
+            id="profileImage"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="absolute opacity-0 w-full h-full top-0 left-0 cursor-pointer "
+          />
+        </label>
+
+      </div>
+      <div>
+        <label htmlFor="username">Apodo: </label>
+        <input
+          type="text"
+          id="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="email">Email: </label>
+        <input
+          type="email"
+          id="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="password">Contraseña: </label>
+        <input
+          type="password"
+          id="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="confirmPassword">Confirmar: </label>
+        <input
+          type="password"
+          id="confirmPassword"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
+      </div>
+      <Button color="orange" type="submit" className='p-2 m-8 w-48'>
+        Registrarse
+      </Button>
+    </form>
+  )
+}
 
 export default RegisterForm;

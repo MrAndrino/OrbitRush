@@ -18,7 +18,7 @@ function LoginForm({ onSubmit }: LoginFormProps) {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="usernameOrEmail">Apodo o Email:</label>
+        <label htmlFor="usernameOrEmail">Apodo o Email: </label>
         <input
           type="text"
           id="usernameOrEmail"
@@ -28,7 +28,7 @@ function LoginForm({ onSubmit }: LoginFormProps) {
         />
       </div>
       <div>
-        <label htmlFor="password">Contraseña:</label>
+        <label htmlFor="password">Contraseña: </label>
         <input
           type="password"
           id="password"
@@ -37,7 +37,7 @@ function LoginForm({ onSubmit }: LoginFormProps) {
           required
         />
       </div>
-      <Button color="blue" type="submit" className='p-2'>
+      <Button color="blue" type="submit" className='p-2 m-8'>
         Iniciar Sesión
       </Button>
     </form>

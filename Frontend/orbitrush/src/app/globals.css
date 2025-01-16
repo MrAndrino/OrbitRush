@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: linear-gradient(135deg, #f1f1f1, #dadada);
   --foreground: #171717;
   --font-primary: "Electrolize", sans-serif;
   --font-secondary: "Roboto", sans-serif;
@@ -13,7 +13,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: linear-gradient(135deg, #0a0a0a, #151515);
     --foreground: #ededed;
     --font-primary: "Electrolize", sans-serif;
     --font-secondary: "Roboto", sans-serif;
@@ -22,6 +22,6 @@
 
 body {
   color: var(--foreground);
-  background-color: var(--background);
+  background: var(--background);
   font-family: var(--font-primary), var(--font-secondary), sans-serif;
 }

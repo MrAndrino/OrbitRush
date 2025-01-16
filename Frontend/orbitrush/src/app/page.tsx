@@ -18,7 +18,7 @@ export default function HomePage() {
         <div className="h-[45vh] select-none">
           <div className="absolute inset-0 bg-black/55 backdrop-blur-md flex flex-col items-center justify-center font-primary text-2xl sm:text-4xl md:text-5xl lg:text-5xl">
             <img src='images/OrbitRush-Title.png' className='h-[12rem]'></img>
-            <p className='pt-[1rem]'>Tu nueva forma de jugar Orbito</p>
+            <p className='pt-[1rem] text-white'>Tu nueva forma de jugar Orbito</p>
           </div>
         </div>
         <Line />
@@ -37,7 +37,7 @@ export default function HomePage() {
       </div>
 
       {/* Modal */}
-      <Modal isOpen={isModalOpen} closeModal={closeModal} color='orange' className='max-w-[55%]'>
+      <Modal isOpen={isModalOpen} closeModal={closeModal} color='orange' className='w-[55%]'>
         <div className='flex flex-col gap-12 font-secondary'>
           <p className="text-5xl font-primary">Instrucciones del juego</p>
           <div className='flex flex-col gap-2'>

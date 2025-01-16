@@ -32,7 +32,7 @@
   max-width: 90%;
   padding: 3rem;
   border-radius: 10px;
-  background: linear-gradient(135deg, #0a0a0a, #151515);
+  background: var(--background);
   overflow-y: auto;
   scrollbar-width: thin;
   

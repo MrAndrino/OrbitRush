@@ -56,9 +56,7 @@ function AuthPage() {
         {renderLogin && <LoginForm onSubmit={handleLogin} />}
       </div>
 
-      <div className="my-8">
         <Line />
-      </div>
 
       {/* Botón Regístrate */}
       <button
