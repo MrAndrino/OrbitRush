@@ -1,7 +1,5 @@
-export const homePage = () => "/";
+export const HomePage = () => "/";
 
-export const signUpPath = () => "/sign-up";
-export const signInPath = () => "/sign-in";
-export const passwordForgotPath = () => "/password-forgot";
+export const AuthPage = () => "/login";
 
 // export const menuPage = () => "/menu";

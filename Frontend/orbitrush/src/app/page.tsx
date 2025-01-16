@@ -16,8 +16,8 @@ export default function HomePage() {
       {/* Encabezado */}
       <div className="relative bg-[url('/images/OrbitRush-Fondo.png')] bg-cover bg-center">
         <div className="h-[45vh] select-none">
-          <div className="absolute inset-0 bg-black/55 backdrop-blur-md flex flex-col items-center justify-center font-primary text-2xl sm:text-4xl md:text-5xl lg:text-6xl">
-            <img src='images/OrbitRush-Title.png' className='h-[15rem]'></img>
+          <div className="absolute inset-0 bg-black/55 backdrop-blur-md flex flex-col items-center justify-center font-primary text-2xl sm:text-4xl md:text-5xl lg:text-5xl">
+            <img src='images/OrbitRush-Title.png' className='h-[12rem]'></img>
             <p className='pt-[1rem]'>Tu nueva forma de jugar Orbito</p>
           </div>
         </div>
