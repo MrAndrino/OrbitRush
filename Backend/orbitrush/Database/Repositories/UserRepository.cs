@@ -14,7 +14,7 @@ public class UserRepository : Repository<User, int>
         nameLabel = nameLabel.ToLower();
 
         User user = await GetQueryable()
-         .Where(user => (user.Name == nameLabel || user.Email == nameLabel) && user.HashPassword == hashPassword)
+         .Where(user => (user.Name.ToLower() == nameLabel || user.Email.ToLower() == nameLabel) && user.HashPassword == hashPassword)
          .FirstOrDefaultAsync();
 
         return user;
