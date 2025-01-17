@@ -5,7 +5,7 @@ import RegisterForm from "@/components/login-register/registerForm";
 import styles from "@/components/login-register/login-register.module.css";
 import Line from "../line/line";
 
-function AuthPage() {
+function LoginRegisterBox() {
   const [showLogin, setShowLogin] = useState(true);
   const [renderLogin, setRenderLogin] = useState(true);
   const [renderRegister, setRenderRegister] = useState(false);
@@ -78,4 +78,4 @@ function AuthPage() {
   );
 }
 
-export default AuthPage;
+export default LoginRegisterBox;

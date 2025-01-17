@@ -17,7 +17,7 @@ export default function HomePage() {
       <div className="relative bg-[url('/images/OrbitRush-Fondo.png')] bg-cover bg-center">
         <div className="h-[45vh] select-none">
           <div className="absolute inset-0 bg-black/55 backdrop-blur-md flex flex-col items-center justify-center font-primary text-2xl sm:text-4xl md:text-5xl lg:text-5xl">
-            <img src='images/OrbitRush-Title.png' className='h-[12rem]'></img>
+            <img src='images/OrbitRush-Title.png' alt='' className='h-[12rem]'></img>
             <p className='pt-[1rem] text-white'>Tu nueva forma de jugar Orbito</p>
           </div>
         </div>
@@ -50,7 +50,7 @@ export default function HomePage() {
               <p className="text-3xl font-primary">Inicio del Juego</p>
               <p>Al comenzar, el sistema asigna al azar quién juega primero. Cada jugador dispone de un conjunto de canicas de su color y toma turnos para realizar sus movimientos.</p>
             </div>
-            <img src='images/placeholder.png' className='h-40' />
+            <img src='images/placeholder.png' alt='' className='h-40' />
           </div>
 
           <div className='flex flex-row-reverse gap-6 items-center'>
@@ -58,25 +58,25 @@ export default function HomePage() {
               <p className="text-3xl font-primary">Turnos de Juego</p>
               <p>Durante cada turno, el jugador debe realizar dos acciones:<br />
                 -Colocar una canica en cualquier celda vacía del tablero de 4x4.<br />
-                -Activar el mecanismo "Orbito", que mueve todas las canicas del tablero en patrones predefinidos, cambiando sus posiciones.</p>
+                -Activar el mecanismo &quot;Orbito&quot;, que mueve todas las canicas del tablero en patrones predefinidos, cambiando sus posiciones.</p>
             </div>
-            <img src='images/placeholder.png' className='h-40' />
+            <img src='images/placeholder.png' alt='' className='h-40' />
           </div>
 
           <div className='flex gap-6'>
             <div className='flex flex-col justify-center gap-2'>
               <p className="text-3xl font-primary">El Tablero Dinámico</p>
-              <p>El tablero se actualiza automáticamente cuando se activa el mecanismo "Orbito". Las canicas del anillo exterior se desplazan en una dirección, mientras que las del anillo interior lo hacen en la dirección opuesta. Este movimiento puede romper alineaciones o crear nuevas oportunidades estratégicas.</p>
+              <p>El tablero se actualiza automáticamente cuando se activa el mecanismo &quot;Orbito&quot;. Las canicas del anillo exterior se desplazan en una dirección, mientras que las del anillo interior lo hacen en la dirección opuesta. Este movimiento puede romper alineaciones o crear nuevas oportunidades estratégicas.</p>
             </div>
-            <img src='images/placeholder.png' className='h-40' />
+            <img src='images/placeholder.png' alt='' className='h-40' />
           </div>
 
           <div className='flex flex-row-reverse gap-6 items-center'>
             <div className='flex flex-col justify-center gap-2'>
               <p className="text-3xl font-primary">Condiciones de Victoria</p>
-              <p>El primer jugador que logre alinear cuatro canicas de su color gana la partida. En caso de que no haya más canicas por colocar, se activará el mecanismo "Orbito" 5 veces. Si en ninguno de esos 5 movimientos se consigue alinear 4 canicas, el juego acabará en empate.</p>
+              <p>El primer jugador que logre alinear cuatro canicas de su color gana la partida. En caso de que no haya más canicas por colocar, se activará el mecanismo &quot;Orbito&quot; 5 veces. Si en ninguno de esos 5 movimientos se consigue alinear 4 canicas, el juego acabará en empate.</p>
             </div>
-            <img src='images/placeholder.png' className='h-40' />
+            <img src='images/placeholder.png' alt='' className='h-40' />
           </div>
 
           <div className='flex flex-col gap-2'>
