@@ -2,13 +2,12 @@
   padding: 2rem;
   border-radius: 10px;
   background: var(--background);
-  overflow-y: auto;
   transition: all 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
   gap: 20px;
   align-items: center;
-  text-align: center;
+  text-align: end;
 }
 
 .auth-container.login {
@@ -22,11 +21,8 @@
 }
 
 .auth-button {
-  display: inline-block;
-  cursor: pointer;
   transition: all 0.3s ease-in-out;
   font-size: 1.5rem;
-  max-width: fit-content;
 }
 
 .auth-button.login {
@@ -49,11 +45,9 @@
 
 .form-container {
   max-height: 0;
-  overflow: hidden;
   opacity: 0;
   transition: max-height 0.5s ease, opacity 0.5s ease;
   visibility: hidden;
-
 }
 
 .form-container.active {
@@ -69,14 +63,34 @@
 .form-container input {
   font-family: var(--font-secondary);
   font-size: 0.9rem;
-  background-color: #b6b6b6;
+  background-color: rgba(255, 255, 255, 0.5);
   border-radius: 5px;
-  color: #171717;
-  padding: 0.3rem;
+  color: var(--foreground);
+  padding: 0.2rem;
 }
 
 .form-container form {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.form-container.login input {
+  border: 2px solid rgb(0, 153, 255, 0.7);
+  background-color: rgba(0, 153, 255, 0.2);
+}
+
+.form-container.login input:hover {
+  background: linear-gradient(135deg, rgba(0, 153, 255, 0.4), rgba(0, 153, 255, 0.7)),
+    linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+}
+
+.form-container.register input {
+  border: 2px solid rgba(255, 140, 0, 0.7);
+  background-color: rgba(255, 140, 0, 0.2);
+}
+
+.form-container.register input:hover {
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.4), rgba(255, 140, 0, 0.7)),
+    linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
 }

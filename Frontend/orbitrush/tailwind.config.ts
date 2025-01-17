@@ -20,6 +20,7 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        'custom-orange': 'rgba(255, 140, 0, 0.7)',
       },
       fontFamily:{
         primary: "var(--font-primary)",

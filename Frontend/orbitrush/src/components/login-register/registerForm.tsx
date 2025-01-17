@@ -49,26 +49,26 @@ function RegisterForm({ onSubmit }: RegisterFormProps) {
       <div>
         <label
           htmlFor="profileImage"
-          className="flex justify-center items-center cursor-pointer w-24 h-24 rounded-full bg-gray-300 text-white relative overflow-hidden m-auto"
+          className="flex justify-center items-center cursor-pointer w-24 h-24 text-white relative m-auto rounded-full overflow-hidden border-2 border-custom-orange mb-2"
         >
           {profileImage ? (
             <img
               src={URL.createObjectURL(profileImage)}
               alt="Imagen de perfil"
-              className="w-full h-full object-cover rounded-full "
+              className='w-full h-full object-cover'
             />
           ) : (
-            <span className="text-2xl">+</span>
+            <span className="text-3xl text-custom-orange">+</span>
           )}
           <input
             type="file"
             id="profileImage"
             accept="image/*"
             onChange={handleImageChange}
-            className="absolute opacity-0 w-full h-full top-0 left-0 cursor-pointer "
+            className="absolute opacity-0 w-full h-full cursor-pointer"
           />
         </label>
-
+        <p className=' mb-4 font-secondary text-center'>Imagen de perfil (opcional)</p>
       </div>
       <div>
         <label htmlFor="username">Apodo: </label>

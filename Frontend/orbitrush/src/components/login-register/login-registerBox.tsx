@@ -50,7 +50,7 @@ function AuthPage() {
 
       {/* Formulario Login */}
       <div
-        className={`${styles["form-container"]} ${showLogin ? styles["active"] : ""
+        className={`${styles["form-container"]} ${styles["login"]} ${showLogin ? styles["active"] : ""
           }`}
       >
         {renderLogin && <LoginForm onSubmit={handleLogin} />}
@@ -69,7 +69,7 @@ function AuthPage() {
 
       {/* Formulario Register */}
       <div
-        className={`${styles["form-container"]} ${!showLogin ? styles["active"] : ""
+        className={`${styles["form-container"]} ${styles["register"]} ${!showLogin ? styles["active"] : ""
           }`}
       >
         {renderRegister && <RegisterForm onSubmit={handleRegister} />}
