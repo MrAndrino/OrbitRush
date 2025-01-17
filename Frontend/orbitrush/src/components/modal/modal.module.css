@@ -1,0 +1,71 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.close-button {
+  position: absolute;
+  top: -5px;
+  right: 10px;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.close-blue:hover, .close-orange:hover{
+  transform: scale(1.2);
+}
+.close-blue:active, .close-orange:active{
+  transform: scale(0.9);
+  transition: transform 0.1s ease, color 0.1s ease;
+}
+
+.blue,
+.orange {
+  position: relative;
+  max-height: 90%;
+  max-width: 90%;
+  padding: 3rem;
+  border-radius: 10px;
+  background: var(--background);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  
+}
+
+.close-blue {
+  color: rgb(0, 153, 255, 0.7);
+}
+.close-blue:hover {
+  color: rgb(0, 153, 255);
+}
+.close-blue:active {
+  color: rgba(0, 153, 255, 0.9);
+}
+
+.blue {
+  border: 2px solid rgb(0, 153, 255);
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+  scrollbar-color: rgb(0, 153, 255, 0.7) #1e1e1e;
+}
+
+.close-orange {
+  color: rgba(255, 140, 0, 0.7);
+}
+.close-orange:hover {
+  color: rgba(255, 140, 0);
+}
+.close-orange:active {
+  color: rgba(255, 140, 0, 0.9);
+}
+
+.orange {
+  border: 2px solid rgba(255, 140, 0);
+  box-shadow: 0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6);
+  scrollbar-color: rgba(255, 140, 0, 0.7) #1e1e1e;
+}

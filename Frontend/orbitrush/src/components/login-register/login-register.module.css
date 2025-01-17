@@ -1,0 +1,96 @@
+.auth-container {
+  padding: 2rem;
+  border-radius: 10px;
+  background: var(--background);
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  text-align: end;
+}
+
+.auth-container.login {
+  border: 2px solid rgb(0, 153, 255);
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+}
+
+.auth-container.register {
+  border: 2px solid rgba(255, 140, 0);
+  box-shadow: 0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6);
+}
+
+.auth-button {
+  transition: all 0.3s ease-in-out;
+  font-size: 1.5rem;
+}
+
+.auth-button.login {
+  color: rgb(0, 153, 255);
+}
+
+.auth-button.register {
+  color: rgba(255, 140, 0);
+}
+
+.auth-button:hover {
+  color: var(--foreground);
+  transform: scale(1.1);
+}
+
+.auth-button.active {
+  color: var(--foreground);
+  transform: scale(1.3);
+}
+
+.form-container {
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.5s ease, opacity 0.5s ease;
+  visibility: hidden;
+}
+
+.form-container.active {
+  max-height: 150rem;
+  opacity: 1;
+  visibility: visible;
+}
+
+.form-container label {
+  font-family: var(--font-secondary);
+}
+
+.form-container input {
+  font-family: var(--font-secondary);
+  font-size: 0.9rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  color: var(--foreground);
+  padding: 0.2rem;
+}
+
+.form-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-container.login input {
+  border: 2px solid rgb(0, 153, 255, 0.7);
+  background-color: rgba(0, 153, 255, 0.2);
+}
+
+.form-container.login input:hover {
+  background: linear-gradient(135deg, rgba(0, 153, 255, 0.4), rgba(0, 153, 255, 0.7)),
+    linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+}
+
+.form-container.register input {
+  border: 2px solid rgba(255, 140, 0, 0.7);
+  background-color: rgba(255, 140, 0, 0.2);
+}
+
+.form-container.register input:hover {
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.4), rgba(255, 140, 0, 0.7)),
+    linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+}
