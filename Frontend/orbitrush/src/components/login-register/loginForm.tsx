@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import Button from '../button/button';
 import { useAuth } from '@/context/authcontext';
 
-
 function LoginForm() {
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");

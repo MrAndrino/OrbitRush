@@ -1,9 +1,10 @@
 'use client'
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from 'jwt-decode'
-import { Login } from '@/api/auth/route'
-import { LOGIN_URL } from '@/config'
+import { Login , Register } from '@/api/auth/route'
+import { LOGIN_URL , REGISTER_URL } from '@/config'
+
 
 export const AuthContext = createContext();
 export const useAuth = () => {
@@ -15,12 +16,25 @@ export const AuthProvider = ({ children }) => {
   const [decodedToken, setDecodedToken] = useState(null);
   const [message, setMessage] = useState("");
 
+  useEffect(() => {},[])
+
   const handleLogin = async(data) => {
     try {
       const respuesta = await Login(LOGIN_URL, data);
-      setToken(respuesta.accessToken);
-      console.log(respuesta.accessToken);
-      saveToken(token)
+
+      saveToken(respuesta.accessToken)
+
+    } catch (error) {
+      setMessage(`Error: ${error.message}`);
+      throw error;
+    }
+  }
+
+  const handleRegister = async(data) => {
+    try {
+      const respuesta = await Register(REGISTER_URL, data);
+      
+      saveToken(respuesta.accessToken)
 
     } catch (error) {
       setMessage(`Error: ${error.message}`);
@@ -30,13 +44,15 @@ export const AuthProvider = ({ children }) => {
 
   const saveToken = (newToken) =>{
     localStorage.setItem("accessToken", JSON.stringify(newToken));
+    setToken(newToken);
     setDecodedToken(jwtDecode(newToken));
   }
 
   const contextValue = {
     token,
     saveToken,
-    handleLogin
+    handleLogin,
+    handleRegister
   }
 
   return (

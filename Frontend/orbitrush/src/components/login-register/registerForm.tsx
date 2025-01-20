@@ -1,23 +1,16 @@
 "use client";
 import React, { useState } from 'react';
 import Button from '../button/button';
+import { useAuth } from '@/context/authcontext';
 
-type RegisterFormProps = {
-  onSubmit: (data: {
-    profileImage: File | null;
-    username: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }) => void;
-};
-
-function RegisterForm({ onSubmit }: RegisterFormProps) {
+function RegisterForm() {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const { handleRegister } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,14 +20,19 @@ function RegisterForm({ onSubmit }: RegisterFormProps) {
       return;
     }
 
-    // onSubmit({
-    //   profileImage,
-    //   username,
-    //   email,
-    //   password,
-    //   confirmPassword,
-    // });
+    const data = new FormData();
+    data.append("name", username)
+    data.append("email", email)
+    data.append("password", password)
+
+    if (profileImage) {
+      data.append("image", profileImage)
+    }
+
+    handleRegister(data);
   };
+
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

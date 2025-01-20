@@ -15,8 +15,8 @@ export async function Login(url, request) {
 }
 
 
-export async function Register(request) {
-  const response = await fetch(REGISTER_URL, {
+export async function Register(url, request) {
+  const response = await fetch(url, {
     method: "POST",
     body: request
   });

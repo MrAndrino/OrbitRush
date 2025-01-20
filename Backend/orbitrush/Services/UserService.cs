@@ -18,7 +18,8 @@ public class UserService
             return defaultImage;
         }
 
-        string fileName = name.ToLower() + "_" + Guid.NewGuid().ToString();
+        string fileExtension = Path.GetExtension(image.FileName).ToLower();
+        string fileName = name.ToLower() + "_" + Guid.NewGuid().ToString() + fileExtension;
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles", fileName);
 
 
