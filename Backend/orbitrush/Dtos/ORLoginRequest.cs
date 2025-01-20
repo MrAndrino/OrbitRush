@@ -1,6 +1,6 @@
 ﻿namespace orbitrush.Dtos;
 
-public class LoginRequest2
+public class ORLoginRequest
 {
     public string NameLabel { get; set; } 
     public string Password { get; set; }

@@ -19,7 +19,8 @@ public class UserSeeder
                 Id = 1,
                 Name = "Mr. Utsugi",
                 Email = "utsugi@gmail.com",
-                HashPassword = PasswordHelper.Hash("Utsugi7"),
+                HashPassword = PasswordHelper.Hash("Utsugi77"),
+                Image = "images/profiles/Mr_Utsugi.webp",
                 Role = "admin"
             },
             new User{
@@ -27,6 +28,7 @@ public class UserSeeder
                 Name = "Ralowl",
                 Email = "ralowl@gmail.com",
                 HashPassword = PasswordHelper.Hash("Ralowl21"),
+                Image = "images/profiles/Ralowl.webp",
                 Role = "user"
             }
         ];

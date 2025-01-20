@@ -4,7 +4,7 @@ import Button from '../button/button';
 
 type RegisterFormProps = {
   onSubmit: (data: {
-    profileImage: File | string | null;
+    profileImage: File | null;
     username: string;
     email: string;
     password: string;
@@ -27,15 +27,13 @@ function RegisterForm({ onSubmit }: RegisterFormProps) {
       return;
     }
 
-    const imageToSubmit = profileImage || "/images/OrbitRush-TrashCan.jpg";
-
-    onSubmit({
-      profileImage: imageToSubmit,
-      username,
-      email,
-      password,
-      confirmPassword,
-    });
+    // onSubmit({
+    //   profileImage,
+    //   username,
+    //   email,
+    //   password,
+    //   confirmPassword,
+    // });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -2,6 +2,7 @@ using Microsoft.IdentityModel.Tokens;
 using orbitrush.Database;
 using orbitrush.Database.Repositories;
 using orbitrush.Seeders;
+using orbitrush.Services;
 using System.Text;
 
 namespace orbitrush;
@@ -14,6 +15,8 @@ public class Program
 
         builder.Services.AddScoped<MyDbContext>();
         builder.Services.AddScoped<UnitOfWork>();
+
+        builder.Services.AddScoped<UserService>();
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
@@ -28,6 +31,15 @@ public class Program
                 ValidateAudience = false,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
             };
+        });
+
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+            });
         });
 
 
@@ -46,13 +58,18 @@ public class Program
 
         var app = builder.Build();
 
+        app.UseStaticFiles();
+
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
         }
 
+        app.UseCors();
         app.UseHttpsRedirection();
+
+        app.UseWebSockets();
 
         app.UseAuthentication();
         app.UseAuthorization();

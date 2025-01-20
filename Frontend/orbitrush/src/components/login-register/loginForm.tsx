@@ -1,18 +1,24 @@
 "use client";
 import React, { useState } from 'react';
 import Button from '../button/button';
+import { useAuth } from '@/context/authcontext';
 
-type LoginFormProps = {
-  onSubmit: (data: { usernameOrEmail: string; password: string }) => void;
-};
 
-function LoginForm({ onSubmit }: LoginFormProps) {
+function LoginForm() {
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const { handleLogin } = useAuth();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ usernameOrEmail, password });
+
+    const data = {
+        nameLabel: usernameOrEmail,
+        password: password
+    }
+
+    handleLogin(data);
   };
 
   return (
