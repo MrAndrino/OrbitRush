@@ -2,4 +2,4 @@ export const HomePage = () => "/";
 
 export const AuthPage = () => "/login";
 
-// export const menuPage = () => "/menu";
+export const MenuPage = () => "/menu";

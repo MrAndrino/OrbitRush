@@ -42,7 +42,7 @@ function LoginForm() {
           required
         />
       </div>
-      <Button color="blue" type="submit" className='p-2 m-8'>
+      <Button color="blue" type="submit" className='p-2 m-8 w-48 self-center'>
         Iniciar Sesión
       </Button>
     </form>

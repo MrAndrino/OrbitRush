@@ -53,7 +53,7 @@ function LoginRegisterBox() {
         className={`${styles["form-container"]} ${styles["login"]} ${showLogin ? styles["active"] : ""
           }`}
       >
-        {renderLogin && <LoginForm onSubmit={handleLogin} />}
+        {renderLogin && <LoginForm/>}
       </div>
 
         <Line />
@@ -72,7 +72,7 @@ function LoginRegisterBox() {
         className={`${styles["form-container"]} ${styles["register"]} ${!showLogin ? styles["active"] : ""
           }`}
       >
-        {renderRegister && <RegisterForm onSubmit={handleRegister} />}
+        {renderRegister && <RegisterForm />}
       </div>
     </div>
   );

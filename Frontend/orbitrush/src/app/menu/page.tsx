@@ -4,13 +4,11 @@ import { useState } from 'react';
 import Button from '@/components/button/button';
 import Line from '@/components/line/line';
 import Modal from '@/components/modal/modal';
-import { useAuth } from '@/context/authcontext';
 
-export default function HomePage() {
+export default function MenuPage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-  const {token} = useAuth()
 
   return (
     <div className="flex flex-col gap-[10vh] text-center min-h-[100vh]">
@@ -30,15 +28,9 @@ export default function HomePage() {
 
       {/* Botonera */}
       <div className="flex justify-center gap-[5rem] select-none">
-        {token ? (
-          <Button href="/menu" color="blue" className="w-[15rem] h-[5rem] text-3xl">
-            ¡Juega Ahora!
-          </Button>
-        ) : (
-          <Button href="/login" color="blue" className="w-[15rem] h-[5rem] text-3xl">
-            ¡Juega Ahora!
-          </Button>
-        )}
+        <Button href="/login" color="blue" className="w-[15rem] h-[5rem] text-3xl">
+          ¡Juega Ahora!
+        </Button>
         <Button onClick={openModal} color="orange" className="w-[15rem] h-[5rem] text-3xl">
           Cómo Jugar
         </Button>
@@ -90,8 +82,8 @@ export default function HomePage() {
           <div className='flex flex-col gap-2'>
             <p className="text-3xl font-primary">¡Hora de jugar!</p>
             <p>Ahora que conoces todas las normas es hora de ponerlo en práctica:<br />
-              ¿Serás capaz de vencer a la IA? ¿Serás el mejor entre tus amigos?<br />
-              Descúbrelo ahora en Orbit Rush!</p>
+            ¿Serás capaz de vencer a la IA? ¿Serás el mejor entre tus amigos?<br />
+            Descúbrelo ahora en Orbit Rush!</p>
           </div>
         </div>
       </Modal>
