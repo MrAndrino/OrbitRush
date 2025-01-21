@@ -39,7 +39,7 @@ export default function RootLayout({
         </AuthProvider>
 
         <Toaster
-          position="bottom-right"
+          position="top-right"
           reverseOrder={false}
           gutter={8} // Espaciado entre los toasts
           toastOptions={{
