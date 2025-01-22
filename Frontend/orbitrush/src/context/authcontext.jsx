@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from 'jwt-decode';
-import { Login, Register } from '@/api/auth/route';
+import { Login, Register } from '@/lib/auth';
 import { LOGIN_URL, REGISTER_URL } from '@/config';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';

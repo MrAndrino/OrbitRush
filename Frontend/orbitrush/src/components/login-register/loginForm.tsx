@@ -13,8 +13,8 @@ function LoginForm() {
     e.preventDefault();
 
     const data = {
-        nameLabel: usernameOrEmail,
-        password: password
+      nameLabel: usernameOrEmail,
+      password: password
     }
 
     handleLogin(data);
@@ -22,28 +22,30 @@ function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="usernameOrEmail">Apodo o Email: </label>
-        <input
-          type="text"
-          id="usernameOrEmail"
-          value={usernameOrEmail}
-          onChange={(e) => setUsernameOrEmail(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="password">Contraseña: </label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+      <div className="flex flex-col gap-4">
+        <div>
+          <label htmlFor="usernameOrEmail">Apodo o Email: </label>
+          <input
+            type="text"
+            id="usernameOrEmail"
+            value={usernameOrEmail}
+            onChange={(e) => setUsernameOrEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="password">Contraseña: </label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
       </div>
       <Button color="blue" type="submit" className='p-2 m-8 w-48 self-center'>
-        Iniciar Sesión
+        Inicia Sesión
       </Button>
     </form>
   );

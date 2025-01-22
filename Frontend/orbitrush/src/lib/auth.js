@@ -14,7 +14,6 @@ export async function Login(url, request) {
   return data;
 }
 
-
 export async function Register(url, request) {
   const response = await fetch(url, {
     method: "POST",

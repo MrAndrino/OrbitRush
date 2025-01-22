@@ -20,20 +20,6 @@ function LoginRegisterBox() {
     }
   }, [showLogin]);
 
-  const handleLogin = (data: { usernameOrEmail: string; password: string }) => {
-    console.log("Login Data:", data);
-  };
-
-  const handleRegister = (data: {
-    profileImage: File | string | null;
-    username: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }) => {
-    console.log("Register Data:", data);
-  };
-
   return (
     <div
       className={`${styles["auth-container"]} ${showLogin ? styles["login"] : styles["register"]

@@ -22,12 +22,12 @@ function RegisterForm() {
     }
 
     const data = new FormData();
-    data.append("name", username)
-    data.append("email", email)
-    data.append("password", password)
+    data.append("name", username);
+    data.append("email", email);
+    data.append("password", password);
 
     if (profileImage) {
-      data.append("image", profileImage)
+      data.append("image", profileImage);
     }
 
     handleRegister(data);
@@ -41,11 +41,11 @@ function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-4">
-      <div className="flex gap-8 justify-center">
+      <div className="flex gap-8 justify-center items-center">
         <div className="flex flex-col items-center">
           <label
             htmlFor="profileImage"
-            className="cursor-pointer w-24 h-24 relative rounded-full overflow-hidden border-2 border-custom-orange mb-2 flex justify-center items-center"
+            className="cursor-pointer w-24 h-24 relative rounded-full overflow-hidden border-2 border-[rgba(255,140,0,0.7)] bg-[rgba(255,140,0,0.2)] hover:bg-[rgba(255,140,0,0.7)] flex justify-center items-center"
           >
             {profileImage ? (
               <img
@@ -54,7 +54,7 @@ function RegisterForm() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-3xl text-custom-orange">+</span>
+              <span className="text-2xl">+</span>
             )}
             <input
               type="file"
@@ -64,7 +64,7 @@ function RegisterForm() {
               className="absolute opacity-0 inset-0 w-full h-full cursor-pointer"
             />
           </label>
-          <p className="text-center font-secondary">Imagen de perfil <br/> (opcional)</p>
+          <p className="text-center font-secondary">Imagen de perfil <br /> (opcional)</p>
         </div>
         <div className="flex flex-col gap-4">
           <div>
@@ -75,7 +75,7 @@ function RegisterForm() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="input-style"
+              className="input-style form-container register"
             />
           </div>
           <div>
@@ -86,7 +86,7 @@ function RegisterForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="input-style"
+              className="input-style form-container register"
             />
           </div>
           <div>
@@ -97,7 +97,7 @@ function RegisterForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="input-style"
+              className="input-style form-container register"
             />
           </div>
           <div>
@@ -108,7 +108,7 @@ function RegisterForm() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              className="input-style"
+              className="input-style form-container register"
             />
           </div>
         </div>
