@@ -41,7 +41,7 @@ function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-4">
-      <div className="flex gap-8 justify-center items-center">
+      <section className="flex gap-8 justify-center items-center">
         <div className="flex flex-col items-center">
           <label
             htmlFor="profileImage"
@@ -66,7 +66,7 @@ function RegisterForm() {
           </label>
           <p className="text-center font-secondary">Imagen de perfil <br /> (opcional)</p>
         </div>
-        <div className="flex flex-col gap-4">
+        <section className="flex flex-col gap-4">
           <div>
             <label htmlFor="username">Apodo: </label>
             <input
@@ -111,8 +111,8 @@ function RegisterForm() {
               className="input-style form-container register"
             />
           </div>
-        </div>
-      </div>
+        </section>
+      </section>
       <Button color="orange" type="submit" className="p-2 w-48 self-center">
         Regístrate
       </Button>

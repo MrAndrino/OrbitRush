@@ -22,7 +22,7 @@ function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="flex flex-col gap-4">
+      <section className="flex flex-col gap-4">
         <div>
           <label htmlFor="usernameOrEmail">Apodo o Email: </label>
           <input
@@ -43,7 +43,7 @@ function LoginForm() {
             required
           />
         </div>
-      </div>
+      </section>
       <Button color="blue" type="submit" className='p-2 m-8 w-48 self-center'>
         Inicia Sesión
       </Button>
