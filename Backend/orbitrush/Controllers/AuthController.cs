@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using orbitrush.Database.Entities;
+using orbitrush.Database.Entities.Enums;
 using orbitrush.Database.Repositories;
 using orbitrush.Dtos;
+using orbitrush.Services;
+using orbitrush.Utils;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -15,16 +18,18 @@ namespace orbitrush.Controllers;
 public class AuthController : ControllerBase
 {
     private UnitOfWork _unitOfWork;
+    private UserService _userService;
     private readonly TokenValidationParameters _tokenParameters;
 
-    public AuthController(IOptionsMonitor<JwtBearerOptions> jwtOptions, UnitOfWork unitOfWork)
+    public AuthController(IOptionsMonitor<JwtBearerOptions> jwtOptions, UnitOfWork unitOfWork, UserService userService)
     {
         _tokenParameters = jwtOptions.Get(JwtBearerDefaults.AuthenticationScheme).TokenValidationParameters;
         _unitOfWork = unitOfWork;
+        _userService = userService;
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<AccessTokenJwt>> Login([FromBody] LoginRequest2 request)
+    public async Task<ActionResult<AccessTokenJwt>> Login([FromBody] ORLoginRequest request)
     {
         try
         {
@@ -50,6 +55,49 @@ public class AuthController : ControllerBase
             return Ok(new AccessTokenJwt { AccessToken = accessToken });
         }
 
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("register")]
+    public async Task<ActionResult<AccessTokenJwt>> Register([FromForm] ORRegisterRequest request)
+    {
+        try
+        {
+            string defaultImage = "images/OrbitRush-TrashCan.jpg";
+            string selectedImage = await _userService.GetUsedImageAsync(request.Image, defaultImage, request.Name);
+
+            bool emailExist = await _unitOfWork.UserRepository.ExistEmail(request.Email);
+            bool nameExist = await _unitOfWork.UserRepository.ExistName(request.Name);
+
+            if (emailExist)
+            {
+                return BadRequest("Este correo ya está en uso.");
+            }
+            if (nameExist)
+            {
+                return BadRequest("Este nombre de usuario ya está en uso");
+            }
+
+            User newUser = new User
+            {
+                Name = request.Name,
+                Email = request.Email,
+                HashPassword = PasswordHelper.Hash(request.Password),
+                Image = selectedImage,
+                Role = "user",
+                State = StateEnum.Connected
+            };
+
+            await _unitOfWork.UserRepository.InsertAsync(newUser);
+            await _unitOfWork.SaveAsync();
+
+            string accessToken = GenerateToken(newUser.Id.ToString(), newUser.Name, newUser.Email, newUser.Role);
+
+            return Ok(new AccessTokenJwt { AccessToken = accessToken });
+        }
         catch (Exception ex)
         {
             return BadRequest(ex.Message);

@@ -1,5 +1,6 @@
 ﻿using orbitrush.Database;
 using orbitrush.Database.Entities;
+using orbitrush.Database.Entities.Enums;
 using orbitrush.Utils;
 
 namespace orbitrush.Seeders;
@@ -19,15 +20,19 @@ public class UserSeeder
                 Id = 1,
                 Name = "Mr. Utsugi",
                 Email = "utsugi@gmail.com",
-                HashPassword = PasswordHelper.Hash("Utsugi7"),
-                Role = "admin"
+                HashPassword = PasswordHelper.Hash("Utsugi77"),
+                Image = "images/profiles/Mr_Utsugi.webp",
+                Role = "admin",
+                State = StateEnum.Disconnected
             },
             new User{
                 Id = 2,
                 Name = "Ralowl",
                 Email = "ralowl@gmail.com",
                 HashPassword = PasswordHelper.Hash("Ralowl21"),
-                Role = "user"
+                Image = "images/profiles/Ralowl.webp",
+                Role = "user",
+                State = StateEnum.Disconnected
             }
         ];
 

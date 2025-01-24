@@ -5,7 +5,7 @@ import RegisterForm from "@/components/login-register/registerForm";
 import styles from "@/components/login-register/login-register.module.css";
 import Line from "../line/line";
 
-function AuthPage() {
+function LoginRegisterBox() {
   const [showLogin, setShowLogin] = useState(true);
   const [renderLogin, setRenderLogin] = useState(true);
   const [renderRegister, setRenderRegister] = useState(false);
@@ -19,20 +19,6 @@ function AuthPage() {
       setTimeout(() => setRenderLogin(false), 500); // Tiempo de la transición
     }
   }, [showLogin]);
-
-  const handleLogin = (data: { usernameOrEmail: string; password: string }) => {
-    console.log("Login Data:", data);
-  };
-
-  const handleRegister = (data: {
-    profileImage: File | string | null;
-    username: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }) => {
-    console.log("Register Data:", data);
-  };
 
   return (
     <div
@@ -53,7 +39,7 @@ function AuthPage() {
         className={`${styles["form-container"]} ${styles["login"]} ${showLogin ? styles["active"] : ""
           }`}
       >
-        {renderLogin && <LoginForm onSubmit={handleLogin} />}
+        {renderLogin && <LoginForm/>}
       </div>
 
         <Line />
@@ -72,10 +58,10 @@ function AuthPage() {
         className={`${styles["form-container"]} ${styles["register"]} ${!showLogin ? styles["active"] : ""
           }`}
       >
-        {renderRegister && <RegisterForm onSubmit={handleRegister} />}
+        {renderRegister && <RegisterForm />}
       </div>
     </div>
   );
 }
 
-export default AuthPage;
+export default LoginRegisterBox;

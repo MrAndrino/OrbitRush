@@ -20,6 +20,27 @@ public class UserRepository : Repository<User, int>
         return user;
     }
 
+    public async Task<bool> ExistName(string name)
+    {
+        User user = await GetQueryable()
+            .FirstOrDefaultAsync(user => user.Name.ToLower() == name.ToLower());
 
-    //public async Task<bool>
+        if (user == null)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public async Task<bool> ExistEmail(string email)
+    {
+        User user = await GetQueryable()
+            .FirstOrDefaultAsync(user => user.Email.ToLower() == email.ToLower());
+
+        if (user == null)
+        {
+            return false;
+        }
+        return true;
+    }
 }
