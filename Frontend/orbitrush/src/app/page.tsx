@@ -20,7 +20,7 @@ export default function HomePage() {
       <section className="relative bg-[url('/images/OrbitRush-Fondo.png')] bg-cover bg-center">
         <div className="h-[45vh] select-none">
           <figure className="absolute inset-0 bg-black/55 backdrop-blur-md flex flex-col items-center justify-center font-primary text-2xl sm:text-4xl md:text-5xl lg:text-5xl">
-            <img src='images/OrbitRush-Title.png' alt='' className='h-[12rem]'></img>
+            <img src='images/OrbitRush-Title.png' alt='' className='h-[12rem]' />
             <p className='pt-[1rem] text-white'>Tu nueva forma de jugar Orbito</p>
           </figure>
         </div>

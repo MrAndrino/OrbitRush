@@ -84,7 +84,19 @@ export const AuthProvider = ({ children }) => {
     setDecodedToken(null);
     closeWebSocket();
     router.push('/login/');
-    toast(`¡Vuelve pronto, ${username}!`);
+    toast.custom(
+      <div style={{
+        backgroundColor: 'var(--backgroundtoast)',
+        color: 'var(--foreground)',
+        fontSize: '16px',
+        borderRadius: '8px',
+        padding: '10px 20px',
+        border: '2px solid rgb(0, 153, 255)',
+        boxShadow: '0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6)',
+      }}>
+        ¡Vuelve pronto, {username}!
+      </div>
+    );
   };
 
   const contextValue = {
