@@ -17,6 +17,7 @@ public class Program
         builder.Services.AddScoped<UnitOfWork>();
 
         builder.Services.AddScoped<UserService>();
+        builder.Services.AddScoped<WebSocketService>();
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();

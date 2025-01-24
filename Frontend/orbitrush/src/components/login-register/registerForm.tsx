@@ -10,11 +10,32 @@ function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
   const { handleRegister } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!username.trim()) {
+      toast.error("Por favor, ingresa un apodo.");
+      return;
+    }
+
+    if (!email.trim()) {
+      toast.error("Por favor, ingresa un email.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Por favor, ingresa un email válido.");
+      return;
+    }
+
+    if (!password.trim()) {
+      toast.error("Por favor, ingresa una contraseña.");
+      return;
+    }
 
     if (password !== confirmPassword) {
       toast.error("Las contraseñas no coinciden");
@@ -30,7 +51,7 @@ function RegisterForm() {
       data.append("image", profileImage);
     }
 
-    handleRegister(data);
+    handleRegister(data, rememberMe);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,7 +61,7 @@ function RegisterForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 py-4">
+    <form onSubmit={handleSubmit} className="space-y-4 py-4" noValidate>
       <section className="flex gap-8 justify-center items-center">
         <div className="flex flex-col items-center">
           <label
@@ -74,7 +95,6 @@ function RegisterForm() {
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              required
               className="input-style form-container register"
             />
           </div>
@@ -85,7 +105,6 @@ function RegisterForm() {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
               className="input-style form-container register"
             />
           </div>
@@ -96,7 +115,6 @@ function RegisterForm() {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
               className="input-style form-container register"
             />
           </div>
@@ -107,12 +125,19 @@ function RegisterForm() {
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              required
               className="input-style form-container register"
             />
           </div>
         </section>
       </section>
+      <div className='flex justify-center items-center gap-1'>
+          <input
+            type="checkbox"
+            id="rememberMe"
+            checked={rememberMe}
+            onChange={() => setRememberMe(!rememberMe)} />
+          <label htmlFor="rememberMe">Recuérdame</label>
+        </div>
       <Button color="orange" type="submit" className="p-2 w-48 self-center">
         Regístrate
       </Button>

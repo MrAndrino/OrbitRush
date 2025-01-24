@@ -6,6 +6,7 @@ import { Login, Register } from '@/lib/auth';
 import { LOGIN_URL, REGISTER_URL } from '@/config';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import { useWebSocket } from "@/context/websocketcontext"
 
 export const AuthContext = createContext();
 export const useAuth = () => {
@@ -25,19 +26,23 @@ export const AuthProvider = ({ children }) => {
     return null;
   });
 
+  const { connectWebSocket, closeWebSocket } = useWebSocket();
+  const router = useRouter();
+
   useEffect(() => {
     if (token) {
       const decoded = jwtDecode(token);
       setDecodedToken(decoded);
+      connectWebSocket();
     }
   }, [token]);
 
-  const router = useRouter();
 
-  const handleLogin = async (data) => {
+  const handleLogin = async (data, rememberMe) => {
     try {
       const respuesta = await Login(LOGIN_URL, data);
-      const username = await saveToken(respuesta.accessToken);
+      await connectWebSocket();
+      const username = await saveToken(respuesta.accessToken, rememberMe);
       router.push('/menu');
       toast.success(`¡Bienvenid@, ${username}!`);
     } catch (error) {
@@ -49,7 +54,8 @@ export const AuthProvider = ({ children }) => {
   const handleRegister = async (data) => {
     try {
       const respuesta = await Register(REGISTER_URL, data);
-      const username = await saveToken(respuesta.accessToken);
+      await connectWebSocket();
+      const username = await saveToken(respuesta.accessToken, rememberMe);
       router.push('/menu');
       toast.success(`Registro exitoso, bienvenid@, ${username}!`);
     } catch (error) {
@@ -58,17 +64,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const saveToken = async (newToken) => {
-    localStorage.setItem("accessToken", JSON.stringify(newToken));
+  const saveToken = async (newToken, rememberMe) => {
+    if (rememberMe) {
+      localStorage.setItem("accessToken", JSON.stringify(newToken));
+    } else {
+      sessionStorage.setItem("accessToken", JSON.stringify(newToken));
+    }
     setToken(newToken);
     const decoded = jwtDecode(newToken);
     setDecodedToken(decoded);
     return decoded.name;
   };
 
+  const logout = () => {
+    const username = decodedToken?.name || "Usuario";
+    localStorage.removeItem('accessToken');
+    sessionStorage.removeItem('accessToken');
+    setToken(null);
+    setDecodedToken(null);
+    closeWebSocket();
+    router.push('/login/');
+    toast(`¡Vuelve pronto, ${username}!`);
+  };
+
   const contextValue = {
     token,
     saveToken,
+    logout,
     handleLogin,
     handleRegister
   };

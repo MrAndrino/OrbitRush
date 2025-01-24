@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/authcontext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Toaster } from 'react-hot-toast';
+import { WebSocketProvider } from "@/context/websocketcontext"
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -33,10 +34,12 @@ export default function RootLayout({
       <body
         className={`${roboto.variable} ${electrolize.variable} antialiased`}
       >
-        <AuthProvider>
-          <ToastContainer />
-          {children}
-        </AuthProvider>
+        <WebSocketProvider>
+          <AuthProvider>
+            <ToastContainer />
+            {children}
+          </AuthProvider>
+        </WebSocketProvider>
 
         <Toaster
           position="top-right"

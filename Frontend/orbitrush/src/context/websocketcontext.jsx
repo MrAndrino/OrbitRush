@@ -6,31 +6,54 @@ const WebSocketContext = createContext(null);
 
 export const WebSocketProvider = ({ children }) => {
     const [ws, setWs] = useState(null);
-    const [messages, setMessages] = useState([]);
 
-    useEffect(() => {
-        const socket = new WebSocket(`wss://${BASE}/ws`); 
+    const connectWebSocket = () => {
+        return new Promise((resolve, reject) => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                console.log("✅ WebSocket ya conectado");
+                return resolve();
+            }
 
-        socket.onopen = () => console.log("✅ WebSocket conectado");
-        socket.onmessage = (event) => {
-            console.log("📩 Mensaje recibido:", event.data);
-            setMessages((prev) => [...prev, event.data]); // Guardar mensajes recibidos
-        };
-        socket.onclose = () => console.log("❌ WebSocket cerrado");
+            const socket = new WebSocket(`wss://localhost:7203/socket`);
 
-        setWs(socket);
+            socket.onopen = () => {
+                console.log("✅ WebSocket conectado");
+                setWs(socket);
+                resolve();
+            };
 
-        return () => socket.close(); // Cerrar WebSocket al desmontar
-    }, []);
+            socket.onerror = (error) => {
+                console.error("❌ Error al conectar el WebSocket", error);
+                reject(new Error("No se pudo conectar al WebSocket"));
+            };
 
-    const sendMessage = (msg) => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(msg);
+            socket.onclose = () => {
+                console.log("❌ WebSocket cerrado");
+                setWs(null);
+            };
+        });
+    };
+
+    const closeWebSocket = () => {
+        if (ws) {
+            console.log("❌ Cerrando WebSocket...");
+            ws.close();
+            setWs(null);
         }
     };
 
+    useEffect(() => {
+        const handleBeforeUnload = () => closeWebSocket();
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+            closeWebSocket();
+        };
+    }, [ws]);
+
     return (
-        <WebSocketContext.Provider value={{ ws, messages, sendMessage }}>
+        <WebSocketContext.Provider value={{ ws, connectWebSocket, closeWebSocket }}>
             {children}
         </WebSocketContext.Provider>
     );
