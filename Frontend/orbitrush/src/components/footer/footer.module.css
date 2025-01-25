@@ -1,17 +1,8 @@
-.hcontainer {
+.fcontainer {
   display: flex;
   justify-content: space-around;
   align-items: center;
   width: 100%;
-  height: 15vh;
+  height: 7vh;
   background: linear-gradient(135deg, #1c2028, #151515);
-}
-
-.hlogo {
-  height: 9vh;
-  transition: transform 0.3s ease;
-}
-
-.hlogo:hover {
-  transform: scale(1.1);
 }
