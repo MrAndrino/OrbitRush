@@ -7,14 +7,14 @@ const WebSocketContext = createContext(null);
 export const WebSocketProvider = ({ children }) => {
     const [ws, setWs] = useState(null);
 
-    const connectWebSocket = () => {
+    const connectWebSocket = (userId) => {
         return new Promise((resolve, reject) => {
             if (ws && ws.readyState === WebSocket.OPEN) {
                 console.log("✅ WebSocket ya conectado");
                 return resolve();
             }
 
-            const socket = new WebSocket(`wss://localhost:7203/socket`);
+            const socket = new WebSocket(`wss://localhost:7203/socket?userId=${userId}`);
 
             socket.onopen = () => {
                 console.log("✅ WebSocket conectado");

@@ -1,6 +1,7 @@
 'use client';
 
 import Button from '@/components/button/button';
+import Footer from '@/components/footer/footer';
 import Header from '@/components/header/header';
 import { useAuth } from '@/context/authcontext';
 
@@ -21,7 +22,7 @@ export default function MenuPage() {
           Logout
         </Button>
       </section>
-
+      <Footer/>
     </section>
   );
 }

@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       const decoded = jwtDecode(token);
       setDecodedToken(decoded);
-      connectWebSocket();
+      connectWebSocket(decodedToken?.id);
     }
   }, [token]);
 
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
   const handleLogin = async (data, rememberMe) => {
     try {
       const respuesta = await Login(LOGIN_URL, data);
-      await connectWebSocket();
+      await connectWebSocket(decodedToken?.id);
       const username = await saveToken(respuesta.accessToken, rememberMe);
       router.push('/menu');
       toast.success(`¡Bienvenid@, ${username}!`);
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
   const handleRegister = async (data) => {
     try {
       const respuesta = await Register(REGISTER_URL, data);
-      await connectWebSocket();
+      await connectWebSocket(decodedToken?.id);
       const username = await saveToken(respuesta.accessToken, rememberMe);
       router.push('/menu');
       toast.success(`Registro exitoso, bienvenid@, ${username}!`);
@@ -101,6 +101,7 @@ export const AuthProvider = ({ children }) => {
 
   const contextValue = {
     token,
+    decodedToken,
     saveToken,
     logout,
     handleLogin,
