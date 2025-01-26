@@ -11,7 +11,7 @@ public class WebSocketService
         _connectionManager = connectionManager;
         _messageHandler = messageHandler;
     }
-    
+
     public async Task HandleAsync(WebSocket webSocket, string userId)
     {
         _connectionManager.AddConnection(userId, webSocket);
@@ -48,8 +48,9 @@ public class WebSocketService
         do
         {
             WebSocketReceiveResult result = await webSocket.ReceiveAsync(buffer, cancellation);
-            string message = System.Text.Encoding.UTF8.GetString(buffer, 0, result.Count);
-            stringBuilder.Append(message);
+
+            string partialMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            stringBuilder.Append(partialMessage);
 
             if (result.CloseStatus.HasValue)
             {
@@ -60,6 +61,8 @@ public class WebSocketService
         }
         while (!endOfMessage);
 
-        return stringBuilder.ToString();
+        string fullMessage = stringBuilder.ToString();
+
+        return fullMessage;
     }
 }

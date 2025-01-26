@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using orbitrush.Database.Entities;
+using orbitrush.Dtos;
+using orbitrush.Mappers;
 using orbitrush.Utils;
 
 namespace orbitrush.Database.Repositories;
@@ -42,5 +44,31 @@ public class UserRepository : Repository<User, int>
             return false;
         }
         return true;
+    }
+    public async Task<string> GetNameById(int id)
+    {
+        return await Context.Users
+            .Where(u => u.Id == id)
+            .Select(u => u.Name)
+            .FirstOrDefaultAsync();
+    }
+    public async Task<List<UserFriendDto>> GetFriendList(int id)
+    {
+        User user = await Context.Users
+            .Include(u => u.Friends)
+            .ThenInclude(f => f.Friend)
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null) 
+        {
+            throw new KeyNotFoundException("Tu usuario no existe");
+        }
+
+        if (user.Friends == null || !user.Friends.Any())
+        {
+            return new List<UserFriendDto>();
+        }
+
+        return UserFriendMapper.ToDtoList(user.Friends);
     }
 }
