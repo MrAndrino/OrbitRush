@@ -14,6 +14,9 @@ public class MyDbContext : DbContext
 
     //Creación de Tablas
     public DbSet<User> Users { get; set; }
+    public DbSet<Match> Matches { get; set; }
+    public DbSet<MatchResult> MatchResults { get; set; }
+    public DbSet<UserFriend> Friends { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
@@ -22,4 +25,10 @@ public class MyDbContext : DbContext
 
         options.UseSqlite($"DataSource={baseDir}{DATABASE_PATH}");
     }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(MyDbContext).Assembly);
+    }
+
 }

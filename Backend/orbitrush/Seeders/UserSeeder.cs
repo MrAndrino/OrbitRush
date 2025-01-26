@@ -33,6 +33,33 @@ public class UserSeeder
                 Image = "images/profiles/Ralowl.webp",
                 Role = "user",
                 State = StateEnum.Disconnected
+            },
+            new User{
+                Id = 3,
+                Name = "Sayetsu",
+                Email = "sayetsu@gmail.com",
+                HashPassword = PasswordHelper.Hash("Sayetsu13"),
+                Image = "images/OrbitRush-TrashCan.jpg",
+                Role = "user",
+                State = StateEnum.Disconnected
+            },
+            new User{
+                Id = 4,
+                Name = "Pixeladu",
+                Email = "pixeladu@gmail.com",
+                HashPassword = PasswordHelper.Hash("Pixeladu24"),
+                Image = "images/OrbitRush-TrashCan.jpg",
+                Role = "user",
+                State = StateEnum.Disconnected
+            },
+            new User{
+                Id = 5,
+                Name = "Fernando",
+                Email = "fernando@gmail.com",
+                HashPassword = PasswordHelper.Hash("Fernando3"),
+                Image = "images/OrbitRush-TrashCan.jpg",
+                Role = "user",
+                State = StateEnum.Disconnected
             }
         ];
 

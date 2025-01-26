@@ -53,6 +53,12 @@ public class Program
             {
                 UserSeeder userSeeder = new UserSeeder(dbContext);
                 userSeeder.Seed();
+                MatchSeeder matchSeeder = new MatchSeeder(dbContext);
+                matchSeeder.Seed();
+                MatchResultSeeder matchResultSeeder = new MatchResultSeeder(dbContext);
+                matchResultSeeder.Seed();
+                FriendSeeder friendSeeder = new FriendSeeder(dbContext);
+                friendSeeder.Seed();
             }
         }
 
