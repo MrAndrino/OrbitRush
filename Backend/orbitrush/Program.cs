@@ -17,7 +17,9 @@ public class Program
         builder.Services.AddScoped<UnitOfWork>();
 
         builder.Services.AddScoped<UserService>();
-        builder.Services.AddScoped<WebSocketService>();
+        builder.Services.AddSingleton<WebSocketConnectionManager>();
+        builder.Services.AddSingleton<WebSocketMessageHandler>();
+        builder.Services.AddSingleton<WebSocketService>();
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
@@ -37,9 +39,9 @@ public class Program
 
         builder.Services.AddCors(options =>
         {
-            options.AddDefaultPolicy(builder =>
+            options.AddPolicy("AllowAllOrigins", policy =>
             {
-                builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
             });
         });
 
@@ -73,7 +75,7 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.UseCors();
+        app.UseCors("AllowAllOrigins");
         app.UseHttpsRedirection();
 
         app.UseWebSockets();

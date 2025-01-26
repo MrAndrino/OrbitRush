@@ -39,7 +39,7 @@ public class UserSeeder
                 Name = "Sayetsu",
                 Email = "sayetsu@gmail.com",
                 HashPassword = PasswordHelper.Hash("Sayetsu13"),
-                Image = "images/OrbitRush-TrashCan.jpg",
+                Image = "images/profiles/Sayetsu.webp",
                 Role = "user",
                 State = StateEnum.Disconnected
             },
@@ -48,7 +48,7 @@ public class UserSeeder
                 Name = "Pixeladu",
                 Email = "pixeladu@gmail.com",
                 HashPassword = PasswordHelper.Hash("Pixeladu24"),
-                Image = "images/OrbitRush-TrashCan.jpg",
+                Image = "images/profiles/Mikel.jpg",
                 Role = "user",
                 State = StateEnum.Disconnected
             },
@@ -57,7 +57,7 @@ public class UserSeeder
                 Name = "Fernando",
                 Email = "fernando@gmail.com",
                 HashPassword = PasswordHelper.Hash("Fernando3"),
-                Image = "images/OrbitRush-TrashCan.jpg",
+                Image = "images/profiles/Fernando.jpg",
                 Role = "user",
                 State = StateEnum.Disconnected
             }

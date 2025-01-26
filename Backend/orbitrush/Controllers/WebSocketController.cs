@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using orbitrush.Services;
 using System.Net.WebSockets;
-
-namespace orbitrush.Controllers;
 
 [Route("socket")]
 [ApiController]
@@ -20,8 +17,18 @@ public class WebSocketController : ControllerBase
     {
         if (HttpContext.WebSockets.IsWebSocketRequest)
         {
-            WebSocket webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-            await _websocketService.HandleAsync(webSocket);
+            string userId = HttpContext.Request.Query["userId"];
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                WebSocket webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                await _websocketService.HandleAsync(webSocket, userId);
+            }
+            else
+            {
+                HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await HttpContext.Response.WriteAsync("Se necesita un UserId");
+            }
         }
         else
         {

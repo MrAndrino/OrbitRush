@@ -1,20 +1,39 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
 
-namespace orbitrush.Services;
-
 public class WebSocketService
 {
-    public async Task HandleAsync(WebSocket webSocket)
-    {
-        while (webSocket.State == WebSocketState.Open)
-        {
-            string message = await ReadAsync(webSocket);
+    private readonly WebSocketConnectionManager _connectionManager;
+    private readonly WebSocketMessageHandler _messageHandler;
 
-            if (!string.IsNullOrWhiteSpace(message))
+    public WebSocketService(WebSocketConnectionManager connectionManager, WebSocketMessageHandler messageHandler)
+    {
+        _connectionManager = connectionManager;
+        _messageHandler = messageHandler;
+    }
+    
+    public async Task HandleAsync(WebSocket webSocket, string userId)
+    {
+        _connectionManager.AddConnection(userId, webSocket);
+
+        try
+        {
+            while (webSocket.State == WebSocketState.Open)
             {
-                string outMessage = $"[{string.Join(", ", message as IEnumerable<char>)}]";
-                await SendAsync(webSocket, outMessage);
+                string message = await ReadAsync(webSocket);
+
+                if (!string.IsNullOrWhiteSpace(message))
+                {
+                    await _messageHandler.ProcessMessageAsync(userId, message);
+                }
+            }
+        }
+        finally
+        {
+            _connectionManager.RemoveConnection(userId);
+            if (webSocket.State == WebSocketState.Open)
+            {
+                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by server", CancellationToken.None);
             }
         }
     }
@@ -22,33 +41,25 @@ public class WebSocketService
     private async Task<string> ReadAsync(WebSocket webSocket, CancellationToken cancellation = default)
     {
         byte[] buffer = new byte[4096];
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new();
+
         bool endOfMessage = false;
 
         do
         {
             WebSocketReceiveResult result = await webSocket.ReceiveAsync(buffer, cancellation);
+            string message = System.Text.Encoding.UTF8.GetString(buffer, 0, result.Count);
+            stringBuilder.Append(message);
 
-            if (result.MessageType == WebSocketMessageType.Text)
-            {
-                string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                stringBuilder.Append(message);
-            }
-            else if (result.CloseStatus.HasValue)
+            if (result.CloseStatus.HasValue)
             {
                 await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, cancellation);
             }
+
             endOfMessage = result.EndOfMessage;
         }
-        while (webSocket.State == WebSocketState.Open && !endOfMessage);
+        while (!endOfMessage);
 
         return stringBuilder.ToString();
-    }
-
-    private Task SendAsync(WebSocket webSocket, string message, CancellationToken cancellation = default)
-    {
-        byte[] bytes = Encoding.UTF8.GetBytes(message);
-
-        return webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, cancellation);
     }
 }
