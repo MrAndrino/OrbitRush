@@ -41,7 +41,8 @@ export const AuthProvider = ({ children }) => {
   const handleLogin = async (data, rememberMe) => {
     try {
       const respuesta = await Login(LOGIN_URL, data);
-      await connectWebSocket(decodedToken?.id);
+      const decoded = jwtDecode(respuesta.accessToken);
+      await connectWebSocket(decoded?.id);
       const username = await saveToken(respuesta.accessToken, rememberMe);
       router.push('/menu');
       toast.success(`¡Bienvenid@, ${username}!`);
@@ -54,7 +55,8 @@ export const AuthProvider = ({ children }) => {
   const handleRegister = async (data) => {
     try {
       const respuesta = await Register(REGISTER_URL, data);
-      await connectWebSocket(decodedToken?.id);
+      const decoded = jwtDecode(respuesta.accessToken);
+      await connectWebSocket(decoded?.id);
       const username = await saveToken(respuesta.accessToken, rememberMe);
       router.push('/menu');
       toast.success(`Registro exitoso, bienvenid@, ${username}!`);
