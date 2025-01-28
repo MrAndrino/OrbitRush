@@ -4,7 +4,7 @@ import Link from 'next/link';
 type ButtonProps = {
   onClick?: () => void;
   children: React.ReactNode;
-  color: 'blue' | 'orange';
+  color: 'blue' | 'orange' | 'red';
   href?: string;
   className?: string;
   type?: 'button' | 'submit' | 'reset';

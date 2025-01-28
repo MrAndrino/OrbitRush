@@ -32,7 +32,7 @@ export default function RootLayout({
 
     <html lang="en">
       <body
-        className={`${roboto.variable} ${electrolize.variable} antialiased`}
+        className={`${roboto.variable} ${electrolize.variable} antialiased overflow-hidden`}
       >
         <WebSocketProvider>
           <AuthProvider>

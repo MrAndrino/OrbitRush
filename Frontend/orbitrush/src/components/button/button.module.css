@@ -1,15 +1,19 @@
+.red,
 .blue,
 .orange {
   border-radius: 5px;
   transition: all 0.3s ease;
-  color: #ededed;;
+  color: #ededed;
+  ;
 }
 
+.red:hover,
 .blue:hover,
 .orange:hover {
   transform: translateY(-5px);
 }
 
+.red:active,
 .blue:active,
 .orange:active {
   transform: translateY(2px);
@@ -52,4 +56,23 @@
   background: linear-gradient(135deg, rgba(255, 140, 0, 0.6), rgba(255, 140, 0, 1)),
     linear-gradient(45deg, rgba(10, 10, 10, 0.8), rgba(40, 40, 40, 0.9));
   box-shadow: 0 0 25px rgba(255, 140, 0, 1), 0 0 35px rgba(255, 140, 0, 0.9);
+}
+
+.red {
+  border: 2px solid rgba(255, 0, 0);
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.3)),
+    linear-gradient(45deg, rgba(10, 10, 10, 0.8), rgba(20, 20, 20, 1));
+  box-shadow: 0 0 10px rgba(255, 0, 0, 1), 0 0 15px rgba(255, 0, 0, 0.6);
+}
+
+.red:hover {
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.4), rgba(255, 0, 0, 0.7)),
+    linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+  box-shadow: 0 0 25px rgba(255, 0, 0, 1), 0 0 40px rgba(255, 0, 0, 0.9);
+}
+
+.red:active {
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.6), rgba(255, 0, 0, 1)),
+    linear-gradient(45deg, rgba(0, 0, 0, 0.8), rgba(30, 30, 30, 0.9));
+  box-shadow: 0 0 25px rgba(255, 0, 0, 1), 0 0 35px rgba(255, 0, 0, 0.9);
 }

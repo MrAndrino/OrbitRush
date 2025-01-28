@@ -5,7 +5,7 @@ interface ModalProps {
   isOpen: boolean;
   closeModal: () => void;
   children: React.ReactNode;
-  color: 'blue' | 'orange';
+  color: 'blue' | 'orange' | 'red';
   className?: string;
 }
 

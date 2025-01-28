@@ -17,14 +17,21 @@
   cursor: pointer;
   transition: all 0.3s ease;
 }
-.close-blue:hover, .close-orange:hover{
+
+.close-red:hover,
+.close-blue:hover,
+.close-orange:hover {
   transform: scale(1.2);
 }
-.close-blue:active, .close-orange:active{
+
+.close-red:active,
+.close-blue:active,
+.close-orange:active {
   transform: scale(0.9);
   transition: transform 0.1s ease, color 0.1s ease;
 }
 
+.red,
 .blue,
 .orange {
   position: relative;
@@ -35,15 +42,17 @@
   background: var(--background);
   overflow-y: auto;
   scrollbar-width: thin;
-  
+
 }
 
 .close-blue {
   color: rgb(0, 153, 255, 0.7);
 }
+
 .close-blue:hover {
   color: rgb(0, 153, 255);
 }
+
 .close-blue:active {
   color: rgba(0, 153, 255, 0.9);
 }
@@ -57,9 +66,11 @@
 .close-orange {
   color: rgba(255, 140, 0, 0.7);
 }
+
 .close-orange:hover {
   color: rgba(255, 140, 0);
 }
+
 .close-orange:active {
   color: rgba(255, 140, 0, 0.9);
 }
@@ -68,4 +79,22 @@
   border: 2px solid rgba(255, 140, 0);
   box-shadow: 0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6);
   scrollbar-color: rgba(255, 140, 0, 0.7) #1e1e1e;
+}
+
+.close-red {
+  color: rgba(255, 0, 0, 0.7);
+}
+
+.close-red:hover {
+  color: rgba(255, 0, 0);
+}
+
+.close-red:active {
+  color: rgba(255, 0, 0, 0.9);
+}
+
+.red {
+  border: 2px solid rgba(255, 0, 0);
+  box-shadow: 0 0 10px rgba(255, 0, 0, 1), 0 0 15px rgba(255, 0, 0, 0.6);
+  scrollbar-color: rgba(255, 0, 0, 0.7) #1e1e1e;
 }

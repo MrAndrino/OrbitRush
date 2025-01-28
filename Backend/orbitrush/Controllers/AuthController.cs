@@ -50,7 +50,7 @@ public class AuthController : ControllerBase
                 return Unauthorized("Nombre de Usuario, email o contraseña inválidos");
             }
 
-            string accessToken = GenerateToken(user.Id.ToString(), user.Name, user.Email, user.Role);
+            string accessToken = GenerateToken(user.Id.ToString(), user.Name, user.Image, user.Role);
 
             return Ok(new AccessTokenJwt { AccessToken = accessToken });
         }
@@ -94,7 +94,7 @@ public class AuthController : ControllerBase
             await _unitOfWork.UserRepository.InsertAsync(newUser);
             await _unitOfWork.SaveAsync();
 
-            string accessToken = GenerateToken(newUser.Id.ToString(), newUser.Name, newUser.Email, newUser.Role);
+            string accessToken = GenerateToken(newUser.Id.ToString(), newUser.Name, newUser.Image, newUser.Role);
 
             return Ok(new AccessTokenJwt { AccessToken = accessToken });
         }
@@ -105,7 +105,7 @@ public class AuthController : ControllerBase
     }
 
 
-    private string GenerateToken(string userId, string userName, string userRole, string userEmail)
+    private string GenerateToken(string userId, string userName, string userImage, string userRole)
     {
         SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
         {
@@ -113,7 +113,7 @@ public class AuthController : ControllerBase
             {
                 { "id", userId },
                 { "name", userName },
-                { "email", userEmail },
+                { "image", userImage },
                 {ClaimTypes.Role, userRole }
             },
 
