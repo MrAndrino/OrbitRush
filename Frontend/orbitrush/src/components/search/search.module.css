@@ -1,0 +1,19 @@
+.searchBox input {
+  font-family: var(--font-secondary);
+  font-size: 0.9rem;
+  color: var(--foreground);
+  padding: 0.2rem;
+  border: 2px solid rgba(255, 140, 0, 0.7);
+  background-color: rgba(255, 140, 0, 0.2);
+  height: 2rem;
+  width: 16.5rem;
+}
+
+.searchBox input:hover {
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.4), rgba(255, 140, 0, 0.7)),
+    linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+}
+
+.searchBox input:focus {
+  outline: none;
+}

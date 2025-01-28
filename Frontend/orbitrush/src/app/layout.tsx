@@ -42,7 +42,7 @@ export default function RootLayout({
         </WebSocketProvider>
 
         <Toaster
-          position="top-right"
+          position="bottom-right"
           reverseOrder={false}
           gutter={8} // Espaciado entre los toasts
           toastOptions={{
