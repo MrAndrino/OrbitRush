@@ -4,9 +4,9 @@ using System.Text;
 public class WebSocketService
 {
     private readonly WebSocketConnectionManager _connectionManager;
-    private readonly WebSocketMessageHandler _messageHandler;
+    private readonly WebSocketFriendHandler _messageHandler;
 
-    public WebSocketService(WebSocketConnectionManager connectionManager, WebSocketMessageHandler messageHandler)
+    public WebSocketService(WebSocketConnectionManager connectionManager, WebSocketFriendHandler messageHandler)
     {
         _connectionManager = connectionManager;
         _messageHandler = messageHandler;

@@ -20,7 +20,7 @@ public class Program
         builder.Services.AddScoped<UserService>();
         builder.Services.AddScoped<UserFriendService>();
         builder.Services.AddSingleton<WebSocketConnectionManager>();
-        builder.Services.AddSingleton<WebSocketMessageHandler>();
+        builder.Services.AddSingleton<WebSocketFriendHandler>();
         builder.Services.AddSingleton<WebSocketService>();
 
         builder.Services.AddControllers();

@@ -16,8 +16,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="WebSocket\" />
-  </ItemGroup>
-
 </Project>
