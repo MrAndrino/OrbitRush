@@ -17,6 +17,7 @@ public class MyDbContext : DbContext
     public DbSet<Match> Matches { get; set; }
     public DbSet<MatchResult> MatchResults { get; set; }
     public DbSet<UserFriend> Friends { get; set; }
+    public DbSet<FriendRequest> FriendRequest { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)

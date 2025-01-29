@@ -45,13 +45,7 @@ public class UserRepository : Repository<User, int>
         }
         return true;
     }
-    public async Task<string> GetNameById(int id)
-    {
-        return await Context.Users
-            .Where(u => u.Id == id)
-            .Select(u => u.Name)
-            .FirstOrDefaultAsync();
-    }
+    
     public async Task<List<UserFriendDto>> GetFriendList(int id)
     {
         User user = await Context.Users

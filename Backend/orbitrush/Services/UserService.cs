@@ -14,7 +14,7 @@ public class UserService
 
     public async Task<string> GetNameById(int id)
     {
-        return await _unitOfWork.UserRepository.GetNameById(id);
+        return await _unitOfWork.UserRepository.GetNameByIdAsync(id);
     }
 
     public async Task<List<UserFriendDto>> GetFriendList(int id)

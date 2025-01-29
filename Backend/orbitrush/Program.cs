@@ -17,8 +17,8 @@ public class Program
 
         builder.Services.AddScoped<MyDbContext>();
         builder.Services.AddScoped<UnitOfWork>();
-
         builder.Services.AddScoped<UserService>();
+        builder.Services.AddScoped<UserFriendService>();
         builder.Services.AddSingleton<WebSocketConnectionManager>();
         builder.Services.AddSingleton<WebSocketMessageHandler>();
         builder.Services.AddSingleton<WebSocketService>();

@@ -57,4 +57,12 @@ public abstract class Repository<TEntity, TId> : IRepository<TEntity, TId> where
     {
         return await GetByIdAsync(id) !=null;
     }
+
+    public async Task<string> GetNameByIdAsync(int id)
+    {
+        return await Context.Users
+            .Where(u => u.Id == id)
+            .Select(u => u.Name)
+            .FirstOrDefaultAsync();
+    }
 }

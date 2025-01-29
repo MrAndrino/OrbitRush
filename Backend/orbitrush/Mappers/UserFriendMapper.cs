@@ -11,7 +11,8 @@ public static class UserFriendMapper
         {
             Id = userFriend.Friend.Id,
             Name = userFriend.Friend.Name,
-            Image = userFriend.Friend.Image
+            Image = userFriend.Friend.Image,
+            State = userFriend.Friend.State,
         };
     }
 
