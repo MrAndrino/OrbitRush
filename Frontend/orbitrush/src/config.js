@@ -5,4 +5,12 @@ export const API_BASE_URL = `${BASE_URL}/api`
 export const LOGIN_URL = `${API_BASE_URL}/Auth/login`
 export const REGISTER_URL = `${API_BASE_URL}/Auth/register`
 
-//Meter todos los endpoints
+//Friend Requests
+export const GET_REQUEST_URL = `${API_BASE_URL}/FriendRequest/getrequests`
+export const DELETE_REQUEST_URL = `${API_BASE_URL}/FriendRequest/deleterequests`
+
+//Gestión de Users
+export const FRIENDLIST_URL = `${API_BASE_URL}/User/friendlist`
+export const USERLIST_URL = `${API_BASE_URL}/User/userlist`
+export const SEARCH_URL = `${API_BASE_URL}/User/search`
+export const DELETE_FRIEND_URL = `${API_BASE_URL}/UserFriend/deletefriend`
