@@ -24,4 +24,9 @@ public class WSConnectionManager
     {
         return _connections.Keys;
     }
+
+    public WebSocket GetConnectionById(string userId)
+    {
+        return _connections.TryGetValue(userId, out var socket) ? socket :null;
+    }
 }

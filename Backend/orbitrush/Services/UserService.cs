@@ -17,7 +17,7 @@ public class UserService
         return await _unitOfWork.UserRepository.GetNameByIdAsync(id);
     }
 
-    public async Task<List<UserFriendDto>> GetFriendList(int id)
+    public async Task<List<UserDto>> GetFriendList(int id)
     {
         return await _unitOfWork.UserRepository.GetFriendList(id);
     }
@@ -41,7 +41,7 @@ public class UserService
         return "images/profiles/" + fileName;
     }
 
-    public async Task<List<UserFriendDto>> GetUsersExcludingFriends(int userId)
+    public async Task<List<UserDto>> GetUsersExcludingFriends(int userId)
     {
         return await _unitOfWork.UserRepository.GetUsersExcludingFriends(userId);
     }

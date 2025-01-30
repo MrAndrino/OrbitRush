@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using orbitrush.Database.Entities;
+using orbitrush.Database.Entities.Enums;
 using orbitrush.Dtos;
 using orbitrush.Mappers;
 using orbitrush.Utils;
@@ -46,7 +47,7 @@ public class UserRepository : Repository<User, int>
         return true;
     }
 
-    public async Task<List<UserFriendDto>> GetFriendList(int id)
+    public async Task<List<UserDto>> GetFriendList(int id)
     {
         User user = await Context.Users
             .Include(u => u.Friends)
@@ -60,13 +61,13 @@ public class UserRepository : Repository<User, int>
 
         if (user.Friends == null || !user.Friends.Any())
         {
-            return new List<UserFriendDto>();
+            return new List<UserDto>();
         }
 
-        return UserFriendMapper.ToDtoList(user.Friends);
+        return UserMapper.ToDtoList(user.Friends);
     }
 
-    public async Task<List<UserFriendDto>> GetUsersExcludingFriends(int userId)
+    public async Task<List<UserDto>> GetUsersExcludingFriends(int userId)
     {
         try
         {
@@ -83,14 +84,14 @@ public class UserRepository : Repository<User, int>
 
             if (userFriends == null)
             {
-                throw new KeyNotFoundException("User or friends not found");
+                throw new KeyNotFoundException("Usuario no encontrado");
             }
 
             var usersExcludingFriends = allUsers
                 .Where(user => !userFriends.Contains(user.Id))
                 .ToList();
 
-            var result = usersExcludingFriends.Select(user => new UserFriendDto
+            var result = usersExcludingFriends.Select(user => new UserDto
             {
                 Id = user.Id,
                 Name = user.Name,
@@ -102,9 +103,27 @@ public class UserRepository : Repository<User, int>
         }
         catch (Exception ex)
         {
-            throw new Exception("Error retrieving users excluding friends", ex);
+            throw new Exception("Error buscando usuarios", ex);
         }
     }
 
+    public async Task<List<int>> GetFriendsIdsAsync(int userId)
+    {
+        return await Context.Users
+            .Include(u => u.Friends)
+            .ThenInclude(f => f.Friend)
+            .Where(u => u.Id == userId)
+            .Select(u => u.Friends.Select(f => f.Friend.Id).ToList())
+            .FirstOrDefaultAsync();
+    }
 
+    public async Task UpdateStateAsync(int userId, StateEnum newState)
+    {
+        User user = await Context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user != null)
+        {
+            user.State = newState;
+            await Context.SaveChangesAsync();
+        }
+    }
 }

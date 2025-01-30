@@ -4,3 +4,5 @@ export const API_BASE_URL = `${BASE_URL}/api`
 //Login y Registro
 export const LOGIN_URL = `${API_BASE_URL}/Auth/login`
 export const REGISTER_URL = `${API_BASE_URL}/Auth/register`
+
+//Meter todos los endpoints

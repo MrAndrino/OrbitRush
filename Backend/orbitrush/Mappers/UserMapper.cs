@@ -3,11 +3,11 @@ using orbitrush.Dtos;
 
 namespace orbitrush.Mappers;
 
-public static class UserFriendMapper
+public static class UserMapper
 {
-    public static UserFriendDto ToDto(UserFriend userFriend)
+    public static UserDto ToDto(UserFriend userFriend)
     {
-        return new UserFriendDto
+        return new UserDto
         {
             Id = userFriend.Friend.Id,
             Name = userFriend.Friend.Name,
@@ -16,7 +16,7 @@ public static class UserFriendMapper
         };
     }
 
-    public static List<UserFriendDto> ToDtoList(List<UserFriend> userFriends)
+    public static List<UserDto> ToDtoList(List<UserFriend> userFriends)
     {
         return userFriends.Select(ToDto).ToList();
     }

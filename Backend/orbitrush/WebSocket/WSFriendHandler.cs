@@ -1,4 +1,5 @@
 ﻿using orbitrush.Database.Entities;
+using orbitrush.Database.Entities.Enums;
 using orbitrush.Database.Repositories;
 using System.Net.WebSockets;
 using System.Text.Json;
@@ -41,6 +42,13 @@ public class WSFriendHandler
                         await HandleAcceptRequestAsync(userId, request);
                         break;
 
+                    case "updateUserState":
+                        if (Enum.TryParse<StateEnum>(request.Message, true, out var newState))
+                        {
+                            await HandleUpdateUserStateAsync(userId, newState);
+                        }
+                        break;
+
                     default:
                         throw new InvalidOperationException("Invalid action.");
                 }
@@ -80,7 +88,7 @@ public class WSFriendHandler
             }
 
             bool requestExist = await unitOfWork.FriendRequestRepository.ExistsBySenderAndTargetAsync(senderId, request.TargetId);
-            
+
             if (requestExist)
             {
                 string targetName = await unitOfWork.FriendRequestRepository.GetNameByIdAsync(int.Parse(request.TargetId));
@@ -174,6 +182,54 @@ public class WSFriendHandler
 
                 await SendAsync(targetSocket, notification);
             }
+        }
+    }
+
+    public async Task HandleUpdateUserStateAsync(string userId, StateEnum newState)
+    {
+        Console.WriteLine($"Actualizando estado de {userId} a {newState}");
+        await UpdateDBUserStateAsync(userId, newState);
+        await NotifyFriendsOfStateChangeAsync(userId, newState);
+    }
+
+    private async Task UpdateDBUserStateAsync(string userId, StateEnum newState)
+    {
+        using (var scope = _serviceProvider.CreateScope())
+        {
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+            var userRepository = unitOfWork.UserRepository;
+
+            await userRepository.UpdateStateAsync(int.Parse(userId), newState);
+            await unitOfWork.SaveAsync();
+        }
+    }
+
+    private async Task NotifyFriendsOfStateChangeAsync(string userId, StateEnum newState)
+    {
+        var friends = await GetFriends(userId);
+        var notification = new
+        {
+            Action = "userStateChanged",
+            userId = userId,
+            State = newState.ToString(),
+        };
+
+        foreach (var friendId in friends)
+        {
+            if (_connectionManager.TryGetConnection(friendId.ToString(), out WebSocket friendSocket) && (friendSocket.State == WebSocketState.Open))
+            {
+                string message = JsonSerializer.Serialize(notification);
+                await SendAsync(friendSocket, message);
+            }
+        }
+    }
+
+    private async Task<List<int>> GetFriends(string userId)
+    {
+        using (var scope = _serviceProvider.CreateScope())
+        {
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+            return await unitOfWork.UserRepository.GetFriendsIdsAsync(int.Parse(userId));
         }
     }
 

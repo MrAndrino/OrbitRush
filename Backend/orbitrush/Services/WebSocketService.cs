@@ -1,20 +1,22 @@
-﻿using System.Net.WebSockets;
+﻿using orbitrush.Database.Entities.Enums;
+using System.Net.WebSockets;
 using System.Text;
 
 public class WebSocketService
 {
     private readonly WSConnectionManager _connectionManager;
-    private readonly WSFriendHandler _messageHandler;
+    private readonly WSFriendHandler _friendHandler;
 
-    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler messageHandler)
+    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler friendHandler)
     {
         _connectionManager = connectionManager;
-        _messageHandler = messageHandler;
+        _friendHandler = friendHandler;
     }
 
     public async Task HandleAsync(WebSocket webSocket, string userId)
     {
         _connectionManager.AddConnection(userId, webSocket);
+        await _friendHandler.HandleUpdateUserStateAsync(userId, StateEnum.Connected);
 
         try
         {
@@ -24,16 +26,18 @@ public class WebSocketService
 
                 if (!string.IsNullOrWhiteSpace(message))
                 {
-                    await _messageHandler.ProcessMessageAsync(userId, message);
+                    await _friendHandler.ProcessMessageAsync(userId, message);
                 }
             }
         }
         finally
         {
             _connectionManager.RemoveConnection(userId);
+            await _friendHandler.HandleUpdateUserStateAsync(userId, StateEnum.Disconnected);
+
             if (webSocket.State == WebSocketState.Open)
             {
-                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by server", CancellationToken.None);
+                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Cerrado por el servidor", CancellationToken.None);
             }
         }
     }

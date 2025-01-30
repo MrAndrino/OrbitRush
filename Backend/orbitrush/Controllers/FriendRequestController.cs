@@ -34,7 +34,6 @@ public class FriendRequestController : BaseController
             return NotFound(new { message = "No se encontró la solicitud de amistad." });
         }
 
-
         await _unitOfWork.FriendRequestRepository.DeleteAsync(request);
         await _unitOfWork.SaveAsync();
 

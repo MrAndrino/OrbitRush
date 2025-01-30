@@ -36,7 +36,7 @@ public class UserController : BaseController
 
     [HttpGet("friendlist")]
     [Authorize]
-    public async Task<ActionResult<List<UserFriendDto>>> GetFriendList()
+    public async Task<ActionResult<List<UserDto>>> GetFriendList()
     {
         try
         {
@@ -51,7 +51,7 @@ public class UserController : BaseController
 
     [HttpGet("userlist")]
     [Authorize]
-    public async Task<ActionResult<List<UserFriendDto>>> GetUsersExcludingFriends()
+    public async Task<ActionResult<List<UserDto>>> GetUsersExcludingFriends()
     {
         try
         {
