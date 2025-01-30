@@ -5,6 +5,12 @@ namespace orbitrush.Database.Repositories;
 
 public class FriendRequestRepository : Repository<FriendRequest, int>
 {
+    public async Task<IEnumerable<FriendRequest>> GetRequestsByTargetIdAsync(string targetId)
+    {
+        return await Context.FriendRequest
+            .Where(fr => fr.TargetId == targetId)
+            .ToListAsync();
+    }
     public FriendRequestRepository(MyDbContext context) : base(context) { }
 
     public async Task<bool> ExistsBySenderAndTargetAsync(string senderId, string targetId)

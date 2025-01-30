@@ -7,6 +7,13 @@ public class UserFriendRepository : Repository<UserFriend, int>
 {
     public UserFriendRepository(MyDbContext context) : base(context) { }
 
+    public async Task<bool> AreFriendsAsync(string userId, string friendId)
+    {
+        return await Context.Friends
+            .AnyAsync(uf => (uf.UserId == int.Parse(userId) && uf.FriendId == int.Parse(friendId)) ||
+                            (uf.UserId == int.Parse(friendId) && uf.FriendId == int.Parse(userId)));
+    }
+
     public async Task<IEnumerable<UserFriend>> GetUserFriendsByIdAsync(int userId, int friendId)
     {
         return await Context.Set<UserFriend>()

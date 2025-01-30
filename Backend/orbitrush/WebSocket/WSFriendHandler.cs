@@ -57,13 +57,49 @@ public class WSFriendHandler
         using (var scope = _serviceProvider.CreateScope())
         {
             var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
-            bool requestExist = await unitOfWork.FriendRequestRepository.ExistsBySenderAndTargetAsync(senderId, request.TargetId);
+            bool areFriends = await unitOfWork.UserFriendRepository.AreFriendsAsync(senderId, request.TargetId);
 
+            if (areFriends)
+            {
+                request.Success = false;
+                request.ResponseMessage = "Ya son amigos.";
+
+                if (_connectionManager.TryGetConnection(senderId, out WebSocket senderSocket))
+                {
+                    string errorMessage = JsonSerializer.Serialize(new
+                    {
+                        Action = "friendRequestError",
+                        Success = false,
+                        ResponseMessage = request.ResponseMessage
+                    });
+
+                    await SendAsync(senderSocket, errorMessage);
+                }
+
+                return;
+            }
+
+            bool requestExist = await unitOfWork.FriendRequestRepository.ExistsBySenderAndTargetAsync(senderId, request.TargetId);
+            
             if (requestExist)
             {
                 string targetName = await unitOfWork.FriendRequestRepository.GetNameByIdAsync(int.Parse(request.TargetId));
                 request.Success = false;
                 request.ResponseMessage = $"Ya se ha enviado una petición a {targetName}";
+
+                if (_connectionManager.TryGetConnection(senderId, out WebSocket senderSocket))
+                {
+                    string errorMessage = JsonSerializer.Serialize(new
+                    {
+                        Action = "friendRequestError",
+                        Success = false,
+                        ResponseMessage = request.ResponseMessage
+                    });
+
+                    await SendAsync(senderSocket, errorMessage);
+                }
+
+                return;
             }
 
             FriendRequest friendRequest = new FriendRequest
@@ -72,7 +108,7 @@ public class WSFriendHandler
                 TargetId = request.TargetId,
             };
 
-            await unitOfWork.FriendRequestRepository.UpdateAsync(friendRequest);
+            await unitOfWork.FriendRequestRepository.InsertAsync(friendRequest);
             await unitOfWork.SaveAsync();
 
             if (_connectionManager.TryGetConnection(request.TargetId, out WebSocket targetSocket))
@@ -107,6 +143,7 @@ public class WSFriendHandler
             {
                 request.Success = false;
                 request.ResponseMessage = $"No se ha enviado ninguna petición.";
+                return;
             }
 
             await unitOfWork.FriendRequestRepository.DeleteAsync(friendRequest);
@@ -130,7 +167,7 @@ public class WSFriendHandler
                 string accepterName = await unitOfWork.FriendRequestRepository.GetNameByIdAsync(int.Parse(accepterId));
                 string notification = JsonSerializer.Serialize(new
                 {
-                    Action = "friendRequestReceived",
+                    Action = "friendRequestAccepted",
                     FromUserId = request.TargetId,
                     Message = $"{accepterName} ha aceptado tu solicitud de amistad."
                 });

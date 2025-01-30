@@ -48,4 +48,26 @@ public class UserController : BaseController
             return StatusCode(500, ex.Message);
         }
     }
+    [HttpGet("userlist")]
+    [Authorize]
+    public async Task<ActionResult<List<UserFriendDto>>> GetUsersExcludingFriends()
+    {
+        try
+        {
+            int userId = GetUserId();
+            var users = await _userService.GetUsersExcludingFriends(userId);
+
+            if (users == null || !users.Any())
+            {
+                return NotFound("No users found");
+            }
+
+            return Ok(users);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message, details = ex.ToString() });
+        }
+    }
+
 }

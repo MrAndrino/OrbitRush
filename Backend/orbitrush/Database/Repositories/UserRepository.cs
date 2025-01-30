@@ -65,4 +65,45 @@ public class UserRepository : Repository<User, int>
 
         return UserFriendMapper.ToDtoList(user.Friends);
     }
+    public async Task<List<UserFriendDto>> GetUsersExcludingFriends(int userId)
+    {
+        try
+        {
+            var allUsers = await Context.Users
+                .Where(u => u.Id != userId)  
+                .ToListAsync();
+
+            var userFriends = await Context.Users
+                .Where(u => u.Id == userId)
+                .Include(u => u.Friends)
+                .ThenInclude(f => f.Friend)
+                .Select(u => u.Friends.Select(f => f.FriendId).ToList())
+                .FirstOrDefaultAsync();
+
+            if (userFriends == null)
+            {
+                throw new KeyNotFoundException("User or friends not found");
+            }
+
+            var usersExcludingFriends = allUsers
+                .Where(user => !userFriends.Contains(user.Id))
+                .ToList();
+
+            var result = usersExcludingFriends.Select(user => new UserFriendDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Image = user.Image,
+                State = user.State 
+            }).ToList();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error retrieving users excluding friends", ex);
+        }
+    }
+
+
 }
