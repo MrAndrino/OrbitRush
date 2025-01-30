@@ -3,9 +3,9 @@ using orbitrush.Dtos;
 
 namespace orbitrush.Mappers;
 
-public static class UserMapper
+public class UserMapper
 {
-    public static UserDto ToDto(UserFriend userFriend)
+    public UserDto FriendToDto(UserFriend userFriend)
     {
         return new UserDto
         {
@@ -16,8 +16,24 @@ public static class UserMapper
         };
     }
 
-    public static List<UserDto> ToDtoList(List<UserFriend> userFriends)
+    public UserDto UserToDto(User user)
     {
-        return userFriends.Select(ToDto).ToList();
+        return new UserDto
+        {
+            Id = user.Id,
+            Name = user.Name,
+            Image = user.Image,
+            State = user.State,
+        };
+    }
+
+    public List<UserDto> UserToDtoList(List<User> user)
+    {
+        return user.Select(UserToDto).ToList();
+    }
+
+    public List<UserDto> FriendToDtoList(List<UserFriend> userFriends)
+    {
+        return userFriends.Select(FriendToDto).ToList();
     }
 }

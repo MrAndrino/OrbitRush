@@ -60,7 +60,7 @@ public class UserController : BaseController
 
             if (users == null || !users.Any())
             {
-                return NotFound("No users found");
+                return NotFound("No hay usuarios");
             }
 
             return Ok(users);
@@ -69,5 +69,14 @@ public class UserController : BaseController
         {
             return StatusCode(500, new { message = ex.Message, details = ex.ToString() });
         }
+    }
+
+    [HttpGet("search")]
+    [Authorize]
+    public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] bool includeFriends)
+    {
+        int id = GetUserId();
+        var result = await _userService.SearchUsers(id, search, includeFriends);
+        return Ok(result);
     }
 }

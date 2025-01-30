@@ -64,7 +64,8 @@ public class UserRepository : Repository<User, int>
             return new List<UserDto>();
         }
 
-        return UserMapper.ToDtoList(user.Friends);
+        var userMapper = new UserMapper();
+        return userMapper.FriendToDtoList(user.Friends);
     }
 
     public async Task<List<UserDto>> GetUsersExcludingFriends(int userId)
@@ -125,5 +126,32 @@ public class UserRepository : Repository<User, int>
             user.State = newState;
             await Context.SaveChangesAsync();
         }
+    }
+    
+    public async Task<List<string>> GetFriendByNames(int id)
+    {
+        var friends = await GetFriendList(id);
+
+        return friends.Select(f => f.Name).ToList();
+    }
+
+    public async Task<List<string>> GetUserByNames(int id)
+    {
+        var users = await GetUsersExcludingFriends(id);
+
+        return users.Select(u => u.Name).ToList();
+    }
+    public async Task<List<User>> GetFriendsByMatchedNames(int userId, IEnumerable<string> matchedNames)
+    {
+        return await Context.Friends
+            .Where(f => f.UserId == userId && matchedNames.Contains(f.Friend.Name))
+            .Select(f => f.Friend)
+            .ToListAsync();
+    }
+    public async Task<List<User>> GetUsersByMatchedNames(IEnumerable<string> matchedNames)
+    {
+        return await Context.Users
+            .Where(u => matchedNames.Contains(u.Name))
+            .ToListAsync();
     }
 }

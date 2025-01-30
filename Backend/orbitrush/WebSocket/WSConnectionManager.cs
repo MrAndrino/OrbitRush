@@ -29,4 +29,8 @@ public class WSConnectionManager
     {
         return _connections.TryGetValue(userId, out var socket) ? socket :null;
     }
+    public IEnumerable<WebSocket> GetAllConnections()
+    {
+        return _connections.Values;
+    }
 }

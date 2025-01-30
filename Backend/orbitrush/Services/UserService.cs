@@ -1,15 +1,21 @@
-﻿using orbitrush.Database.Repositories;
+﻿using orbitrush.Database.Entities;
+using orbitrush.Database.Repositories;
 using orbitrush.Dtos;
+using orbitrush.Mappers;
 
 namespace orbitrush.Services;
 
 public class UserService
 {
     private UnitOfWork _unitOfWork;
+    private SmartSearchService smartSearchService;
+    private UserMapper _userMapper;
 
-    public UserService(UnitOfWork unitOfWork)
+    public UserService(UnitOfWork unitOfWork, UserMapper userMapper)
     {
         _unitOfWork = unitOfWork;
+        _userMapper = userMapper;
+        smartSearchService = new SmartSearchService();
     }
 
     public async Task<string> GetNameById(int id)
@@ -44,5 +50,36 @@ public class UserService
     public async Task<List<UserDto>> GetUsersExcludingFriends(int userId)
     {
         return await _unitOfWork.UserRepository.GetUsersExcludingFriends(userId);
+    }
+
+    public async Task<List<UserDto>> SearchUsers(int userId, string search, bool includeFriends)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            throw new ArgumentException("La búsqueda no puede estar vacía.");
+        }
+
+        List<string> names = includeFriends
+            ? await _unitOfWork.UserRepository.GetFriendByNames(userId)
+            : await _unitOfWork.UserRepository.GetUserByNames(userId);
+
+        IEnumerable<string> matchedNames = smartSearchService.Search(search, names);
+
+        List<User> matchedUsers = new List<User>();
+
+        if (matchedNames != null && matchedNames.Any())
+        {
+            if (!includeFriends)
+            {
+                matchedUsers = await _unitOfWork.UserRepository.GetUsersByMatchedNames(matchedNames);
+            }
+            else
+            {
+                matchedUsers = await _unitOfWork.UserRepository.GetFriendsByMatchedNames(userId, matchedNames);
+
+            }
+        }
+
+        return _userMapper.UserToDtoList(matchedUsers);
     }
 }

@@ -6,16 +6,20 @@ public class WebSocketService
 {
     private readonly WSConnectionManager _connectionManager;
     private readonly WSFriendHandler _friendHandler;
+    private readonly WSOnlineCount _onlineCount;
 
-    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler friendHandler)
+    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler friendHandler, WSOnlineCount onlineCount)
     {
         _connectionManager = connectionManager;
         _friendHandler = friendHandler;
+        _onlineCount = onlineCount;
     }
 
     public async Task HandleAsync(WebSocket webSocket, string userId)
     {
         _connectionManager.AddConnection(userId, webSocket);
+        _onlineCount.Increment();
+        await _onlineCount.NotifyAllClientsAsync(_connectionManager.GetAllConnections());
         await _friendHandler.HandleUpdateUserStateAsync(userId, StateEnum.Connected);
 
         try
@@ -33,6 +37,8 @@ public class WebSocketService
         finally
         {
             _connectionManager.RemoveConnection(userId);
+            _onlineCount.Decrement();
+            await _onlineCount.NotifyAllClientsAsync(_connectionManager.GetAllConnections());
             await _friendHandler.HandleUpdateUserStateAsync(userId, StateEnum.Disconnected);
 
             if (webSocket.State == WebSocketState.Open)
