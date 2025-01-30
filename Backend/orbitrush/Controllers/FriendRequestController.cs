@@ -1,15 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using orbitrush.Database.Repositories;
-using System.Security.Claims;
 
 namespace orbitrush.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class FriendRequestController : ControllerBase
+public class FriendRequestController : BaseController
 {
     private readonly UnitOfWork _unitOfWork;
 
@@ -21,24 +19,21 @@ public class FriendRequestController : ControllerBase
     [HttpGet("getrequests")]
     public async Task<IActionResult> GetFriendRequests()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
-
-        var requests = await _unitOfWork.FriendRequestRepository.GetRequestsByTargetIdAsync(userId);
+        var userId = GetUserId();
+        var requests = await _unitOfWork.FriendRequestRepository.GetRequestsByTargetIdAsync(userId.ToString());
         return Ok(requests);
     }
 
     [HttpDelete("deleterequests")]
     public async Task<IActionResult> RejectFriendRequest(string senderId)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
-
-        var request = await _unitOfWork.FriendRequestRepository.FindBySenderAndTargetAsync( userId, senderId);
+        var userId = GetUserId();
+        var request = await _unitOfWork.FriendRequestRepository.FindBySenderAndTargetAsync(senderId, userId.ToString());
         if (request == null)
+        {
             return NotFound(new { message = "No se encontró la solicitud de amistad." });
+        }
+
 
         await _unitOfWork.FriendRequestRepository.DeleteAsync(request);
         await _unitOfWork.SaveAsync();
