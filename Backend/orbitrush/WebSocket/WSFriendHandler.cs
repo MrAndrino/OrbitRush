@@ -31,7 +31,6 @@ public class WSFriendHandler
 
             if (request != null)
             {
-                Console.WriteLine($"Received action: {request.Action}");
                 switch (request.Action)
                 {
                     case "sendFriendRequest":
@@ -47,6 +46,10 @@ public class WSFriendHandler
                         {
                             await HandleUpdateUserStateAsync(userId, newState);
                         }
+                        break;
+
+                    case "deleteFriend":
+                        await HandleRemoveFriendAsync(userId, request);
                         break;
 
                     default:
@@ -169,7 +172,6 @@ public class WSFriendHandler
             });
             await unitOfWork.SaveAsync();
 
-
             if (_connectionManager.TryGetConnection(request.TargetId, out WebSocket targetSocket))
             {
                 string accepterName = await unitOfWork.FriendRequestRepository.GetNameByIdAsync(int.Parse(accepterId));
@@ -182,6 +184,72 @@ public class WSFriendHandler
 
                 await SendAsync(targetSocket, notification);
             }
+
+            await NotifyFriendListUpdateAsync(accepterId);
+            await NotifyFriendListUpdateAsync(request.TargetId);
+        }
+    }
+    private async Task HandleRemoveFriendAsync(string userId, FriendRequestMessage request)
+    {
+        using (var scope = _serviceProvider.CreateScope())
+        {
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+
+            var userFriends = await unitOfWork.UserFriendRepository.GetUserFriendsByIdAsync(int.Parse(userId), int.Parse(request.TargetId));
+            if (!userFriends.Any())
+            {
+                Console.WriteLine("No hay amigos que eliminar");
+                return;
+            }
+
+            await unitOfWork.UserFriendRepository.DeleteUserFriendsAsync(userFriends);
+            await unitOfWork.SaveAsync();
+
+            await NotifyFriendListUpdateAsync(userId);
+            await NotifyFriendListUpdateAsync(request.TargetId);
+        }
+    }
+
+    private async Task NotifyFriendListUpdateAsync(string userId)
+    {
+        var friends = await GetFriendsWithState(userId);
+
+        var notification = new
+        {
+            Action = "updateFriendList",
+            Friends = friends
+        };
+
+        if (_connectionManager.TryGetConnection(userId, out WebSocket userSocket) && userSocket.State == WebSocketState.Open)
+        {
+            string message = JsonSerializer.Serialize(notification);
+            await SendAsync(userSocket, message);
+        }
+    }
+
+    private async Task<List<object>> GetFriendsWithState(string userId)
+    {
+        using (var scope = _serviceProvider.CreateScope())
+        {
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+            var friendIds = await unitOfWork.UserRepository.GetFriendsIdsAsync(int.Parse(userId));
+
+            var friends = new List<object>();
+            foreach (var friendId in friendIds)
+            {
+                var state = StateEnum.Disconnected;
+                if (_connectionManager.TryGetConnection(friendId.ToString(), out WebSocket friendSocket))
+                {
+                    state = StateEnum.Connected;
+                }
+
+                friends.Add(new
+                {
+                    UserId = friendId,
+                    State = state.ToString()
+                });
+            }
+            return friends;
         }
     }
 
