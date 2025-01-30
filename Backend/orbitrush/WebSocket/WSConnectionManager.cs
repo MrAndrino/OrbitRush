@@ -1,7 +1,7 @@
 ﻿using System.Net.WebSockets;
 using System.Collections.Concurrent;
 
-public class WebSocketConnectionManager
+public class WSConnectionManager
 {
     private readonly ConcurrentDictionary<string, WebSocket> _connections = new();
 

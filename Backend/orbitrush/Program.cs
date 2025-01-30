@@ -19,8 +19,8 @@ public class Program
         builder.Services.AddScoped<UnitOfWork>();
         builder.Services.AddScoped<UserService>();
         builder.Services.AddScoped<UserFriendService>();
-        builder.Services.AddSingleton<WebSocketConnectionManager>();
-        builder.Services.AddSingleton<WebSocketFriendHandler>();
+        builder.Services.AddSingleton<WSConnectionManager>();
+        builder.Services.AddSingleton<WSFriendHandler>();
         builder.Services.AddSingleton<WebSocketService>();
 
         builder.Services.AddControllers();

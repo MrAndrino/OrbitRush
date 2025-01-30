@@ -3,12 +3,12 @@ using orbitrush.Database.Repositories;
 using System.Net.WebSockets;
 using System.Text.Json;
 
-public class WebSocketFriendHandler
+public class WSFriendHandler
 {
-    private readonly WebSocketConnectionManager _connectionManager;
+    private readonly WSConnectionManager _connectionManager;
     private readonly IServiceProvider _serviceProvider;
 
-    public WebSocketFriendHandler(WebSocketConnectionManager connectionManager, IServiceProvider serviceProvider)
+    public WSFriendHandler(WSConnectionManager connectionManager, IServiceProvider serviceProvider)
     {
         _connectionManager = connectionManager;
         _serviceProvider = serviceProvider;

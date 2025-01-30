@@ -3,10 +3,10 @@ using System.Text;
 
 public class WebSocketService
 {
-    private readonly WebSocketConnectionManager _connectionManager;
-    private readonly WebSocketFriendHandler _messageHandler;
+    private readonly WSConnectionManager _connectionManager;
+    private readonly WSFriendHandler _messageHandler;
 
-    public WebSocketService(WebSocketConnectionManager connectionManager, WebSocketFriendHandler messageHandler)
+    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler messageHandler)
     {
         _connectionManager = connectionManager;
         _messageHandler = messageHandler;
