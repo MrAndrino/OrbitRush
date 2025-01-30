@@ -45,7 +45,7 @@ public class UserRepository : Repository<User, int>
         }
         return true;
     }
-    
+
     public async Task<List<UserFriendDto>> GetFriendList(int id)
     {
         User user = await Context.Users
@@ -53,7 +53,7 @@ public class UserRepository : Repository<User, int>
             .ThenInclude(f => f.Friend)
             .FirstOrDefaultAsync(u => u.Id == id);
 
-        if (user == null) 
+        if (user == null)
         {
             throw new KeyNotFoundException("Tu usuario no existe");
         }
@@ -65,12 +65,13 @@ public class UserRepository : Repository<User, int>
 
         return UserFriendMapper.ToDtoList(user.Friends);
     }
+
     public async Task<List<UserFriendDto>> GetUsersExcludingFriends(int userId)
     {
         try
         {
             var allUsers = await Context.Users
-                .Where(u => u.Id != userId)  
+                .Where(u => u.Id != userId)
                 .ToListAsync();
 
             var userFriends = await Context.Users
@@ -94,7 +95,7 @@ public class UserRepository : Repository<User, int>
                 Id = user.Id,
                 Name = user.Name,
                 Image = user.Image,
-                State = user.State 
+                State = user.State
             }).ToList();
 
             return result;

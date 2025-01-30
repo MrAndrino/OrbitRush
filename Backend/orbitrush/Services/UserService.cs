@@ -33,12 +33,16 @@ public class UserService
         string fileName = name.ToLower() + "_" + Guid.NewGuid().ToString() + fileExtension;
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "profiles", fileName);
 
-
         using (var stream = new FileStream(filePath, FileMode.Create))
         {
             await image.CopyToAsync(stream);
         }
 
         return "images/profiles/" + fileName;
+    }
+
+    public async Task<List<UserFriendDto>> GetUsersExcludingFriends(int userId)
+    {
+        return await _unitOfWork.UserRepository.GetUsersExcludingFriends(userId);
     }
 }

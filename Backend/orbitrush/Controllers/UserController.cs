@@ -48,6 +48,7 @@ public class UserController : BaseController
             return StatusCode(500, ex.Message);
         }
     }
+
     [HttpGet("userlist")]
     [Authorize]
     public async Task<ActionResult<List<UserFriendDto>>> GetUsersExcludingFriends()
@@ -69,5 +70,4 @@ public class UserController : BaseController
             return StatusCode(500, new { message = ex.Message, details = ex.ToString() });
         }
     }
-
 }
