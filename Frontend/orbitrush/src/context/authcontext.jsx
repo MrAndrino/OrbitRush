@@ -1,12 +1,12 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { jwtDecode } from 'jwt-decode';
 import { Login, Register } from '@/lib/auth';
 import { LOGIN_URL, REGISTER_URL } from '@/config';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { useWebSocket } from "@/context/websocketcontext"
+import { useWebSocket } from "@/context/websocketcontext";
 
 export const AuthContext = createContext();
 export const useAuth = () => {
@@ -21,27 +21,23 @@ export const AuthProvider = ({ children }) => {
     return "";
   });
 
-  const [decodedToken, setDecodedToken] = useState(() => {
-    if (token) return jwtDecode(token);
-    return null;
-  });
-
+  const [decodedToken, setDecodedToken] = useState(null);
   const { connectWebSocket, closeWebSocket } = useWebSocket();
   const router = useRouter();
 
   useEffect(() => {
-    if (token) {
-      const decoded = jwtDecode(token);
-      setDecodedToken(decoded);
-      connectWebSocket(decodedToken?.id);
+    if (token && decodedToken && decodedToken.id) {
+      console.log("Token decodificado:", decodedToken);
+      connectWebSocket(decodedToken.id);
+    } else {
+      console.log("No hay token o id válido para conectar el WebSocket");
     }
-  }, [token]);
+  }, [token, decodedToken, connectWebSocket]);
 
 
   const handleLogin = async (data, rememberMe) => {
     try {
       const respuesta = await Login(LOGIN_URL, data);
-      await connectWebSocket(decodedToken?.id);
       const username = await saveToken(respuesta.accessToken, rememberMe);
       router.push('/menu');
       toast.success(`¡Bienvenid@, ${username}!`);
@@ -54,10 +50,9 @@ export const AuthProvider = ({ children }) => {
   const handleRegister = async (data) => {
     try {
       const respuesta = await Register(REGISTER_URL, data);
-      await connectWebSocket(decodedToken?.id);
-      const username = await saveToken(respuesta.accessToken, rememberMe);
+      await saveToken(respuesta.accessToken);
       router.push('/menu');
-      toast.success(`Registro exitoso, bienvenid@, ${username}!`);
+      toast.success(`Registro exitoso, bienvenid@, ${respuesta.username}!`);
     } catch (error) {
       toast.error(error.message || "Ocurrió un error al registrarse");
       throw error;
@@ -77,13 +72,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    const username = decodedToken?.name || "Usuario";
+    const username = decodedToken ? decodedToken.name : "Usuario"; 
     localStorage.removeItem('accessToken');
     sessionStorage.removeItem('accessToken');
     setToken(null);
     setDecodedToken(null);
     closeWebSocket();
     router.push('/login/');
+
     toast.custom(
       <div style={{
         backgroundColor: 'var(--backgroundtoast)',

@@ -30,13 +30,15 @@ const MainCard = () => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [menuVisible]);
 
+  const imageUrl = decodedToken?.image ? `${BASE_URL}/${decodedToken.image}` : "/images/OrbitRush-TrashCan.jpg";
+
   return (
     <div className={styles.mainCard}>
-      <div 
-        className={`${styles.userInfo} ${menuVisible ? styles.active : ""}`} 
+      <div
+        className={`${styles.userInfo} ${menuVisible ? styles.active : ""}`}
         onClick={handleOpenMenu}
       >
-        <img src={`${BASE_URL}/${decodedToken?.image}`} alt="" className={styles.userImage} />
+        <img src={imageUrl} alt="User" className={styles.userImage} />
         <span>{decodedToken?.name}</span>
       </div>
 

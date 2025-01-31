@@ -114,10 +114,10 @@ public class Program
         app.UseCors("AllowAllOrigins");
         app.UseHttpsRedirection();
 
-        app.UseWebSockets();
-
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseWebSockets();
 
         app.MapControllers();
 

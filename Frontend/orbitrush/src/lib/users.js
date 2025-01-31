@@ -1,4 +1,5 @@
 export async function getFriendList(url, token) {
+  
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -17,6 +18,7 @@ export async function getFriendList(url, token) {
 
 
 export async function getUserList(url, token) {
+
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -38,6 +40,7 @@ export async function getUserList(url, token) {
 
 
 export async function searchUsers(url, token, search, includeFriends) {
+
   const queryParams = new URLSearchParams({ search, includeFriends });
   const response = await fetch(`${url}?${queryParams.toString()}`, {
     method: "GET",
@@ -57,6 +60,7 @@ export async function searchUsers(url, token, search, includeFriends) {
 
 
 export async function deleteFriend(url, token, friendId) {
+  
   const response = await fetch(url, {
     method: "DELETE",
     headers: {

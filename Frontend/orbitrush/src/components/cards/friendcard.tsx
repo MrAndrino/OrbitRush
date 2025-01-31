@@ -2,18 +2,20 @@ import React, { useState } from "react";
 import styles from "./friendcard.module.css";
 import Modal from "../modal/modal";
 import Button from "../button/button";
+import { BASE_URL } from "@/config";
+import { useUsers } from "@/context/userscontext";
 
 export interface User {
   id: number;
   name: string;
   image: string;
-  status: "Disconnected" | "Connected" | "Playing";
+  state: "Disconnected" | "Connected" | "Playing"; 
 }
 
-const statusColors: Record<User["status"], string> = {
-  Disconnected: styles.statusDisconnected,
-  Connected: styles.statusConnected,
-  Playing: styles.statusPlaying,
+const stateColors: Record<User["state"], string> = {
+  Disconnected: styles.stateDisconnected,
+  Connected: styles.stateConnected,
+  Playing: styles.statePlaying,
 };
 
 interface FriendCardProps {
@@ -24,17 +26,23 @@ interface FriendCardProps {
 }
 
 const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) => {
+  const { removeFriend } = useUsers();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  const handleRemoveFriend = () => {
+    removeFriend(user.id); 
+    closeModal();
+  };
+
   return (
     <div className={`${styles.userCard} ${isExpanded ? styles.cardHovered : ""}`}>
       <div className={styles.userInfo} onClick={handleExpand}>
         <div className={styles.imageContainer}>
-          <img src={user.image} alt="" className={styles.userImage} />
-          <div className={`${styles.statusIndicator} ${statusColors[user.status]}`}></div>
+          <img src={`${BASE_URL}/${user.image}`} alt="" className={styles.userImage} />
+          <div className={`${styles.stateIndicator} ${stateColors[user.state]}`}></div>
         </div>
         <span className={styles.userName}>{user.name}</span>
       </div>
@@ -62,7 +70,7 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
             Seguro que quieres eliminar a "{user.name}" de tu lista de amigos?
           </p>
           <div className="flex justify-center gap-[5rem] select-none">
-            <Button color="red" className="w-[10rem] h-[4rem] text-2xl">Eliminar</Button>
+            <Button color="red" onClick={handleRemoveFriend} className="w-[10rem] h-[4rem] text-2xl">Eliminar</Button>
             <Button color="blue" onClick={closeModal} className="w-[10rem] h-[4rem] text-2xl">Cancelar</Button>
           </div>
         </div>
