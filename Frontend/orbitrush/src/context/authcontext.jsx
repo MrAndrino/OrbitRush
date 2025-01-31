@@ -27,12 +27,8 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token && decodedToken && decodedToken.id) {
-      console.log("Token decodificado:", decodedToken);
       connectWebSocket(decodedToken.id);
-    } else {
-      console.log("No hay token o id válido para conectar el WebSocket");
-    }
-  }, [token, decodedToken, connectWebSocket]);
+    }}, [token, decodedToken, connectWebSocket]);
 
 
   const handleLogin = async (data, rememberMe) => {
