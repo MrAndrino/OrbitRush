@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useAuth } from "@/context/authcontext";
+import { useAuth } from "@/context/authcontext";  // Usar el contexto correctamente
 import { useRouter } from "next/navigation";
 import styles from "./maincard.module.css";
 import { BASE_URL } from "@/config";
 
 const MainCard = () => {
-  const { decodedToken, logout } = useAuth();
+  const { decodedToken, setDecodedToken, logout } = useAuth(); // Acceder a setDecodedToken
   const router = useRouter();
   const [menuVisible, setMenuVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -30,13 +30,15 @@ const MainCard = () => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [menuVisible]);
 
+  const imageUrl = decodedToken?.image ? `${BASE_URL}/${decodedToken.image}` : "/images/OrbitRush-TrashCan.jpg";
+
   return (
     <div className={styles.mainCard}>
-      <div 
-        className={`${styles.userInfo} ${menuVisible ? styles.active : ""}`} 
+      <div
+        className={`${styles.userInfo} ${menuVisible ? styles.active : ""}`}
         onClick={handleOpenMenu}
       >
-        <img src={`${BASE_URL}/${decodedToken?.image}`} alt="" className={styles.userImage} />
+        <img src={imageUrl} alt="User" className={styles.userImage} />
         <span>{decodedToken?.name}</span>
       </div>
 

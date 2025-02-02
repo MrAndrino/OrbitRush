@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Roboto, Electrolize } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/authcontext";
+import { UsersProvider } from "@/context/userscontext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Toaster } from 'react-hot-toast';
@@ -36,13 +37,15 @@ export default function RootLayout({
       >
         <WebSocketProvider>
           <AuthProvider>
-            <ToastContainer />
-            {children}
+            <UsersProvider>
+              <ToastContainer />
+              {children}
+            </UsersProvider>
           </AuthProvider>
         </WebSocketProvider>
 
         <Toaster
-          position="top-right"
+          position="bottom-right"
           reverseOrder={false}
           gutter={8} // Espaciado entre los toasts
           toastOptions={{

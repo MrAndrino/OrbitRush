@@ -1,12 +1,12 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { jwtDecode } from 'jwt-decode';
 import { Login, Register } from '@/lib/auth';
 import { LOGIN_URL, REGISTER_URL } from '@/config';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { useWebSocket } from "@/context/websocketcontext"
+import { useWebSocket } from "@/context/websocketcontext";
 
 export const AuthContext = createContext();
 export const useAuth = () => {
@@ -16,33 +16,32 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
     if (typeof window !== "undefined") {
-      return JSON.parse(localStorage.getItem("accessToken")) || "";
+      return JSON.parse(localStorage.getItem("accessToken")) || 
+             JSON.parse(sessionStorage.getItem("accessToken")) || "";
     }
     return "";
   });
 
-  const [decodedToken, setDecodedToken] = useState(() => {
-    if (token) return jwtDecode(token);
-    return null;
-  });
-
+  const [decodedToken, setDecodedToken] = useState(null);
   const { connectWebSocket, closeWebSocket } = useWebSocket();
   const router = useRouter();
 
   useEffect(() => {
     if (token) {
-      const decoded = jwtDecode(token);
+      const decoded = jwtDecode(token); 
       setDecodedToken(decoded);
-      connectWebSocket(decodedToken?.id);
     }
-  }, [token]);
+  }, [token]); 
 
+  useEffect(() => {
+    if (token && decodedToken && decodedToken.id) {
+      connectWebSocket(decodedToken.id);
+    }
+  }, [token, decodedToken, connectWebSocket]);
 
   const handleLogin = async (data, rememberMe) => {
     try {
       const respuesta = await Login(LOGIN_URL, data);
-      const decoded = jwtDecode(respuesta.accessToken);
-      await connectWebSocket(decoded?.id);
       const username = await saveToken(respuesta.accessToken, rememberMe);
       router.push('/menu');
       toast.success(`¡Bienvenid@, ${username}!`);
@@ -55,37 +54,40 @@ export const AuthProvider = ({ children }) => {
   const handleRegister = async (data) => {
     try {
       const respuesta = await Register(REGISTER_URL, data);
-      const decoded = jwtDecode(respuesta.accessToken);
-      await connectWebSocket(decoded?.id);
-      const username = await saveToken(respuesta.accessToken, rememberMe);
+      await saveToken(respuesta.accessToken);
       router.push('/menu');
-      toast.success(`Registro exitoso, bienvenid@, ${username}!`);
+      toast.success(`Registro exitoso, bienvenid@, ${respuesta.username}!`);
     } catch (error) {
       toast.error(error.message || "Ocurrió un error al registrarse");
       throw error;
     }
   };
 
-  const saveToken = async (newToken, rememberMe) => {
+  const saveToken = (newToken, rememberMe) => {
     if (rememberMe) {
       localStorage.setItem("accessToken", JSON.stringify(newToken));
     } else {
       sessionStorage.setItem("accessToken", JSON.stringify(newToken));
     }
-    setToken(newToken);
+  
+    window.dispatchEvent(new Event("storage"));
+
     const decoded = jwtDecode(newToken);
+    setToken(newToken);
     setDecodedToken(decoded);
-    return decoded.name;
+  
+    return decoded.name; 
   };
 
   const logout = () => {
-    const username = decodedToken?.name || "Usuario";
+    const username = decodedToken ? decodedToken.name : "Usuario"; 
     localStorage.removeItem('accessToken');
     sessionStorage.removeItem('accessToken');
     setToken(null);
     setDecodedToken(null);
     closeWebSocket();
     router.push('/login/');
+
     toast.custom(
       <div style={{
         backgroundColor: 'var(--backgroundtoast)',
@@ -104,6 +106,7 @@ export const AuthProvider = ({ children }) => {
   const contextValue = {
     token,
     decodedToken,
+    setDecodedToken,
     saveToken,
     logout,
     handleLogin,

@@ -1,7 +1,7 @@
 ﻿using System.Net.WebSockets;
 using System.Collections.Concurrent;
 
-public class WebSocketConnectionManager
+public class WSConnectionManager
 {
     private readonly ConcurrentDictionary<string, WebSocket> _connections = new();
 
@@ -23,5 +23,14 @@ public class WebSocketConnectionManager
     public IEnumerable<string> GetAllUserIds()
     {
         return _connections.Keys;
+    }
+
+    public WebSocket GetConnectionById(string userId)
+    {
+        return _connections.TryGetValue(userId, out var socket) ? socket :null;
+    }
+    public IEnumerable<WebSocket> GetAllConnections()
+    {
+        return _connections.Values;
     }
 }

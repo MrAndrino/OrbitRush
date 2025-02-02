@@ -21,7 +21,7 @@ public class UserSeeder
                 Name = "Mr. Utsugi",
                 Email = "utsugi@gmail.com",
                 HashPassword = PasswordHelper.Hash("Utsugi77"),
-                Image = "images/profiles/Mr_Utsugi.webp",
+                Image = "images/profiles/Utsugi.webp",
                 Role = "admin",
                 State = StateEnum.Disconnected
             },

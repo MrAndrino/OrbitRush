@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using orbitrush.Database.Entities;
+using orbitrush.Database.Entities.Enums;
 using orbitrush.Dtos;
 using orbitrush.Mappers;
 using orbitrush.Utils;
@@ -45,30 +46,112 @@ public class UserRepository : Repository<User, int>
         }
         return true;
     }
-    public async Task<string> GetNameById(int id)
-    {
-        return await Context.Users
-            .Where(u => u.Id == id)
-            .Select(u => u.Name)
-            .FirstOrDefaultAsync();
-    }
-    public async Task<List<UserFriendDto>> GetFriendList(int id)
+
+    public async Task<List<UserDto>> GetFriendList(int id)
     {
         User user = await Context.Users
             .Include(u => u.Friends)
             .ThenInclude(f => f.Friend)
             .FirstOrDefaultAsync(u => u.Id == id);
 
-        if (user == null) 
+        if (user == null)
         {
             throw new KeyNotFoundException("Tu usuario no existe");
         }
 
         if (user.Friends == null || !user.Friends.Any())
         {
-            return new List<UserFriendDto>();
+            return new List<UserDto>();
         }
 
-        return UserFriendMapper.ToDtoList(user.Friends);
+        var userMapper = new UserMapper();
+        return userMapper.FriendToDtoList(user.Friends);
+    }
+
+    public async Task<List<UserDto>> GetUsersExcludingFriends(int userId)
+    {
+        try
+        {
+            var allUsers = await Context.Users
+                .Where(u => u.Id != userId)
+                .ToListAsync();
+
+            var userFriends = await Context.Users
+                .Where(u => u.Id == userId)
+                .Include(u => u.Friends)
+                .ThenInclude(f => f.Friend)
+                .Select(u => u.Friends.Select(f => f.FriendId).ToList())
+                .FirstOrDefaultAsync();
+
+            if (userFriends == null)
+            {
+                throw new KeyNotFoundException("Usuario no encontrado");
+            }
+
+            var usersExcludingFriends = allUsers
+                .Where(user => !userFriends.Contains(user.Id))
+                .ToList();
+
+            var result = usersExcludingFriends.Select(user => new UserDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Image = user.Image,
+                State = user.State
+            }).ToList();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error buscando usuarios", ex);
+        }
+    }
+
+    public async Task<List<int>> GetFriendsIdsAsync(int userId)
+    {
+        return await Context.Users
+            .Include(u => u.Friends)
+            .ThenInclude(f => f.Friend)
+            .Where(u => u.Id == userId)
+            .Select(u => u.Friends.Select(f => f.Friend.Id).ToList())
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task UpdateStateAsync(int userId, StateEnum newState)
+    {
+        User user = await Context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user != null)
+        {
+            user.State = newState;
+            await Context.SaveChangesAsync();
+        }
+    }
+    
+    public async Task<List<string>> GetFriendByNames(int id)
+    {
+        var friends = await GetFriendList(id);
+
+        return friends.Select(f => f.Name).ToList();
+    }
+
+    public async Task<List<string>> GetUserByNames(int id)
+    {
+        var users = await GetUsersExcludingFriends(id);
+
+        return users.Select(u => u.Name).ToList();
+    }
+    public async Task<List<User>> GetFriendsByMatchedNames(int userId, IEnumerable<string> matchedNames)
+    {
+        return await Context.Friends
+            .Where(f => f.UserId == userId && matchedNames.Contains(f.Friend.Name))
+            .Select(f => f.Friend)
+            .ToListAsync();
+    }
+    public async Task<List<User>> GetUsersByMatchedNames(IEnumerable<string> matchedNames)
+    {
+        return await Context.Users
+            .Where(u => matchedNames.Contains(u.Name))
+            .ToListAsync();
     }
 }

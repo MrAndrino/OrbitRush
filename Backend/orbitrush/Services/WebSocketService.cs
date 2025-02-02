@@ -1,20 +1,26 @@
-﻿using System.Net.WebSockets;
+﻿using orbitrush.Database.Entities.Enums;
+using System.Net.WebSockets;
 using System.Text;
 
 public class WebSocketService
 {
-    private readonly WebSocketConnectionManager _connectionManager;
-    private readonly WebSocketMessageHandler _messageHandler;
+    private readonly WSConnectionManager _connectionManager;
+    private readonly WSFriendHandler _friendHandler;
+    private readonly WSOnlineCount _onlineCount;
 
-    public WebSocketService(WebSocketConnectionManager connectionManager, WebSocketMessageHandler messageHandler)
+    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler friendHandler, WSOnlineCount onlineCount)
     {
         _connectionManager = connectionManager;
-        _messageHandler = messageHandler;
+        _friendHandler = friendHandler;
+        _onlineCount = onlineCount;
     }
 
     public async Task HandleAsync(WebSocket webSocket, string userId)
     {
         _connectionManager.AddConnection(userId, webSocket);
+        _onlineCount.Increment();
+        await _onlineCount.NotifyAllClientsAsync(_connectionManager.GetAllConnections());
+        await _friendHandler.HandleUpdateUserStateAsync(userId, StateEnum.Connected);
 
         try
         {
@@ -24,16 +30,20 @@ public class WebSocketService
 
                 if (!string.IsNullOrWhiteSpace(message))
                 {
-                    await _messageHandler.ProcessMessageAsync(userId, message);
+                    await _friendHandler.ProcessMessageAsync(userId, message);
                 }
             }
         }
         finally
         {
             _connectionManager.RemoveConnection(userId);
+            _onlineCount.Decrement();
+            await _onlineCount.NotifyAllClientsAsync(_connectionManager.GetAllConnections());
+            await _friendHandler.HandleUpdateUserStateAsync(userId, StateEnum.Disconnected);
+
             if (webSocket.State == WebSocketState.Open)
             {
-                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by server", CancellationToken.None);
+                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Cerrado por el servidor", CancellationToken.None);
             }
         }
     }

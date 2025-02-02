@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using orbitrush.Database;
 using orbitrush.Database.Repositories;
+using orbitrush.Mappers;
 using orbitrush.Seeders;
 using orbitrush.Services;
 using System.Text;
@@ -17,11 +18,17 @@ public class Program
 
         builder.Services.AddScoped<MyDbContext>();
         builder.Services.AddScoped<UnitOfWork>();
-
         builder.Services.AddScoped<UserService>();
-        builder.Services.AddSingleton<WebSocketConnectionManager>();
-        builder.Services.AddSingleton<WebSocketMessageHandler>();
+        builder.Services.AddScoped<UserFriendService>();
+        builder.Services.AddScoped<SmartSearchService>();
+
+        builder.Services.AddScoped<UserMapper>();
+
+        builder.Services.AddSingleton<WSConnectionManager>();
+        builder.Services.AddSingleton<WSFriendHandler>();
+        builder.Services.AddSingleton<WSOnlineCount>();
         builder.Services.AddSingleton<WebSocketService>();
+
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
@@ -107,10 +114,10 @@ public class Program
         app.UseCors("AllowAllOrigins");
         app.UseHttpsRedirection();
 
-        app.UseWebSockets();
-
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseWebSockets();
 
         app.MapControllers();
 
