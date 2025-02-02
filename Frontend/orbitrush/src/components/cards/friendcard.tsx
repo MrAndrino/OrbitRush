@@ -4,6 +4,7 @@ import Modal from "../modal/modal";
 import Button from "../button/button";
 import { BASE_URL } from "@/config";
 import { useUsers } from "@/context/userscontext";
+import toast from "react-hot-toast";
 
 export interface User {
   id: number;
@@ -34,6 +35,7 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
 
   const handleRemoveFriend = () => {
     removeFriend(user.id); 
+    toast.success(`Eliminaste a ${user.name} correctamente.`);
     closeModal();
   };
 

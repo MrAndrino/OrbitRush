@@ -1,0 +1,133 @@
+/* Contenedor general */
+.container {
+  position: relative;
+}
+
+/* Panel lateral (menú) - estilo base */
+.menu {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  right: -21vw; /* Ubicado fuera de la pantalla */
+  width: 17vw;
+  height: 100%;
+  background: var(--background);
+  /* El box-shadow y border se definirán en las clases específicas */
+  transition: right 0.3s ease;
+  z-index: 10;
+}
+
+/* Clase para mostrar el menú */
+.menuVisible {
+  right: 0;
+}
+
+/* Estilos para el menú cuando se activa el botón de notificaciones (azul) */
+.menuBlue {
+  border: 3px solid rgb(0, 153, 255);
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+}
+
+/* Estilos para el menú cuando se activa el botón de usuarios (naranja) */
+.menuOrange {
+  border: 3px solid rgba(255, 140, 0);
+  box-shadow: 0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6);
+}
+
+/* Estilos para el input de búsqueda (para el menú de usuarios) */
+.searchBox input {
+  font-family: var(--font-secondary);
+  color: var(--foreground);
+  padding: 0.2rem;
+  border: 3px solid rgba(255, 140, 0, 0.7);
+  background-color: rgba(255, 140, 0, 0.2);
+  height: 2.55rem;
+  width: 100%;
+}
+
+.searchBox input:hover {
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.4), rgba(255, 140, 0, 0.7)),
+              linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+}
+
+.searchBox input:focus {
+  outline: none;
+}
+
+/* Contenedor de los botones */
+.buttonContainer {
+  position: absolute;
+  top: 35%;
+  right: -8vh;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Espaciado reducido entre botones */
+  z-index: 5;
+  transition: right 0.3s ease;
+}
+
+/* Desplazar botones cuando se abre el menú */
+.buttonsShifted {
+  right: 13.5vw;
+}
+
+/* ============================= */
+/* Estilos para el botón de notificaciones (azul) */
+/* ============================= */
+.buttonBlue {
+  background: linear-gradient(135deg, rgba(0, 153, 255, 0.2), rgba(0, 153, 255, 0.3)),
+              linear-gradient(45deg, rgba(10, 10, 10, 0.8), rgba(20, 20, 20, 1));
+  color: #ededed;
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+  border: 2px solid rgb(0, 153, 255);
+  border-radius: 5px;
+  padding: 2rem 4rem 2rem 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.buttonBlue:hover {
+  background: linear-gradient(135deg, rgba(0, 153, 255, 0.4), rgba(0, 153, 255, 0.7)),
+              linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+  box-shadow: 0 0 25px rgba(0, 153, 255, 1), 0 0 40px rgba(0, 153, 255, 0.9);
+}
+
+.buttonBlue:active {
+  background: linear-gradient(135deg, rgba(0, 153, 255, 0.6), rgba(0, 153, 255, 1)),
+              linear-gradient(45deg, rgba(0, 0, 0, 0.8), rgba(30, 30, 30, 0.9));
+  box-shadow: 0 0 25px rgba(0, 153, 255, 1), 0 0 35px rgba(0, 153, 255, 0.9);
+}
+
+/* ============================= */
+/* Estilos para el botón de usuarios (naranja) */
+/* ============================= */
+.buttonOrange {
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.2), rgba(255, 140, 0, 0.3)),
+              linear-gradient(45deg, rgba(10, 10, 10, 0.8), rgba(20, 20, 20, 1));
+  color: #ededed;
+  box-shadow: 0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6);
+  border: 2px solid rgba(255, 140, 0);
+  border-radius: 5px;
+  padding: 2rem 4rem 2rem 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.buttonOrange:hover {
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.4), rgba(255, 140, 0, 0.7)),
+              linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+  box-shadow: 0 0 25px rgba(255, 140, 0, 1), 0 0 40px rgba(255, 140, 0, 0.9);
+}
+
+.buttonOrange:active {
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.6), rgba(255, 140, 0, 1)),
+              linear-gradient(45deg, rgba(10, 10, 10, 0.8), rgba(40, 40, 40, 0.9));
+  box-shadow: 0 0 25px rgba(255, 140, 0, 1), 0 0 35px rgba(255, 140, 0, 0.9);
+}
+
+/* Opcional: resaltar el botón activo */
+.active {
+  border-color: #fff;
+}
