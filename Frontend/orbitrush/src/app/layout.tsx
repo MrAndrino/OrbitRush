@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { Roboto, Electrolize } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/context/authcontext";
-import { UsersProvider } from "@/context/userscontext";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Toaster } from 'react-hot-toast';
+import { ToastContainer } from "react-toastify";
+
 import { WebSocketProvider } from "@/context/websocketcontext"
-import { WSMessageProvider } from "@/context/wsmessagecontext"
-import { FriendRequestsProvider } from "@/context/requestcontext"
+import { AuthProvider } from "@/context/authcontext";
+import { UsersProvider } from "@/context/userscontext";
+
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -39,12 +39,8 @@ export default function RootLayout({
         <WebSocketProvider>
           <AuthProvider>
             <UsersProvider>
-              <WSMessageProvider>
-                <FriendRequestsProvider>
-                  <ToastContainer />
-                  {children}
-                </FriendRequestsProvider>
-              </WSMessageProvider>
+              <ToastContainer />
+              {children}
             </UsersProvider>
           </AuthProvider>
         </WebSocketProvider>

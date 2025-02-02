@@ -13,6 +13,7 @@ export const useAuth = () => {
   return useContext(AuthContext);
 };
 
+// ========== AuthProvider ==========
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
     if (typeof window !== "undefined") {
@@ -21,24 +22,28 @@ export const AuthProvider = ({ children }) => {
     }
     return "";
   });
-
   const [decodedToken, setDecodedToken] = useState(null);
+
+  // ----- Otros Hooks -----
   const { connectWebSocket, closeWebSocket } = useWebSocket();
   const router = useRouter();
 
+  // ----- Decodificación del Token cuando cambia -----
   useEffect(() => {
     if (token) {
-      const decoded = jwtDecode(token); 
+      const decoded = jwtDecode(token);
       setDecodedToken(decoded);
     }
-  }, [token]); 
+  }, [token]);
 
+  // ----- Conexión del WebSocket cuando el token y su decodificación están disponibles -----
   useEffect(() => {
     if (token && decodedToken && decodedToken.id) {
       connectWebSocket(decodedToken.id);
     }
   }, [token, decodedToken, connectWebSocket]);
 
+  // ----- Manejo del Login -----
   const handleLogin = async (data, rememberMe) => {
     try {
       const respuesta = await Login(LOGIN_URL, data);
@@ -51,6 +56,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // ----- Manejo del Registro -----
   const handleRegister = async (data) => {
     try {
       const respuesta = await Register(REGISTER_URL, data);
@@ -63,6 +69,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // ----- Guardar el Token y Actualizar Estados -----
   const saveToken = (newToken, rememberMe) => {
     if (rememberMe) {
       localStorage.setItem("accessToken", JSON.stringify(newToken));
@@ -71,23 +78,23 @@ export const AuthProvider = ({ children }) => {
     }
   
     window.dispatchEvent(new Event("storage"));
-
+  
     const decoded = jwtDecode(newToken);
     setToken(newToken);
     setDecodedToken(decoded);
   
-    return decoded.name; 
+    return decoded.name;
   };
 
+  // ----- Logout -----
   const logout = () => {
-    const username = decodedToken ? decodedToken.name : "Usuario"; 
+    const username = decodedToken ? decodedToken.name : "Usuario";
     localStorage.removeItem('accessToken');
     sessionStorage.removeItem('accessToken');
     setToken(null);
     setDecodedToken(null);
     closeWebSocket();
     router.push('/login/');
-
     toast.custom(
       <div style={{
         backgroundColor: 'var(--backgroundtoast)',
@@ -103,6 +110,7 @@ export const AuthProvider = ({ children }) => {
     );
   };
 
+  // ----- Valor del Contexto y Renderizado -----
   const contextValue = {
     token,
     decodedToken,

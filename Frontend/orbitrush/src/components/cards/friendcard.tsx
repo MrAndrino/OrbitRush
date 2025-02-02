@@ -5,7 +5,7 @@ import Button from "../button/button";
 import { BASE_URL } from "@/config";
 import { useUsers } from "@/context/userscontext";
 import toast from "react-hot-toast";
-import { useWSM } from "@/context/wsmessagecontext";
+import { useWebSocket } from "@/context/websocketcontext";
 
 export interface User {
   id: number;
@@ -29,7 +29,7 @@ interface FriendCardProps {
 
 const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) => {
   const { removeFriend } = useUsers();
-  const { sendFriendRequest } = useWSM();
+  const { sendFriendRequest } = useWebSocket();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);

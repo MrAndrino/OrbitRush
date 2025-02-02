@@ -1,17 +1,18 @@
 'use client';
 
-import Button from "@/components/button/button";
 import { createContext, useState, useEffect, useContext } from "react";
 import { toast } from 'react-hot-toast';
 
 const WebSocketContext = createContext();
 export const useWebSocket = () => useContext(WebSocketContext);
 
+// ========== WebSocketProvider ==========
 export const WebSocketProvider = ({ children }) => {
   const [ws, setWs] = useState(null);
   const [connected, setConnected] = useState(false);
   const [request, setRequest] = useState([]);
 
+  // ----- Conexión del WebSocket -----
   const connectWebSocket = (userId) => {
     if (ws && ws.readyState === WebSocket.OPEN) {
       console.log("✅ WebSocket ya conectado");
@@ -28,15 +29,30 @@ export const WebSocketProvider = ({ children }) => {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log("data: ", data)
       switch (data.Action) {
         case "friendRequestReceived":
           handleFriendRequest(data);
           break;
 
+        case "userStateChanged":
+          const friendStateEvent = new CustomEvent("friendStateUpdate", {
+            detail: { userId: data.userId, newState: data.State }
+          });
+          window.dispatchEvent(friendStateEvent);
+          break;
+
+        case "updateFriendList":
+          const updateFriendEvent = new CustomEvent("updateFriendList", {
+            detail: { friends: data.Friends }
+          });
+          window.dispatchEvent(updateFriendEvent);
+          break;
+
         default:
-          console.error("No se ha leído el mensaje")
+          console.error("No se ha leído el mensaje");
       }
-    }
+    };
 
     socket.onerror = (error) => {
       console.error("❌ Error al conectar el WebSocket", error);
@@ -49,6 +65,7 @@ export const WebSocketProvider = ({ children }) => {
     };
   };
 
+  // ----- Cierre del WebSocket -----
   const closeWebSocket = () => {
     if (ws) {
       console.log("❌ Cerrando WebSocket...");
@@ -58,11 +75,13 @@ export const WebSocketProvider = ({ children }) => {
     }
   };
 
+  // ----- Manejo de solicitud de amistad recibida -----
   const handleFriendRequest = (data) => {
     setRequest((prevRequest) => [
-      ...prevRequest, { fromUserId: data.FromUserId, message: data.Message }
+      ...prevRequest,
+      { fromUserId: data.FromUserId, message: data.Message }
     ]);
-    console.log(data.Message)
+    console.log(data.Message);
     toast.custom(
       <div style={{
         backgroundColor: 'var(--backgroundtoast)',
@@ -76,8 +95,23 @@ export const WebSocketProvider = ({ children }) => {
         {data.Message}
       </div>
     );
-  }
+  };
 
+  // ----- Envío de solicitud de amistad -----
+  const sendFriendRequest = (targetId) => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("Web Socket no conectado");
+      return;
+    }
+    const mensaje = JSON.stringify({
+      Action: "sendFriendRequest",
+      TargetId: `${targetId}`
+    });
+    console.log("mensaje: ", mensaje);
+    ws.send(mensaje);
+  };
+
+  // ----- useEffect para manejo del cierre del WebSocket al salir de la página -----
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (ws) {
@@ -91,13 +125,15 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [ws]);
 
+
+  // ----- Valor del contexto y renderizado-----
   const contextValue = {
     ws,
     connectWebSocket,
     closeWebSocket,
-    connected
+    connected,
+    sendFriendRequest
   };
-
 
   return (
     <WebSocketContext.Provider value={contextValue}>
