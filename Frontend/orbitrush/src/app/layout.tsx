@@ -7,6 +7,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Toaster } from 'react-hot-toast';
 import { WebSocketProvider } from "@/context/websocketcontext"
+import { WSMessageProvider } from "@/context/wsmessagecontext"
+import { FriendRequestsProvider } from "@/context/requestcontext"
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -32,14 +34,17 @@ export default function RootLayout({
   return (
 
     <html lang="en">
-      <body
-        className={`${roboto.variable} ${electrolize.variable} antialiased overflow-hidden`}
-      >
+      <body className={`${roboto.variable} ${electrolize.variable} antialiased overflow-hidden`}>
+
         <WebSocketProvider>
           <AuthProvider>
             <UsersProvider>
-              <ToastContainer />
-              {children}
+              <WSMessageProvider>
+                <FriendRequestsProvider>
+                  <ToastContainer />
+                  {children}
+                </FriendRequestsProvider>
+              </WSMessageProvider>
             </UsersProvider>
           </AuthProvider>
         </WebSocketProvider>

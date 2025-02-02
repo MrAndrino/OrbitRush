@@ -1,15 +1,19 @@
+'use client'
+
 import { createContext, useContext, useState, useEffect } from "react";
 import { GET_REQUEST_URL, DELETE_REQUEST_URL } from "../config";
-import { getFriendRequests, rejectFriendRequest } from "../api/friendRequestsApi";
+import { getFriendRequests, rejectFriendRequest } from "@/lib/request";
+import { useAuth } from "./authcontext";
 
 export const FriendRequestsContext = createContext();
 export const useRequest = () => {
   return useContext(FriendRequestsContext);
 };
 
-export function FriendRequestsProvider({ children, token }) {
+export function FriendRequestsProvider({ children}) {
   const [friendRequests, setFriendRequests] = useState([]);
   const [loading, setLoading] = useState(false);
+  const {token} = useAuth();
 
   useEffect(() => {
     async function fetchRequests() {
@@ -35,13 +39,15 @@ export function FriendRequestsProvider({ children, token }) {
     }
   }
 
+  const contextValue = {
+    friendRequests,
+    loading,
+    handleRejectRequest
+  };
+
   return (
-    <FriendRequestsContext.Provider value={{ friendRequests, loading, handleRejectRequest }}>
+    <FriendRequestsContext.Provider value={contextValue}>
       {children}
     </FriendRequestsContext.Provider>
   );
-}
-
-export function useFriendRequests() {
-  return useContext(FriendRequestsContext);
 }

@@ -3,12 +3,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { FRIENDLIST_URL, USERLIST_URL, SEARCH_URL, DELETE_FRIEND_URL } from "@/config";
 import { getFriendList, getUserList, searchUsers, deleteFriend } from "@/lib/users";
+import { useWebSocket } from "./websocketcontext";
 
 export const UsersContext = createContext();
 export const useUsers = () => useContext(UsersContext);
 
 export const UsersProvider = ({ children }) => {
   const [token, setToken] = useState(null);
+  const { ws } = useWebSocket();
 
   useEffect(() => {
     const loadToken = () => {
@@ -17,11 +19,11 @@ export const UsersProvider = ({ children }) => {
         setToken(JSON.parse(storedToken));
       }
     };
-  
-    loadToken(); 
-  
+
+    loadToken();
+
     window.addEventListener("storage", loadToken);
-  
+
     return () => {
       window.removeEventListener("storage", loadToken);
     };
@@ -106,13 +108,34 @@ export const UsersProvider = ({ children }) => {
     }
   };
 
+  const updateFriendState = (userId, newState) => {
+    setFriendList((prevList) =>
+      prevList.map((friend) =>
+        friend.id === userId ? { ...friend, state: newState } : friend))
+  }
+
+  useEffect(() => {
+    if (!ws) return;
+    const handleMessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.Action === "userStateChanged") {
+        updateFriendState(data.userId, data.State);
+      }
+    }
+    ws.addEventListener("message", handleMessage);
+
+    return () => {
+      ws.removeEventListener("message", handleMessage);
+    };
+  }, [ws]);
+
   useEffect(() => {
     if (token) {
       console.log("Token disponible, cargando listas...");
       getFriends();
       getUsers();
     }
-  }, [token]); 
+  }, [token]);
 
   const contextValue = {
     friendList,

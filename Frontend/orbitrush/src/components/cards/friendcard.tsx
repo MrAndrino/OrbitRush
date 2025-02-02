@@ -5,12 +5,13 @@ import Button from "../button/button";
 import { BASE_URL } from "@/config";
 import { useUsers } from "@/context/userscontext";
 import toast from "react-hot-toast";
+import { useWSM } from "@/context/wsmessagecontext";
 
 export interface User {
   id: number;
   name: string;
   image: string;
-  state: "Disconnected" | "Connected" | "Playing"; 
+  state: "Disconnected" | "Connected" | "Playing";
 }
 
 const stateColors: Record<User["state"], string> = {
@@ -28,13 +29,19 @@ interface FriendCardProps {
 
 const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) => {
   const { removeFriend } = useUsers();
+  const { sendFriendRequest } = useWSM();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  const handleSendRequest = () => {
+    sendFriendRequest(user.id);
+    toast.success(`Enviaste solicitud de amistad a ${user.name}.`);
+  };
+
   const handleRemoveFriend = () => {
-    removeFriend(user.id); 
+    removeFriend(user.id);
     toast.success(`Eliminaste a ${user.name} correctamente.`);
     closeModal();
   };
@@ -59,7 +66,7 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
             </>
           ) : (
             <>
-              <button className={styles.extraButton}>Agregar</button>
+              <button className={styles.extraButton} onClick={handleSendRequest}>Agregar</button>
               <button className={styles.extraButton}>Perfil</button>
             </>
           )}

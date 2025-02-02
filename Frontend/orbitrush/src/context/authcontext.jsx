@@ -95,8 +95,8 @@ export const AuthProvider = ({ children }) => {
         fontSize: '16px',
         borderRadius: '8px',
         padding: '10px 20px',
-        border: '2px solid rgb(0, 153, 255)',
-        boxShadow: '0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6)',
+        border: '2px solid rgba(255, 140, 0)',
+        boxShadow: '0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6)',
       }}>
         ¡Vuelve pronto, {username}!
       </div>
