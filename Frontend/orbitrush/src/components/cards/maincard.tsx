@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useAuth } from "@/context/authcontext";
+import { useAuth } from "@/context/authcontext";  // Usar el contexto correctamente
 import { useRouter } from "next/navigation";
 import styles from "./maincard.module.css";
 import { BASE_URL } from "@/config";
 
 const MainCard = () => {
-  const { decodedToken, logout } = useAuth();
+  const { decodedToken, setDecodedToken, logout } = useAuth(); // Acceder a setDecodedToken
   const router = useRouter();
   const [menuVisible, setMenuVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });

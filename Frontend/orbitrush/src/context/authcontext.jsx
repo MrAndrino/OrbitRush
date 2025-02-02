@@ -16,7 +16,8 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
     if (typeof window !== "undefined") {
-      return JSON.parse(localStorage.getItem("accessToken")) || "";
+      return JSON.parse(localStorage.getItem("accessToken")) || 
+             JSON.parse(sessionStorage.getItem("accessToken")) || "";
     }
     return "";
   });
@@ -26,10 +27,17 @@ export const AuthProvider = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
+    if (token) {
+      const decoded = jwtDecode(token); 
+      setDecodedToken(decoded);
+    }
+  }, [token]); 
+
+  useEffect(() => {
     if (token && decodedToken && decodedToken.id) {
       connectWebSocket(decodedToken.id);
-    }}, [token, decodedToken, connectWebSocket]);
-
+    }
+  }, [token, decodedToken, connectWebSocket]);
 
   const handleLogin = async (data, rememberMe) => {
     try {
@@ -55,16 +63,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const saveToken = async (newToken, rememberMe) => {
+  const saveToken = (newToken, rememberMe) => {
     if (rememberMe) {
       localStorage.setItem("accessToken", JSON.stringify(newToken));
     } else {
       sessionStorage.setItem("accessToken", JSON.stringify(newToken));
     }
-    setToken(newToken);
+  
+    window.dispatchEvent(new Event("storage"));
+
     const decoded = jwtDecode(newToken);
+    setToken(newToken);
     setDecodedToken(decoded);
-    return decoded.name;
+  
+    return decoded.name; 
   };
 
   const logout = () => {
@@ -94,6 +106,7 @@ export const AuthProvider = ({ children }) => {
   const contextValue = {
     token,
     decodedToken,
+    setDecodedToken,
     saveToken,
     logout,
     handleLogin,

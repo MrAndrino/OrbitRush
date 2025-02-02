@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useAuth } from "./authcontext";
 import { FRIENDLIST_URL, USERLIST_URL, SEARCH_URL, DELETE_FRIEND_URL } from "@/config";
 import { getFriendList, getUserList, searchUsers, deleteFriend } from "@/lib/users";
 
@@ -9,7 +8,24 @@ export const UsersContext = createContext();
 export const useUsers = () => useContext(UsersContext);
 
 export const UsersProvider = ({ children }) => {
-  const { token } = useAuth();
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    const loadToken = () => {
+      const storedToken = sessionStorage.getItem('accessToken') || localStorage.getItem('accessToken');
+      if (storedToken) {
+        setToken(JSON.parse(storedToken));
+      }
+    };
+  
+    loadToken(); 
+  
+    window.addEventListener("storage", loadToken);
+  
+    return () => {
+      window.removeEventListener("storage", loadToken);
+    };
+  }, []);
 
   const [friendList, setFriendList] = useState([]);
   const [userList, setUserList] = useState([]);
@@ -31,6 +47,10 @@ export const UsersProvider = ({ children }) => {
   };
 
   const getFriends = async () => {
+    if (!token) {
+      console.log("No hay token disponible");
+      return;
+    }
     try {
       const respuesta = await getFriendList(FRIENDLIST_URL, token);
       const friendsWithState = respuesta.map(friend => ({
@@ -44,6 +64,10 @@ export const UsersProvider = ({ children }) => {
   };
 
   const getUsers = async () => {
+    if (!token) {
+      console.log("No hay token disponible");
+      return;
+    }
     try {
       const respuesta = await getUserList(USERLIST_URL, token);
       const usersWithState = respuesta.map(user => ({
@@ -57,6 +81,10 @@ export const UsersProvider = ({ children }) => {
   };
 
   const search = async () => {
+    if (!token) {
+      console.log("No hay token disponible");
+      return;
+    }
     try {
       const respuesta = await searchUsers(SEARCH_URL, token, searchTerm, includeFriends);
       setSearchResults(respuesta);
@@ -66,6 +94,10 @@ export const UsersProvider = ({ children }) => {
   };
 
   const removeFriend = async (friendId) => {
+    if (!token) {
+      console.log("No hay token disponible");
+      return;
+    }
     try {
       await deleteFriend(DELETE_FRIEND_URL, token, friendId);
       setFriendList((prevList) => prevList.filter((friend) => friend.id !== friendId));
@@ -75,23 +107,27 @@ export const UsersProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    if (token) getFriends();
-  }, [token]);
+    if (token) {
+      console.log("Token disponible, cargando listas...");
+      getFriends();
+      getUsers();
+    }
+  }, [token]); 
 
   const contextValue = {
     friendList,
-        userList,
-        searchResults,
-        searchTerm,
-        includeFriends,
-        setSearchTerm,
-        setIncludeFriends,
-        getFriends,
-        getUsers,
-        search,
-        removeFriend,
-
+    userList,
+    searchResults,
+    searchTerm,
+    includeFriends,
+    setSearchTerm,
+    setIncludeFriends,
+    getFriends,
+    getUsers,
+    search,
+    removeFriend,
   };
+
   return (
     <UsersContext.Provider value={contextValue}>
       {children}
