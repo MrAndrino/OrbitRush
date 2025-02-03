@@ -4,25 +4,18 @@ import GameNotificationCard, { GameNotification } from "@/components/miscelaneus
 import styles from "./notificationlist.module.css";
 
 interface NotificationListProps {
-  // La lista de notificaciones puede ser de amistad o de juego.
   notifications: FriendNotification[] | GameNotification[];
   type: "friend" | "game";
-  // Callbacks para notificaciones de amistad
+
   onAcceptFriend?: (id: number) => void;
   onRefuseFriend?: (id: number) => void;
-  // Callbacks para notificaciones de juego
   onAcceptGame?: (id: number) => void;
   onRefuseGame?: (id: number) => void;
 }
 
-const NotificationList = ({
-  notifications,
-  type,
-  onAcceptFriend,
-  onRefuseFriend,
-  onAcceptGame,
-  onRefuseGame,
-}: NotificationListProps) => {
+const NotificationList = ({ notifications, type, onAcceptFriend, onRefuseFriend, onAcceptGame, onRefuseGame, }: NotificationListProps) => {
+
+
   return (
     <div className={styles.notificationList}>
       {notifications.map((notification) =>

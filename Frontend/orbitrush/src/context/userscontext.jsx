@@ -15,7 +15,6 @@ export const UsersProvider = ({ children }) => {
   // ========== Estados de Autenticación y Token ==========
   const [token, setToken] = useState(null);
   const { token: authToken } = useAuth();
-  const { ws } = useWebSocket();
 
   // ========== Estados de Listas y Parámetros ==========
   const [friendList, setFriendList] = useState([]);

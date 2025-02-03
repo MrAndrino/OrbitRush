@@ -21,7 +21,14 @@ public class FriendRequestController : BaseController
     {
         var userId = GetUserId();
         var requests = await _unitOfWork.FriendRequestRepository.GetRequestsByTargetIdAsync(userId.ToString());
-        return Ok(requests);
+        var requestData = new List<object>();
+
+        foreach (var request in requests)
+        {
+            var senderName = await _unitOfWork.UserRepository.GetNameByIdAsync(int.Parse(request.SenderId));
+            requestData.Add(new { request.Id, request.SenderId, request.TargetId, SenderName = senderName });
+        }
+        return Ok(requestData);
     }
 
     [HttpDelete("deleterequests")]

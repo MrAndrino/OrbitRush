@@ -11,7 +11,7 @@ const BoxDual = () => {
   const [activeMenu, setActiveMenu] = useState<MenuType>(null);
   const [notifType, setNotifType] = useState<"game" | "friend">("game");
   const containerRef = useRef<HTMLDivElement>(null);
-  const { getUsers, userList, search, setSearchTerm } = useUsers();
+  const { getUsers, userList, search, setSearchTerm, friendRequests } = useUsers();
   const [inputValue, setInputValue] = useState("");
 
   const handleUserClick = () => {
@@ -52,10 +52,6 @@ const BoxDual = () => {
   const dummyGameNotifications = [
     { id: 1, sender: "Usuario1" },
     { id: 2, sender: "Usuario2" },
-  ];
-  const dummyFriendNotifications = [
-    { id: 1, sender: "Usuario3" },
-    { id: 2, sender: "Usuario4" },
   ];
 
   return (
@@ -103,7 +99,7 @@ const BoxDual = () => {
               notifications={
                 notifType === "game"
                   ? dummyGameNotifications
-                  : dummyFriendNotifications
+                  : friendRequests
               }
               type={notifType}
               onAcceptGame={(id) => console.log("Aceptar game", id)}

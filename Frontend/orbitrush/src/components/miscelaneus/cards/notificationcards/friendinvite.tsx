@@ -12,11 +12,8 @@ interface FriendNotificationProps {
   onRefuseFriend: (id: number) => void;
 }
 
-const FriendNotificationCard = ({
-  notification,
-  onAcceptFriend,
-  onRefuseFriend,
-}: FriendNotificationProps) => {
+const FriendNotificationCard = ({notification, onAcceptFriend, onRefuseFriend,}: FriendNotificationProps) => {
+  
   const handleAccept = () => {
     onAcceptFriend(notification.id);
   };
