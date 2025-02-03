@@ -1,4 +1,4 @@
-import styles from '@/components/line/line.module.css'
+import styles from '@/components/miscelaneus/line/line.module.css'
 
 function Line () {
   return(

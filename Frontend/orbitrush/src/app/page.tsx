@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import Button from '@/components/button/button';
-import Line from '@/components/line/line';
-import Modal from '@/components/modal/modal';
+import Button from '@/components/miscelaneus/button/button';
+import Line from '@/components/miscelaneus/line/line';
+import Modal from '@/components/miscelaneus/modal/modal';
 import { useAuth } from '@/context/authcontext';
-import Instructions from '@/components/instructions/instructions';
+import Instructions from '@/components/miscelaneus/instructions/instructions';
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);

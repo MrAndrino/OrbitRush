@@ -1,6 +1,6 @@
 'use client';
 
-import Instructions from '@/components/instructions/instructions';
+import Instructions from '@/components/miscelaneus/instructions/instructions';
 
 export default function MenuPage() {
 

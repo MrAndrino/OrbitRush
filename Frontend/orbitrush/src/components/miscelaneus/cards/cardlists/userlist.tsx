@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import FriendCard, { User } from "../friendcard"; 
+import FriendCard, { User } from "../friendcard/friendcard"; 
 import styles from "./userlist.module.css";
 
 interface UserListProps {

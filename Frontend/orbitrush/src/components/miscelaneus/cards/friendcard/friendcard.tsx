@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styles from "./friendcard.module.css";
-import Modal from "../modal/modal";
-import Button from "../button/button";
+import Modal from "../../modal/modal";
+import Button from "../../button/button";
 import { BASE_URL } from "@/config";
 import { useUsers } from "@/context/userscontext";
 import toast from "react-hot-toast";

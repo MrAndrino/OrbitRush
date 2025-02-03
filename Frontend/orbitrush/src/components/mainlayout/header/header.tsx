@@ -1,8 +1,8 @@
-import styles from '@/components/header/header.module.css'
-import Button from '../button/button';
-import Line from '../line/line';
+import styles from './header.module.css'
+import Button from '../../miscelaneus/button/button';
+import Line from '../../miscelaneus/line/line';
 import Link from 'next/link';
-import MainCard from '../cards/maincard';
+import MainCard from '../../miscelaneus/cards/maincard/maincard';
 
 function Header() {
   return (

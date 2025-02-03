@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import Button from '../button/button';
+import Button from '../miscelaneus/button/button';
 import { useAuth } from '@/context/authcontext';
 import { toast } from 'react-hot-toast';
 

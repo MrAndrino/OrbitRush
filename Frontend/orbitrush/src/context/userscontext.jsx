@@ -78,6 +78,16 @@ export const UsersProvider = ({ children }) => {
     }
   };
 
+  // ----- Obtener lista de solicitudes de amistad -----
+  const getFriendReq = async () => {
+    try {
+      const requests = await getFriendRequests(GET_REQUEST_URL, authToken);
+      setFriendRequests(requests);
+    } catch (error) {
+      console.error("Error al obtener solicitudes de amistad:", error);
+    }
+  };
+
   // ----- Buscar usuarios -----
   const search = async () => {
     if (!token) return;
@@ -99,22 +109,6 @@ export const UsersProvider = ({ children }) => {
       console.error("Error al eliminar amigo:", error);
     }
   };
-
-  // // ----- Obtener solicitudes de amistad -----
-  // useEffect(() => {
-  //   if (!authToken) return;
-  //   const fetchRequests = async () => {
-  //     setLoadingRequests(true);
-  //     try {
-  //       const requests = await getFriendRequests(GET_REQUEST_URL, authToken);
-  //       setFriendRequests(requests);
-  //     } catch (error) {
-  //       console.error("Error al obtener solicitudes de amistad:", error);
-  //     }
-  //     setLoadingRequests(false);
-  //   };
-  //   fetchRequests();
-  // }, [authToken]);
 
   // ----- Rechazar solicitud de amistad -----
   const handleRejectRequest = async (senderId) => {
@@ -156,10 +150,7 @@ export const UsersProvider = ({ children }) => {
 
   useEffect(() => {
     const handleUpdateFriendList = (event) => {
-      const {friends} = event.detail;
-      setFriendList(friends.map((friend)=> {
-        ({id:friend.userId, state:friend.State})
-      }))
+      getFriends()
     };
 
     window.addEventListener("updateFriendList", handleUpdateFriendList);
@@ -167,14 +158,14 @@ export const UsersProvider = ({ children }) => {
     return () => {
       window.removeEventListener("updateFriendList", handleUpdateFriendList);
     };
-  }, []);
+  }, [getFriends]);
 
 
   // ========== Efecto para cargar listas al obtener el Token ==========
   useEffect(() => {
     if (token) {
       getFriends();
-      getUsers();
+      getFriendReq();
     }
   }, [token]);
 

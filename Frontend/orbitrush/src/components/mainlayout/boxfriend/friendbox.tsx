@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import UserList from '@/components/cards/cardlist/userlist';
+import UserList from '@/components/miscelaneus/cards/cardlists/userlist';
 import styles from "./friendbox.module.css";
 import { useUsers } from '@/context/userscontext';
 

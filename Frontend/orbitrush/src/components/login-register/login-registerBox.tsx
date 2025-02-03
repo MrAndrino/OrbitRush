@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import LoginForm from "@/components/login-register/loginForm";
 import RegisterForm from "@/components/login-register/registerForm";
 import styles from "@/components/login-register/login-register.module.css";
-import Line from "../line/line";
+import Line from "../miscelaneus/line/line";
 
 function LoginRegisterBox() {
   const [showLogin, setShowLogin] = useState(true);

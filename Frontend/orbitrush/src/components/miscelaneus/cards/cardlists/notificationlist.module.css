@@ -1,0 +1,6 @@
+.notificationList {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  scrollbar-color: rgb(0, 153, 255, 0.7) #1e1e1e;
+}

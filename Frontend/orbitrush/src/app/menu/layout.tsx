@@ -1,11 +1,9 @@
 'use client';
 
-import Footer from '@/components/footer/footer';
-import Header from '@/components/header/header';
-import Friendbox from '@/components/boxfriend/friendbox';
-import UserBox from '@/components/boxuser/userbox';
-import NotificationBox from '@/components/boxnotification/notificationbox';
-import DualDropdown from '@/components/boxprueba/boxprueba';
+import Footer from '@/components/mainlayout/footer/footer';
+import Header from '@/components/mainlayout/header/header';
+import Friendbox from '@/components/mainlayout/boxfriend/friendbox';
+import BoxDual from '@/components/mainlayout/boxdual/boxdual';
 
 export default function MenuLayout({
   children,
@@ -25,7 +23,7 @@ export default function MenuLayout({
         <div className='w-[17%]'>
           <Friendbox/>
         </div>
-        <DualDropdown/>
+        <BoxDual/>
       </section>
 
       <Footer />

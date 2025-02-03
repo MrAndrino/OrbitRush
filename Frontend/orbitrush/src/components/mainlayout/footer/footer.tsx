@@ -1,5 +1,5 @@
-import styles from '@/components/footer/footer.module.css'
-import Line from '../line/line';
+import styles from './footer.module.css'
+import Line from '@/components/miscelaneus/line/line';
 
 function Footer() {
   return (
