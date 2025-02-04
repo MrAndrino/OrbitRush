@@ -79,4 +79,45 @@ public class UserController : BaseController
         var result = await _userService.SearchUsers(id, search, includeFriends);
         return Ok(result);
     }
+
+    [HttpGet("selfprofile")]
+    [Authorize]
+    public async Task<IActionResult> GetUserMatches()
+    {
+        try
+        {
+            int userId = GetUserId();
+            var userWithMatches = await _userService.GetUserWithMatches(userId);
+
+            if (userWithMatches == null)
+            {
+                return NotFound("Usuario no encontrado o sin partidos.");
+            }
+
+            return Ok(userWithMatches);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message, details = ex.ToString() });
+        }
+    }
+
+    [HttpGet("userprofile")]
+    [Authorize]
+    public async Task<IActionResult> GetUserProfile(int id)
+    {
+        try
+        {
+            var userProfile = await _userService.GetUserProfile(id);
+            if (userProfile == null)
+            {
+                return NotFound("Usuario no encontrado.");
+            }
+            return Ok(userProfile);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message, details = ex.ToString() });
+        }
+    }
 }

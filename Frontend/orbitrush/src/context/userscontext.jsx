@@ -4,16 +4,14 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { FRIENDLIST_URL, USERLIST_URL, SEARCH_URL, DELETE_FRIEND_URL, GET_REQUEST_URL, DELETE_REQUEST_URL } from "@/config";
 import { getFriendList, getUserList, searchUsers, deleteFriend } from "@/lib/users";
 import { getFriendRequests, rejectFriendRequest } from "@/lib/request";
-import { useAuth } from "./authcontext";
 
 export const UsersContext = createContext();
 export const useUsers = () => useContext(UsersContext);
 
 export const UsersProvider = ({ children }) => {
 
-  // ========== Estados de Autenticación y Token ==========
+  // ========== Token ==========
   const [token, setToken] = useState(null);
-  const { token: authToken } = useAuth();
 
   // ========== Estados de Listas y Parámetros ==========
   const [friendList, setFriendList] = useState([]);
@@ -22,9 +20,10 @@ export const UsersProvider = ({ children }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [includeFriends, setIncludeFriends] = useState(false);
 
-  // ========== Estados de Solicitudes de Amistad ==========
+  // ========== Estados de Solicitudes de Amistad y Perfiles ==========
   const [friendRequests, setFriendRequests] = useState([]);
-  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [selfProfile, setSelfProfile] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
 
   // ----- Función para mapear el estado del usuario -----
   const mapState = (stateValue) => {
@@ -56,7 +55,6 @@ export const UsersProvider = ({ children }) => {
 
   // ----- Obtener lista de amigos -----
   const getFriends = async () => {
-    if (!token) return;
     try {
       const response = await getFriendList(FRIENDLIST_URL, token);
       setFriendList(response.map(friend => ({ ...friend, state: mapState(friend.state) })));
@@ -67,7 +65,6 @@ export const UsersProvider = ({ children }) => {
 
   // ----- Obtener lista de usuarios -----
   const getUsers = async () => {
-    if (!token) return;
     try {
       const response = await getUserList(USERLIST_URL, token);
       setUserList(response.map(user => ({ ...user, state: mapState(user.state) })));
@@ -76,20 +73,18 @@ export const UsersProvider = ({ children }) => {
     }
   };
 
-  // ----- Obtener lista de solicitudes de amistad -----
-  const getFriendReq = async () => {
-    try {
-      const requests = await getFriendRequests(GET_REQUEST_URL, token);
-      console.log("requests:", requests)
-      setFriendRequests(requests);
-    } catch (error) {
-      console.error("Error al obtener solicitudes de amistad:", error);
-    }
+  // ----- Actualizar lista de amigos -----
+  const updateFriendState = (userId, newState) => {
+    setFriendList((prevList) => {
+      const updatedList = prevList.map((friend) =>
+        friend.id === parseInt(userId) ? { ...friend, state: newState } : friend
+      );
+      return updatedList;
+    });
   };
 
   // ----- Buscar usuarios -----
   const search = async () => {
-    if (!token) return;
     if (searchTerm.trim() === "") {
       setSearchResults([]);
       return;
@@ -105,9 +100,19 @@ export const UsersProvider = ({ children }) => {
     }
   };
 
+  // ----- Obtener lista de solicitudes de amistad -----
+  const getFriendReq = async () => {
+    try {
+      const requests = await getFriendRequests(GET_REQUEST_URL, token);
+      console.log("requests:", requests)
+      setFriendRequests(requests);
+    } catch (error) {
+      console.error("Error al obtener solicitudes de amistad:", error);
+    }
+  };
+
   // ----- Rechazar solicitud de amistad -----
   const handleRejectFriend = async (senderId) => {
-    if (!token) return;
     try {
       await rejectFriendRequest(DELETE_REQUEST_URL, token, senderId);
       setFriendRequests(prevRequests => prevRequests.filter(req => req.senderId !== senderId));
@@ -116,16 +121,27 @@ export const UsersProvider = ({ children }) => {
     }
   };
 
-  // ----- Actualizar lista de amigos -----
-  const updateFriendState = (userId, newState) => {
-    setFriendList((prevList) => {
-      const updatedList = prevList.map((friend) =>
-        friend.id === parseInt(userId) ? { ...friend, state: newState } : friend
-      );
-
-      return updatedList;
-    });
+  // ----- Obtener el perfil propio -----
+  const getSelfProfileData = async () => {
+    try {
+      const profile = await getSelfProfile(SELF_PROFILE_URL, token);
+      setSelfProfile(profile);
+      console.log("perfil: ",profile)
+    } catch (error) {
+      console.error("No se pudo cargar tu perfil.");
+    }
   };
+
+  // ----- Obtener el perfil de otro usuario -----
+  const getUserProfileData = async (userId) => {
+    try {
+      const profile = await getUserProfile(USER_PROFILE_URL, token, userId);
+      setUserProfile(profile);
+    } catch (error) {
+      console.error("No se pudo cargar el perfil del usuario.");
+    }
+  };
+
 
   // ----- Efecto para actualizar notificaciones a tiempo real -----
   useEffect(() => {
@@ -194,9 +210,10 @@ export const UsersProvider = ({ children }) => {
     getUsers,
     search,
     friendRequests,
-    loadingRequests,
     handleRejectFriend,
-    getFriendReq
+    getFriendReq,
+    getSelfProfileData,
+    getUserProfileData
   };
 
   return (

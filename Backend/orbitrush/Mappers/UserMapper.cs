@@ -36,4 +36,44 @@ public class UserMapper
     {
         return userFriends.Select(FriendToDto).ToList();
     }
+
+    public UserDto UserMatchesDto(User user)
+    {
+        return new UserDto
+        {
+            Id = user.Id,
+            Name = user.Name,
+            Image = user.Image,
+            Email = user.Email,
+            Role = user.Role,
+            State = user.State,
+            Matches = user.MatchResults.Select(mr => new MatchDto
+            {
+                Id = mr.Match.Id,
+                MatchDate = mr.Match.MatchDate,
+                Duration = mr.Match.Duration,
+                Result = mr.Result,
+                OpponentName = mr.Match.Results.FirstOrDefault(x => x.UserId != user.Id)?.User?.Name
+            }).ToList()
+        };
+    }
+
+    public static UserProfileDto UserToProfileDto(User user)
+    {
+        return new UserProfileDto
+        {
+            Id = user.Id,
+            Name = user.Name,
+            Image = user.Image,
+            State = user.State,
+            Matches = user.MatchResults.Select(mr => new MatchDto
+            {
+                Id = mr.Match.Id,
+                MatchDate = mr.Match.MatchDate,
+                Duration = mr.Match.Duration,
+                Result = mr.Result,
+                OpponentName = mr.Match.Results.FirstOrDefault(x => x.UserId != user.Id)?.User?.Name
+            }).ToList()
+        };
+    }
 }

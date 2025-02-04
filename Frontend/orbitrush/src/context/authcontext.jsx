@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { jwtDecode } from 'jwt-decode';
 import { Login, Register } from '@/lib/auth';
 import { LOGIN_URL, REGISTER_URL } from '@/config';
@@ -17,8 +17,8 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
     if (typeof window !== "undefined") {
-      return JSON.parse(localStorage.getItem("accessToken")) || 
-             JSON.parse(sessionStorage.getItem("accessToken")) || "";
+      return JSON.parse(localStorage.getItem("accessToken")) ||
+        JSON.parse(sessionStorage.getItem("accessToken")) || "";
     }
     return "";
   });
@@ -37,11 +37,13 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   // ----- Conexión del WebSocket cuando el token y su decodificación están disponibles -----
+  const onlyOnce = useRef(false)
   useEffect(() => {
-    if (token && decodedToken && decodedToken.id) {
+    if (!onlyOnce.current && token && decodedToken && decodedToken.id) {
       connectWebSocket(decodedToken.id);
+      onlyOnce.current = true;
     }
-  }, [token, decodedToken, connectWebSocket]);
+  }, [decodedToken]);
 
   // ----- Manejo del Login -----
   const handleLogin = async (data, rememberMe) => {
@@ -76,13 +78,13 @@ export const AuthProvider = ({ children }) => {
     } else {
       sessionStorage.setItem("accessToken", JSON.stringify(newToken));
     }
-  
+
     window.dispatchEvent(new Event("storage"));
-  
+
     const decoded = jwtDecode(newToken);
     setToken(newToken);
     setDecodedToken(decoded);
-  
+
     return decoded.name;
   };
 

@@ -77,3 +77,37 @@ export async function deleteFriend(url, token, friendId) {
     throw new Error("Error al eliminar el amigo");
   }
 }
+
+export async function getSelfProfile(url, token) {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al obtener tu perfil");
+  }
+
+  const data = await response.json();
+  return data;
+}
+
+export async function getUserProfile(url, token, userId) {
+  const response = await fetch(`${url}/${userId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al obtener el perfil del usuario");
+  }
+
+  const data = await response.json();
+  return data;
+}

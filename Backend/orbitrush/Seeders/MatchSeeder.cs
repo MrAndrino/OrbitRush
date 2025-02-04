@@ -14,9 +14,9 @@ public class MatchSeeder
     public void Seed()
     {
         Match[] matches = [
-            new Match{ Id = 1, MatchDate = DateTime.UtcNow },
-            new Match{ Id = 2, MatchDate = DateTime.UtcNow.AddDays(-1) },
-            new Match{ Id = 3, MatchDate = DateTime.UtcNow.AddDays(-2) }
+            new Match{ Id = 1, MatchDate = DateTime.UtcNow, Duration = TimeSpan.FromMinutes(5) },
+            new Match{ Id = 2, MatchDate = DateTime.UtcNow.AddDays(-1), Duration = TimeSpan.FromMinutes(7) },
+            new Match{ Id = 3, MatchDate = DateTime.UtcNow.AddDays(-2), Duration = TimeSpan.FromMinutes(3) }
             ];
 
         _context.Matches.AddRange(matches);

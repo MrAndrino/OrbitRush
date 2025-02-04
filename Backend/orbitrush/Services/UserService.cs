@@ -82,4 +82,22 @@ public class UserService
 
         return _userMapper.UserToDtoList(matchedUsers);
     }
+
+    public async Task<UserDto> GetUserWithMatches(int userId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserWithMatchesAsync(userId);
+        if (user == null)
+            return null;
+
+        return _userMapper.UserMatchesDto(user);
+    }
+
+    public async Task<UserProfileDto> GetUserProfile(int id)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserWithMatchesAsync(id);
+        if (user == null)
+            return null;
+
+        return UserMapper.UserToProfileDto(user);
+    }
 }

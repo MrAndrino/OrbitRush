@@ -1,15 +1,28 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useAuth } from "@/context/authcontext";  // Usar el contexto correctamente
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/authcontext";
 import styles from "./maincard.module.css";
 import { BASE_URL } from "@/config";
+import Modal from "../../modal/modal";
+import UserProfile from "../../profiles/selfprofile";
+import { useUsers } from "@/context/userscontext";
 
 const MainCard = () => {
-  const { decodedToken, setDecodedToken, logout } = useAuth(); // Acceder a setDecodedToken
-  const router = useRouter();
+  const { decodedToken, logout } = useAuth();
   const [menuVisible, setMenuVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
+
+const {getSelfProfileData} = useUsers();
+
+const handlegetSelfProfileData = () => {
+  getSelfProfileData()
+};
+
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const openModal = () => {
+    console.log("decodedToken:", decodedToken);
+    setIsModalOpen(true);}
+  const closeModal = () => setIsModalOpen(false);
 
   const handleOpenMenu = (event: React.MouseEvent) => {
     setPosition({ x: event.clientX - 20, y: event.clientY + 20 });
@@ -43,15 +56,16 @@ const MainCard = () => {
       </div>
 
       {menuVisible && (
-        <div
-          ref={menuRef}
-          className={styles.menu}
-          style={{ top: position.y, left: position.x }}
-        >
-          <button onClick={() => router.push("/perfil")}>Ver mi perfil</button>
+        <div ref={menuRef} className={styles.menu} style={{ top: position.y, left: position.x }}>
+          <button onClick={handlegetSelfProfileData}>Ver mi perfil</button>
           <button onClick={logout}>Cerrar sesión</button>
         </div>
       )}
+
+      {/* Modal */}
+      <Modal isOpen={isModalOpen} closeModal={closeModal} color='blue' className='w-[55%]'>
+        <UserProfile />
+      </Modal>
     </div>
   );
 };

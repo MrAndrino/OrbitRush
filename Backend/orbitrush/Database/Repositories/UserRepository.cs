@@ -127,7 +127,7 @@ public class UserRepository : Repository<User, int>
             await Context.SaveChangesAsync();
         }
     }
-    
+
     public async Task<List<string>> GetFriendByNames(int id)
     {
         var friends = await GetFriendList(id);
@@ -153,5 +153,15 @@ public class UserRepository : Repository<User, int>
         return await Context.Users
             .Where(u => matchedNames.Contains(u.Name))
             .ToListAsync();
+    }
+
+    public async Task<User> GetUserWithMatchesAsync(int userId)
+    {
+        return await Context.Users
+            .Include(u => u.MatchResults)
+            .ThenInclude(mr => mr.Match)
+            .ThenInclude(m => m.Results)
+            .ThenInclude(r => r.User)
+            .FirstOrDefaultAsync(u => u.Id == userId);
     }
 }

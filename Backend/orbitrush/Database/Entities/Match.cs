@@ -10,6 +10,7 @@ public class Match
 
     public DateTime MatchDate { get; set; } = DateTime.UtcNow;
 
+    public TimeSpan Duration { get; set; }
 
     public List<MatchResult> Results { get; set; } = new();
 }
