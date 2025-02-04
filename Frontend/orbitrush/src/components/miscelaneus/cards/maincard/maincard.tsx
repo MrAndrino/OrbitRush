@@ -3,8 +3,7 @@ import { useAuth } from "@/context/authcontext";
 import styles from "./maincard.module.css";
 import { BASE_URL } from "@/config";
 import Modal from "../../modal/modal";
-import UserProfile from "../../profiles/selfprofile";
-import { useUsers } from "@/context/userscontext";
+import SelfProfile from "../../profiles/selfprofile";
 
 const MainCard = () => {
   const { decodedToken, logout } = useAuth();
@@ -12,16 +11,12 @@ const MainCard = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
 
-const {getSelfProfileData} = useUsers();
-
-const handlegetSelfProfileData = () => {
-  getSelfProfileData()
-};
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const openModal = () => {
-    console.log("decodedToken:", decodedToken);
-    setIsModalOpen(true);}
+    setIsModalOpen(true);
+    setMenuVisible(false);
+  }
   const closeModal = () => setIsModalOpen(false);
 
   const handleOpenMenu = (event: React.MouseEvent) => {
@@ -57,14 +52,14 @@ const handlegetSelfProfileData = () => {
 
       {menuVisible && (
         <div ref={menuRef} className={styles.menu} style={{ top: position.y, left: position.x }}>
-          <button onClick={handlegetSelfProfileData}>Ver mi perfil</button>
+          <button onClick={openModal}>Ver mi perfil</button>
           <button onClick={logout}>Cerrar sesión</button>
         </div>
       )}
 
       {/* Modal */}
-      <Modal isOpen={isModalOpen} closeModal={closeModal} color='blue' className='w-[55%]'>
-        <UserProfile />
+      <Modal isOpen={isModalOpen} closeModal={closeModal} color='orange'>
+        <SelfProfile />
       </Modal>
     </div>
   );

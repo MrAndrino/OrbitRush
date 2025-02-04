@@ -1,0 +1,64 @@
+.profileContainer {
+  display: flex;
+  color: var(--foreground);
+  border-radius: 5px;
+  gap: 5rem;
+  align-items: center;
+}
+
+.profileData {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: center;
+}
+
+.profileImage {
+  border-radius: 50%;
+  width: 10rem;
+  height: 10rem;
+}
+
+.profileName {
+  font-size: 1.7rem;
+  font-weight: bold;
+}
+
+.matchesHistory {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.matchesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.matchItem {
+  display: flex;
+  gap: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #4a4a4a;
+}
+
+.matchItemPart {
+  display: flex;
+  flex-direction: column;
+}
+
+.resultWin {
+  color: green;
+  font-size: 1.3rem;
+}
+
+.resultLoss {
+  color: red;
+  font-size: 1.3rem;
+}
+
+.resultDraw {
+  color: orange;
+  font-size: 1.3rem;
+}

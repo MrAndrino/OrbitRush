@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { FRIENDLIST_URL, USERLIST_URL, SEARCH_URL, DELETE_FRIEND_URL, GET_REQUEST_URL, DELETE_REQUEST_URL } from "@/config";
-import { getFriendList, getUserList, searchUsers, deleteFriend } from "@/lib/users";
+import { FRIENDLIST_URL, USERLIST_URL, SEARCH_URL, GET_REQUEST_URL, DELETE_REQUEST_URL, SELF_PROFILE_URL, USER_PROFILE_URL } from "@/config";
+import { getFriendList, getUserList, searchUsers, getSelfProfile, getUserProfile } from "@/lib/users";
 import { getFriendRequests, rejectFriendRequest } from "@/lib/request";
 
 export const UsersContext = createContext();
@@ -126,7 +126,6 @@ export const UsersProvider = ({ children }) => {
     try {
       const profile = await getSelfProfile(SELF_PROFILE_URL, token);
       setSelfProfile(profile);
-      console.log("perfil: ",profile)
     } catch (error) {
       console.error("No se pudo cargar tu perfil.");
     }
@@ -213,7 +212,9 @@ export const UsersProvider = ({ children }) => {
     handleRejectFriend,
     getFriendReq,
     getSelfProfileData,
-    getUserProfileData
+    getUserProfileData,
+    selfProfile,
+    userProfile
   };
 
   return (

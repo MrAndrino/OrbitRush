@@ -11,19 +11,23 @@ interface Match {
   opponentName: string;
 }
 
-const SelfProfile = () => {
-  const { selfProfile, getSelfProfileData } = useUsers();
+interface UserProfileProps {
+  id: number;
+}
+
+const UserProfile = ({id}:UserProfileProps) => {
+  const { userProfile, getUserProfileData } = useUsers();
 
   useEffect(() => {
-    getSelfProfileData();
+    getUserProfileData(id);
   }, []);
 
-  if (!selfProfile) {
-    return <div>No se pudieron cargar los datos de tu perfil.</div>;
+  if (!userProfile) {
+    return <div>No se pudieron cargar los datos de este perfil.</div>;
   }
 
-  const profileImage = selfProfile.image
-    ? `${BASE_URL}/${selfProfile.image}`
+  const profileImage = userProfile.image
+    ? `${BASE_URL}/${userProfile.image}`
     : "/images/OrbitRush-TrashCan.jpg";
 
   const getResultInfo = (result: number) => {
@@ -45,16 +49,16 @@ const SelfProfile = () => {
       <div className={styles.profileData}>
         <img src={profileImage} alt="Imagen de perfil" className={styles.profileImage} />
         <div>
-          <p className={styles.profileName}>{selfProfile.name}</p>
-          <p>{selfProfile.email}</p>
+          <p className={styles.profileName}>{userProfile.name}</p>
+          <p>{userProfile.email}</p>
         </div>
       </div>
 
       <div className={styles.matchesHistory}>
         <p className={styles.profileName}>Historial de partidas:</p>
         <ul className={styles.matchesList}>
-          {selfProfile.matches && selfProfile.matches.length > 0 ? (
-            selfProfile.matches.map((match: Match, index: number) => {
+          {userProfile.matches && userProfile.matches.length > 0 ? (
+            userProfile.matches.map((match: Match, index: number) => {
               const resultInfo = getResultInfo(match.result);
               return (
                 <li key={index} className={styles.matchItem}>
@@ -90,4 +94,4 @@ const SelfProfile = () => {
   );
 };
 
-export default SelfProfile;
+export default UserProfile;

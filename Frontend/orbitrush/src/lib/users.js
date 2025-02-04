@@ -96,7 +96,7 @@ export async function getSelfProfile(url, token) {
 }
 
 export async function getUserProfile(url, token, userId) {
-  const response = await fetch(`${url}/${userId}`, {
+  const response = await fetch(`${url}?id=${userId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
