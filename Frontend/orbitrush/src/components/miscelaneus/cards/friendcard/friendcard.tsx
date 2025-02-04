@@ -49,7 +49,9 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
       <div className={styles.userInfo} onClick={handleExpand}>
         <div className={styles.imageContainer}>
           <img src={`${BASE_URL}/${user.image}`} alt="" className={styles.userImage} />
-          <div className={`${styles.stateIndicator} ${stateColors[user.state]}`}></div>
+          {type === "friend" && (
+            <div className={`${styles.stateIndicator} ${stateColors[user.state]}`}></div>
+          )}
         </div>
         <span className={styles.userName}>{user.name}</span>
       </div>

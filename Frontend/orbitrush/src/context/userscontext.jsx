@@ -90,9 +90,16 @@ export const UsersProvider = ({ children }) => {
   // ----- Buscar usuarios -----
   const search = async () => {
     if (!token) return;
+    if (searchTerm.trim() === "") {
+      setSearchResults([]);
+      return;
+    }
     try {
       const response = await searchUsers(SEARCH_URL, token, searchTerm, includeFriends);
-      setSearchResults(response);
+      const mappedResults = response.map(user => ({
+        ...user, state: mapState(user.state)
+      }));
+      setSearchResults(mappedResults);
     } catch (error) {
       console.error("Error al buscar usuarios:", error);
     }

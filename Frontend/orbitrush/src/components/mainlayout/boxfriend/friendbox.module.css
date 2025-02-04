@@ -1,17 +1,18 @@
-.fbContainer{
+.fbContainer {
   display: flex;
   flex-direction: column;
   height: 81vh;
-  border-left: 3px solid rgba(255, 232, 203, 0.781);
-  box-shadow: 0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6);
+  border-left: 2px solid white;
+  box-shadow: inset 2px 0px 7px rgba(0, 153, 255, 0.8),
+    -2px 0px 10px rgba(255, 140, 0, 0.8);
   background: var(--background);
 }
 
 .searchBox input {
   font-family: var(--font-secondary);
   color: var(--foreground);
-  padding: 0.2rem;
-  border: 3px solid rgba(255, 140, 0, 0.7);
+  padding: 0.5rem;
+  border-bottom: 2px solid rgba(255, 140, 0, 0.7);
   background-color: rgba(255, 140, 0, 0.2);
   height: 2.55rem;
   width: 100%;

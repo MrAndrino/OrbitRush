@@ -11,7 +11,7 @@ const BoxDual = () => {
   const [activeMenu, setActiveMenu] = useState<MenuType>(null);
   const [notifType, setNotifType] = useState<"game" | "friend">("game");
   const containerRef = useRef<HTMLDivElement>(null);
-  const { getUsers, userList, search, setSearchTerm, friendRequests } = useUsers();
+  const { searchTerm, getUsers, userList, searchResults, search, setSearchTerm, setIncludeFriends, friendRequests } = useUsers();
   const [inputValue, setInputValue] = useState("");
 
   const handleUserClick = () => {
@@ -27,8 +27,14 @@ const BoxDual = () => {
     const value = e.target.value;
     setInputValue(value);
     setSearchTerm(value);
-    search();
+    setIncludeFriends(false);
   };
+
+  useEffect(() => {
+    search();
+  }, [searchTerm]);
+
+  const displayedUsers = inputValue.trim() === "" ? userList : searchResults;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -71,7 +77,7 @@ const BoxDual = () => {
                 placeholder="Buscar usuarios..."
               />
             </div>
-            <UserList users={userList} type="user" />
+            <UserList users={displayedUsers} type="user" />
           </>
         )}
         {activeMenu === "notification" && (
@@ -93,11 +99,11 @@ const BoxDual = () => {
       {/* Contenedor de botones (notificaciones y usuarios) */}
       <div className={`${styles.buttonContainer} ${activeMenu ? styles.buttonsShifted : ""}`}>
         <button onClick={handleNotifClick} className={`${styles.buttonBlue} ${activeMenu === "notification" ? styles.activeBlue : ""}`}>
-          <Bell />
+          <Bell className={styles.icon} />
           {showNotificationDot && <span className={styles.notificationDot} />}
         </button>
         <button onClick={handleUserClick} className={`${styles.buttonOrange} ${activeMenu === "user" ? styles.activeOrange : ""}`}>
-          <UserPlus />
+          <UserPlus className={styles.icon} />
         </button>
       </div>
     </section>
