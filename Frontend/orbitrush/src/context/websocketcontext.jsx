@@ -33,6 +33,18 @@ export const WebSocketProvider = ({ children }) => {
       switch (data.Action) {
         case "friendRequestReceived":
           handleFriendRequest(data);
+          const friendRequestEvent = new CustomEvent("friendRequestReceived", {
+            detail: data,
+          });
+          window.dispatchEvent(friendRequestEvent);
+          break;
+
+        case "acceptFriendRequest":
+          toast.success(data.Message)
+          const acceptFriendEvent = new CustomEvent("acceptFriendRequest", {
+            detail: data,
+          });
+          window.dispatchEvent(acceptFriendEvent);
           break;
 
         case "userStateChanged":
@@ -81,7 +93,6 @@ export const WebSocketProvider = ({ children }) => {
       ...prevRequest,
       { fromUserId: data.FromUserId, message: data.Message }
     ]);
-    console.log(data.Message);
     toast.custom(
       <div style={{
         backgroundColor: 'var(--backgroundtoast)',
@@ -111,6 +122,20 @@ export const WebSocketProvider = ({ children }) => {
     ws.send(mensaje);
   };
 
+  // ----- Aceptar solicitud de amistad -----
+  const acceptFriendRequest = (targetId) => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("Web Socket no conectado");
+      return;
+    }
+    const mensaje = JSON.stringify({
+      Action: "acceptFriendRequest",
+      TargetId: `${targetId}`
+    });
+    console.log("mensaje: ", mensaje);
+    ws.send(mensaje);
+  };
+
   // ----- useEffect para manejo del cierre del WebSocket al salir de la página -----
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -132,7 +157,8 @@ export const WebSocketProvider = ({ children }) => {
     connectWebSocket,
     closeWebSocket,
     connected,
-    sendFriendRequest
+    sendFriendRequest,
+    acceptFriendRequest
   };
 
   return (

@@ -1,5 +1,5 @@
 export async function getFriendRequests(url, token) {
-  const response = await fetch(`${url}/api/FriendRequest/getrequests`, {
+  const response = await fetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -15,7 +15,7 @@ export async function getFriendRequests(url, token) {
 }
 
 export async function rejectFriendRequest(url, token, senderId) {
-  const response = await fetch(`${url}/api/FriendRequest/deleterequests?senderId=${senderId}`, {
+  const response = await fetch(`${url}?senderId=${senderId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

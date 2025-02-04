@@ -6,14 +6,9 @@ import styles from "./notificationlist.module.css";
 interface NotificationListProps {
   notifications: FriendNotification[] | GameNotification[];
   type: "friend" | "game";
-
-  onAcceptFriend?: (id: number) => void;
-  onRefuseFriend?: (id: number) => void;
-  onAcceptGame?: (id: number) => void;
-  onRefuseGame?: (id: number) => void;
 }
 
-const NotificationList = ({ notifications, type, onAcceptFriend, onRefuseFriend, onAcceptGame, onRefuseGame, }: NotificationListProps) => {
+const NotificationList = ({ notifications, type }: NotificationListProps) => {
 
 
   return (
@@ -23,15 +18,11 @@ const NotificationList = ({ notifications, type, onAcceptFriend, onRefuseFriend,
           <FriendNotificationCard
             key={notification.id}
             notification={notification as FriendNotification}
-            onAcceptFriend={onAcceptFriend!}
-            onRefuseFriend={onRefuseFriend!}
           />
         ) : (
           <GameNotificationCard
             key={notification.id}
             notification={notification as GameNotification}
-            onAcceptGame={onAcceptGame!}
-            onRefuseGame={onRefuseGame!}
           />
         )
       )}

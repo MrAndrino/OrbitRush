@@ -80,7 +80,8 @@ export const UsersProvider = ({ children }) => {
   // ----- Obtener lista de solicitudes de amistad -----
   const getFriendReq = async () => {
     try {
-      const requests = await getFriendRequests(GET_REQUEST_URL, authToken);
+      const requests = await getFriendRequests(GET_REQUEST_URL, token);
+      console.log("requests:", requests)
       setFriendRequests(requests);
     } catch (error) {
       console.error("Error al obtener solicitudes de amistad:", error);
@@ -103,17 +104,17 @@ export const UsersProvider = ({ children }) => {
     if (!token) return;
     try {
       await deleteFriend(DELETE_FRIEND_URL, token, friendId);
-      setFriendList(prevList => prevList.filter(friend => friend.id !== friendId));
+      getFriends();
     } catch (error) {
       console.error("Error al eliminar amigo:", error);
     }
   };
 
   // ----- Rechazar solicitud de amistad -----
-  const handleRejectRequest = async (senderId) => {
-    if (!authToken) return;
+  const handleRejectFriend = async (senderId) => {
+    if (!token) return;
     try {
-      await rejectFriendRequest(DELETE_REQUEST_URL, authToken, senderId);
+      await rejectFriendRequest(DELETE_REQUEST_URL, token, senderId);
       setFriendRequests(prevRequests => prevRequests.filter(req => req.senderId !== senderId));
     } catch (error) {
       console.error("Error al rechazar solicitud de amistad:", error);
@@ -130,6 +131,19 @@ export const UsersProvider = ({ children }) => {
       return updatedList;
     });
   };
+
+  // ----- Efecto para actualizar notificaciones a tiempo real -----
+  useEffect(() => {
+    const handleFriendReq = (event) => {
+      getFriendReq()
+    };
+
+    window.addEventListener("friendRequestReceived", handleFriendReq);
+
+    return () => {
+      window.removeEventListener("friendRequestReceived", handleFriendReq);
+    };
+  }, [getFriendReq]);
 
   // ----- Efectos para actualizar lista de amigos a tiempo real -----
   useEffect(() => {
@@ -153,9 +167,11 @@ export const UsersProvider = ({ children }) => {
     };
 
     window.addEventListener("updateFriendList", handleUpdateFriendList);
+    window.addEventListener("acceptFriendRequest", handleUpdateFriendList);
 
     return () => {
       window.removeEventListener("updateFriendList", handleUpdateFriendList);
+      window.removeEventListener("acceptFriendRequest", handleUpdateFriendList);
     };
   }, [getFriends]);
 
@@ -183,7 +199,8 @@ export const UsersProvider = ({ children }) => {
     removeFriend,
     friendRequests,
     loadingRequests,
-    handleRejectRequest
+    handleRejectFriend,
+    getFriendReq
   };
 
   return (

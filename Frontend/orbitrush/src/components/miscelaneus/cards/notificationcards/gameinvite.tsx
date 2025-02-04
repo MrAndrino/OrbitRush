@@ -8,21 +8,17 @@ export interface GameNotification {
 
 interface GameNotificationProps {
   notification: GameNotification;
-  onAcceptGame: (id: number) => void;
-  onRefuseGame: (id: number) => void;
 }
 
 const GameNotificationCard = ({
   notification,
-  onAcceptGame,
-  onRefuseGame,
 }: GameNotificationProps) => {
   const handleAccept = () => {
-    onAcceptGame(notification.id);
+
   };
 
   const handleRefuse = () => {
-    onRefuseGame(notification.id);
+
   };
 
   return (

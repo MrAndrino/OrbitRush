@@ -1,31 +1,37 @@
 import React from "react";
 import styles from "./notificationcard.module.css";
+import { useUsers } from "@/context/userscontext";
+import { useWebSocket } from "@/context/websocketcontext";
 
 export interface FriendNotification {
   id: number;
-  sender: string;
+  senderId: number;
+  targetId: number;
+  senderName: string;
 }
 
 interface FriendNotificationProps {
   notification: FriendNotification;
-  onAcceptFriend: (id: number) => void;
-  onRefuseFriend: (id: number) => void;
 }
 
-const FriendNotificationCard = ({notification, onAcceptFriend, onRefuseFriend,}: FriendNotificationProps) => {
+const FriendNotificationCard = ({notification}: FriendNotificationProps) => {
+
+  const {handleRejectFriend, getFriendReq} = useUsers();
+  const {acceptFriendRequest} = useWebSocket();
   
   const handleAccept = () => {
-    onAcceptFriend(notification.id);
+    acceptFriendRequest(notification.senderId)
+    getFriendReq();
   };
 
   const handleRefuse = () => {
-    onRefuseFriend(notification.id);
+    handleRejectFriend(notification.senderId);
   };
 
   return (
     <div className={styles.notificationCard}>
       <span className={styles.notificationMessage}>
-        {notification.sender} quiere ser tu amigo
+        {notification.senderName} quiere ser tu amigo
       </span>
       <div className={styles.buttonContainer}>
         <button className={styles.acceptButton} onClick={handleAccept}>
