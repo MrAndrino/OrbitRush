@@ -1,61 +1,63 @@
 .notificationCard {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   padding: 0.8rem;
   border-bottom: 3px solid black;
   transition: all 0.3s ease-in-out;
-  gap: 1rem;
   background: linear-gradient(135deg, #1c2028, #151515);
   user-select: none;
+  font-family: var(--font-secondary);
+  color: #ededed;
+  text-align: center;
 }
 
 .notificationCard:hover {
   background: linear-gradient(135deg, #2a2f3a, #222222);
 }
 
-.notificationMessage {
-  font-size: 1.25em;
-  color: white;
+.notificationUser{
+  font-size: 1.2rem;
+  color: rgba(0, 153, 255, 1);
 }
 
 .buttonContainer {
   display: flex;
   flex-direction: row;
-  gap: 0.5rem;
+  width: 100%;
+  justify-content: space-around;
 }
 
 .acceptButton,
 .rejectButton {
-  font-family: var(--font-secondary);
-  color: white;
   cursor: pointer;
   border: none;
-  padding: 0.5rem 1rem;
-  transition: background-color 0.3s ease;
+  transition: color 0.3s ease;
   border-radius: 5px;
+  font-size: 1rem;
+  padding-top: 0.5rem;
 }
 
 .acceptButton {
-  background-color: #007500;
+  color: #ededed;
 }
 
 .acceptButton:hover {
-  background-color: rgba(0, 200, 0, 0.7);
+  color: rgba(0, 153, 255, 0.7);
 }
 
 .acceptButton:active {
-  background-color: rgba(0, 175, 0, 0.7);
+  color: rgba(0, 96, 160, 0.7);
 }
 
 .rejectButton {
-  background-color: rgb(190, 0, 0);
+  color: rgb(190, 0, 0);
 }
 
 .rejectButton:hover {
-  background-color: rgba(255, 0, 0, 0.7);
+  color: rgba(255, 0, 0);
 }
 
 .rejectButton:active {
-  background-color: rgb(160, 0, 0);
+  color: rgb(160, 0, 0);
 }

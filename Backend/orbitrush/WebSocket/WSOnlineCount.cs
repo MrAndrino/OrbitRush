@@ -1,5 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 
 public class WSOnlineCount
 {
@@ -22,7 +23,15 @@ public class WSOnlineCount
 
     public async Task NotifyAllClientsAsync(IEnumerable<WebSocket> clients)
     {
-        var message = Encoding.UTF8.GetBytes($"Jugadores conectados: {_connectedPlayers}");
+        var payload = new
+        {
+            Action = "onlineCountUpdate",
+            OnlineCount = _connectedPlayers
+        };
+
+        var json = JsonSerializer.Serialize(payload);
+        var message = Encoding.UTF8.GetBytes(json);
+
         var tasks = clients
             .Where(ws => ws.State == WebSocketState.Open)
             .Select(ws => ws.SendAsync(new ArraySegment<byte>(message), WebSocketMessageType.Text, true, CancellationToken.None));

@@ -11,7 +11,7 @@ const BoxDual = () => {
   const [activeMenu, setActiveMenu] = useState<MenuType>(null);
   const [notifType, setNotifType] = useState<"game" | "friend">("game");
   const containerRef = useRef<HTMLDivElement>(null);
-  const { getUsers, userList, search, setSearchTerm, friendRequests, getFriendReq } = useUsers();
+  const { getUsers, userList, search, setSearchTerm, friendRequests } = useUsers();
   const [inputValue, setInputValue] = useState("");
 
   const handleUserClick = () => {
@@ -45,8 +45,8 @@ const BoxDual = () => {
     activeMenu === "user"
       ? styles.menuOrange
       : activeMenu === "notification"
-      ? styles.menuBlue
-      : "";
+        ? styles.menuBlue
+        : "";
 
   // Arrays de notificaciones dummy para ejemplo:
   const dummyGameNotifications = [
@@ -54,12 +54,13 @@ const BoxDual = () => {
     { id: 2, sender: "Usuario2" },
   ];
 
+  const showNotificationDot =
+    dummyGameNotifications.length > 0 || friendRequests.length > 0;
+
   return (
     <section className={styles.container} ref={containerRef}>
       {/* Panel lateral: se muestra/oculta según botón presionado */}
-      <div
-        className={`${styles.menu} ${activeMenu ? styles.menuVisible : ""} ${menuStyleClass}`}
-      >
+      <div className={`${styles.menu} ${activeMenu ? styles.menuVisible : ""} ${menuStyleClass}`}>
         {activeMenu === "user" && (
           <>
             <div className={styles.searchBox}>
@@ -77,54 +78,25 @@ const BoxDual = () => {
           <div className={styles.notifContent}>
             {/* Botones para alternar entre notificaciones de partida y amistad */}
             <div className={styles.notifButtonsContainer}>
-              <button
-                onClick={() => setNotifType("game")}
-                className={`${styles.notifButton} ${
-                  notifType === "game" ? styles.activeNotif : ""
-                }`}
-              >
+              <button onClick={() => setNotifType("game")} className={`${styles.notifButton} ${notifType === "game" ? styles.activeNotif : ""}`}>
                 Partida
               </button>
-              <button
-                onClick={() => setNotifType("friend")}
-                className={`${styles.notifButton} ${
-                  notifType === "friend" ? styles.activeNotif : ""
-                }`}
-              >
+              <button onClick={() => setNotifType("friend")} className={`${styles.notifButton} ${notifType === "friend" ? styles.activeNotif : ""}`}>
                 Amistad
               </button>
             </div>
-            {/* Renderizamos la lista de notificaciones según el tipo seleccionado */}
-            <NotificationList
-              notifications={
-                notifType === "game"
-                  ? dummyGameNotifications
-                  : friendRequests
-              }
-              type={notifType}
-            />
+            <NotificationList notifications={notifType === "game" ? dummyGameNotifications : friendRequests} type={notifType} />
           </div>
         )}
       </div>
 
       {/* Contenedor de botones (notificaciones y usuarios) */}
-      <div
-        className={`${styles.buttonContainer} ${activeMenu ? styles.buttonsShifted : ""}`}
-      >
-        <button
-          onClick={handleNotifClick}
-          className={`${styles.buttonBlue} ${
-            activeMenu === "notification" ? styles.activeBlue : ""
-          }`}
-        >
+      <div className={`${styles.buttonContainer} ${activeMenu ? styles.buttonsShifted : ""}`}>
+        <button onClick={handleNotifClick} className={`${styles.buttonBlue} ${activeMenu === "notification" ? styles.activeBlue : ""}`}>
           <Bell />
+          {showNotificationDot && <span className={styles.notificationDot} />}
         </button>
-        <button
-          onClick={handleUserClick}
-          className={`${styles.buttonOrange} ${
-            activeMenu === "user" ? styles.activeOrange : ""
-          }`}
-        >
+        <button onClick={handleUserClick} className={`${styles.buttonOrange} ${activeMenu === "user" ? styles.activeOrange : ""}`}>
           <UserPlus />
         </button>
       </div>

@@ -5,7 +5,6 @@ import { FRIENDLIST_URL, USERLIST_URL, SEARCH_URL, DELETE_FRIEND_URL, GET_REQUES
 import { getFriendList, getUserList, searchUsers, deleteFriend } from "@/lib/users";
 import { getFriendRequests, rejectFriendRequest } from "@/lib/request";
 import { useAuth } from "./authcontext";
-import { useWebSocket } from "./websocketcontext";
 
 export const UsersContext = createContext();
 export const useUsers = () => useContext(UsersContext);
@@ -99,17 +98,6 @@ export const UsersProvider = ({ children }) => {
     }
   };
 
-  // ----- Eliminar amigo -----
-  const removeFriend = async (friendId) => {
-    if (!token) return;
-    try {
-      await deleteFriend(DELETE_FRIEND_URL, token, friendId);
-      getFriends();
-    } catch (error) {
-      console.error("Error al eliminar amigo:", error);
-    }
-  };
-
   // ----- Rechazar solicitud de amistad -----
   const handleRejectFriend = async (senderId) => {
     if (!token) return;
@@ -168,10 +156,12 @@ export const UsersProvider = ({ children }) => {
 
     window.addEventListener("updateFriendList", handleUpdateFriendList);
     window.addEventListener("acceptFriendRequest", handleUpdateFriendList);
+    window.addEventListener("deleteFriend", handleUpdateFriendList);
 
     return () => {
       window.removeEventListener("updateFriendList", handleUpdateFriendList);
       window.removeEventListener("acceptFriendRequest", handleUpdateFriendList);
+      window.removeEventListener("deleteFriend", handleUpdateFriendList);
     };
   }, [getFriends]);
 
@@ -196,7 +186,6 @@ export const UsersProvider = ({ children }) => {
     getFriends,
     getUsers,
     search,
-    removeFriend,
     friendRequests,
     loadingRequests,
     handleRejectFriend,

@@ -11,6 +11,7 @@ export const WebSocketProvider = ({ children }) => {
   const [ws, setWs] = useState(null);
   const [connected, setConnected] = useState(false);
   const [request, setRequest] = useState([]);
+  const [onlineCount, setOnlineCount] = useState(0);
 
   // ----- Conexión del WebSocket -----
   const connectWebSocket = (userId) => {
@@ -54,11 +55,23 @@ export const WebSocketProvider = ({ children }) => {
           window.dispatchEvent(friendStateEvent);
           break;
 
+        case "onlineCountUpdate":
+          console.log('Nuevo conteo de usuarios conectados:', data.OnlineCount);
+          setOnlineCount(data.OnlineCount);
+          break;
+
         case "updateFriendList":
           const updateFriendEvent = new CustomEvent("updateFriendList", {
             detail: { friends: data.Friends }
           });
           window.dispatchEvent(updateFriendEvent);
+          break;
+
+        case "deleteFriend":
+          const deleteFriendEvent = new CustomEvent("deleteFriend", {
+            detail: { friends: data.Friends }
+          });
+          window.dispatchEvent(deleteFriendEvent);
           break;
 
         default:
@@ -136,6 +149,20 @@ export const WebSocketProvider = ({ children }) => {
     ws.send(mensaje);
   };
 
+  // ----- Eliminar amigo -----
+  const deleteFriend = (targetId) => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("Web Socket no conectado");
+      return;
+    }
+    const mensaje = JSON.stringify({
+      Action: "deleteFriend",
+      TargetId: `${targetId}`
+    });
+    console.log("mensaje: ", mensaje);
+    ws.send(mensaje);
+  };
+
   // ----- useEffect para manejo del cierre del WebSocket al salir de la página -----
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -158,7 +185,9 @@ export const WebSocketProvider = ({ children }) => {
     closeWebSocket,
     connected,
     sendFriendRequest,
-    acceptFriendRequest
+    acceptFriendRequest,
+    deleteFriend,
+    onlineCount,
   };
 
   return (

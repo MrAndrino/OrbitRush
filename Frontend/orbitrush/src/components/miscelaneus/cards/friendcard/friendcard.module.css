@@ -70,9 +70,9 @@
   gap: 0.5rem;
 }
 
-.extraButton, .extraButtonErase {
+.extraButton{
   font-family: var(--font-secondary);
-  color: white;
+  color: #ededed;
   cursor: pointer;
   transition: color 0.3s ease;
 }

@@ -23,9 +23,8 @@ const GameNotificationCard = ({
 
   return (
     <div className={styles.notificationCard}>
-      <span className={styles.notificationMessage}>
-        {notification.sender} ha invitado a jugar
-      </span>
+      <span className={styles.notificationUser}>{notification.sender}</span>
+      <span className={styles.notificationMessage}>quiere ser tu amig@</span>
       <div className={styles.buttonContainer}>
         <button className={styles.acceptButton} onClick={handleAccept}>
           Aceptar

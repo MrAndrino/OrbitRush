@@ -30,9 +30,8 @@ const FriendNotificationCard = ({notification}: FriendNotificationProps) => {
 
   return (
     <div className={styles.notificationCard}>
-      <span className={styles.notificationMessage}>
-        {notification.senderName} quiere ser tu amigo
-      </span>
+      <span className={styles.notificationUser}>{notification.senderName}</span>
+      <span className={styles.notificationMessage}>quiere ser tu amig@</span>
       <div className={styles.buttonContainer}>
         <button className={styles.acceptButton} onClick={handleAccept}>
           Aceptar

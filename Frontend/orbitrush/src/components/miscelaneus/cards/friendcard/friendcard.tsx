@@ -3,7 +3,6 @@ import styles from "./friendcard.module.css";
 import Modal from "../../modal/modal";
 import Button from "../../button/button";
 import { BASE_URL } from "@/config";
-import { useUsers } from "@/context/userscontext";
 import toast from "react-hot-toast";
 import { useWebSocket } from "@/context/websocketcontext";
 
@@ -28,8 +27,7 @@ interface FriendCardProps {
 }
 
 const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) => {
-  const { removeFriend } = useUsers();
-  const { sendFriendRequest } = useWebSocket();
+  const { sendFriendRequest, deleteFriend } = useWebSocket();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
@@ -41,7 +39,7 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
   };
 
   const handleRemoveFriend = () => {
-    removeFriend(user.id);
+    deleteFriend(user.id);
     toast.success(`Eliminaste a ${user.name} correctamente.`);
     closeModal();
   };
