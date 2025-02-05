@@ -1,18 +1,22 @@
 ﻿using orbitrush.Database.Entities.Enums;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
+using static WSGameHandler;
 
 public class WebSocketService
 {
     private readonly WSConnectionManager _connectionManager;
     private readonly WSFriendHandler _friendHandler;
+    private readonly WSGameHandler _gameHandler;
     private readonly WSOnlineCount _onlineCount;
 
-    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler friendHandler, WSOnlineCount onlineCount)
+    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler friendHandler, WSOnlineCount onlineCount, WSGameHandler gameHandler)
     {
         _connectionManager = connectionManager;
         _friendHandler = friendHandler;
         _onlineCount = onlineCount;
+        _gameHandler = gameHandler;
     }
 
     public async Task HandleAsync(WebSocket webSocket, string userId)
@@ -30,7 +34,16 @@ public class WebSocketService
 
                 if (!string.IsNullOrWhiteSpace(message))
                 {
-                    await _friendHandler.ProcessMessageAsync(userId, message);
+                    var messageData = JsonSerializer.Deserialize<GameRequestMessage>(message);
+
+                    if (messageData?.Action == "invite")
+                    {
+                        await _gameHandler.ProcessGameMessageAsync(userId, message);
+                    }
+                    else
+                    {
+                        await _friendHandler.ProcessMessageAsync(userId, message);
+                    }
                 }
             }
         }

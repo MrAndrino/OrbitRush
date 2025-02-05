@@ -26,6 +26,7 @@ public class Program
 
         builder.Services.AddSingleton<WSConnectionManager>();
         builder.Services.AddSingleton<WSFriendHandler>();
+        builder.Services.AddSingleton<WSGameHandler>();
         builder.Services.AddSingleton<WSOnlineCount>();
         builder.Services.AddSingleton<WebSocketService>();
 

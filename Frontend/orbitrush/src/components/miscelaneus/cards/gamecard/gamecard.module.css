@@ -1,0 +1,29 @@
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.5rem;
+  gap: 1.2rem;
+  background: linear-gradient(135deg, #1c2028, #151515);
+  padding: 3rem;
+  transition: border 0.3s, box-shadow 0.3s;
+  max-height: 60%;
+  width: 15rem;
+}
+
+.blue {
+  border: 2px solid rgb(0, 153, 255);
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+}
+
+.orange {
+  border: 2px solid rgba(255, 140, 0);
+  box-shadow: 0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6);
+}
+
+.userImage {
+  width: 7rem;
+  height: 7rem;
+  border-radius: 50%;
+}

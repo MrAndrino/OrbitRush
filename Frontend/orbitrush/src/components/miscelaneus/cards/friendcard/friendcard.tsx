@@ -29,16 +29,12 @@ interface FriendCardProps {
 
 const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) => {
   const { sendFriendRequest, deleteFriend } = useWebSocket();
-  // Estado para el primer modal (por ejemplo, para eliminar a un amigo)
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // Estado para el segundo modal (puede ser para otra acción)
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
 
-  // Funciones para el primer modal
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // Funciones para el segundo modal
   const openSecondModal = () => setIsSecondModalOpen(true);
   const closeSecondModal = () => setIsSecondModalOpen(false);
 
@@ -51,12 +47,6 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
     deleteFriend(user.id);
     toast.success(`Eliminaste a ${user.name} correctamente.`);
     closeModal();
-  };
-
-  // Ejemplo de acción para el segundo modal
-  const handleSecondModalAction = () => {
-    toast.success("Acción realizada en el segundo modal");
-    closeSecondModal();
   };
 
   return (
@@ -96,12 +86,12 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
         </div>
       )}
 
-      {/* Primer Modal: Confirmación para eliminar a un amigo */}
+
       <Modal isOpen={isModalOpen} closeModal={closeModal} color='orange'>
-        <UserProfile id={user.id}/>
+        <UserProfile id={user.id} />
       </Modal>
 
-      {/* Segundo Modal: Ejemplo para otra acción */}
+
       <Modal isOpen={isSecondModalOpen} closeModal={closeSecondModal} color="red" className="w-[40%]">
         <div className="flex flex-col gap-12">
           <p className="text-2xl">

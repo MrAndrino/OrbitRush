@@ -1,0 +1,23 @@
+.lobbyBox {
+  display: flex;
+  flex-direction: row;    /* Alinea los elementos de izquierda a derecha */
+  justify-content: space-between; /* Centra los elementos horizontalmente */
+  align-items: center;     /* Centra los elementos verticalmente */
+  gap: 5rem;               /* Espacio entre los elementos */
+  width: 100vh;
+  height: 100%;
+}
+
+.playerOne {
+  align-self: flex-end;    /* Coloca el primer GameCard abajo */
+  order: 1;                /* Primero en el orden visual */
+}
+
+.lobbyBox img {
+  order: 2;                /* Coloca la imagen en el centro */
+}
+
+.playerTwo {
+  align-self: flex-start;  /* Coloca el segundo GameCard arriba */
+  order: 3;                /* Segundo en el orden visual */
+}

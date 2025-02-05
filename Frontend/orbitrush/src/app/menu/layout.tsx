@@ -16,7 +16,7 @@ export default function MenuLayout({
       <Header />
 
       <section className='flex'>
-        <div className="flex justify-evenly w-[83%] h-[81vh] py-12 px-24 overflow-auto scrollbar-hidden text-center">
+        <div className="flex justify-evenly w-[83%] h-[81vh] overflow-auto scrollbar-hidden text-center">
           {children}
         </div>
 
