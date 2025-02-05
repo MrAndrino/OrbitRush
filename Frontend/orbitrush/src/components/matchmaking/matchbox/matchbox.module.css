@@ -1,0 +1,41 @@
+.matchbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #1c2028, #151515);
+  border: 2px solid rgb(0, 153, 255);
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+  transition: background-color 0.2s;
+  color: var(--foreground);
+  border-radius: 5px;
+  width: 17rem;
+}
+
+.icon {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 140, 0);
+  box-shadow: 0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6);
+  user-select: none;
+}
+
+.matchcontent {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+.matchTitle {
+  font-size: 1.7rem;
+}
+
+.matchText {
+  font-size: 0.9rem;
+  font-family: var(--font-secondary);
+  text-align: center;
+}

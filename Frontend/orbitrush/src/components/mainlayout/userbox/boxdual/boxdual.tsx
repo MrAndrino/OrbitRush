@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import styles from "./boxdual.module.css";
-import UserList from "../../miscelaneus/cards/cardlists/userlist";
-import NotificationList from "../../miscelaneus/cards/cardlists/notificationlist";
+import UserList from "@/components/miscelaneus/cards/cardlists/userlist";
+import NotificationList from "@/components/miscelaneus/cards/cardlists/notificationlist";
 import { useUsers } from "@/context/userscontext";
 import { Bell, UserPlus } from "lucide-react";
 

@@ -2,8 +2,8 @@
 
 import Footer from '@/components/mainlayout/footer/footer';
 import Header from '@/components/mainlayout/header/header';
-import Friendbox from '@/components/mainlayout/boxfriend/friendbox';
-import BoxDual from '@/components/mainlayout/boxdual/boxdual';
+import Friendbox from '@/components/mainlayout/userbox/boxfriend/friendbox';
+import BoxDual from '@/components/mainlayout/userbox/boxdual/boxdual';
 
 export default function MenuLayout({
   children,

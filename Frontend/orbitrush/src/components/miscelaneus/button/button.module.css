@@ -4,6 +4,7 @@
   border-radius: 5px;
   transition: all 0.3s ease;
   color: #ededed;
+  user-select: none;
   ;
 }
 
