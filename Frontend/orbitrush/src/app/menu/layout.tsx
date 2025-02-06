@@ -16,14 +16,15 @@ export default function MenuLayout({
       <Header />
 
       <section className='flex'>
-        <div className="flex justify-evenly w-[83%] h-[81vh] overflow-auto scrollbar-hidden text-center">
+        <div className='w-[15%] z-10'>
+          <Friendbox />
+        </div>
+
+        <div className="flex justify-center w-[85%] h-[81vh] pr-12">
           {children}
         </div>
 
-        <div className='w-[17%]'>
-          <Friendbox/>
-        </div>
-        <BoxDual/>
+        <BoxDual />
       </section>
 
       <Footer />

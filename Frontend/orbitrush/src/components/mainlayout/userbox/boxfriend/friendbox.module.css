@@ -2,9 +2,8 @@
   display: flex;
   flex-direction: column;
   height: 81vh;
-  border-left: 2px solid white;
-  box-shadow: inset 2px 0px 7px rgba(0, 153, 255, 0.8),
-    -2px 0px 10px rgba(255, 140, 0, 0.8);
+  border-right: 2px solid white;
+  box-shadow: 2px 0px 10px rgba(255, 140, 0, 0.8);
   background: var(--background);
 }
 

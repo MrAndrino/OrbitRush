@@ -1,23 +1,26 @@
 .lobbyBox {
   display: flex;
-  flex-direction: row;    /* Alinea los elementos de izquierda a derecha */
-  justify-content: space-between; /* Centra los elementos horizontalmente */
-  align-items: center;     /* Centra los elementos verticalmente */
-  gap: 5rem;               /* Espacio entre los elementos */
-  width: 100vh;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
   height: 100%;
+  background: linear-gradient(133deg, #0a0a0a 36%,
+      rgba(0, 153, 255, 0.8) 45%,
+      rgba(255, 255, 255, 0.8) 50%,
+      rgba(255, 140, 0, 0.8) 55%,
+      #151515 64%);
 }
 
-.playerOne {
-  align-self: flex-end;    /* Coloca el primer GameCard abajo */
-  order: 1;                /* Primero en el orden visual */
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rem;
 }
 
-.lobbyBox img {
-  order: 2;                /* Coloca la imagen en el centro */
-}
-
-.playerTwo {
-  align-self: flex-start;  /* Coloca el segundo GameCard arriba */
-  order: 3;                /* Segundo en el orden visual */
+.image {
+  border: 3px solid rgba(255, 255, 255);
+  box-shadow: 0 0 10px rgba(255, 255, 255), 0 0 15px rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  width: 12rem;
 }

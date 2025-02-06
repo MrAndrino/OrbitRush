@@ -12,7 +12,7 @@ function Instructions() {
           <p className="text-3xl font-primary">Inicio del Juego</p>
           <p>Al comenzar, el sistema asigna al azar quién juega primero. Cada jugador dispone de un conjunto de canicas de su color y toma turnos para realizar sus movimientos.</p>
         </div>
-        <img src='images/placeholder.png' alt='' className='h-40' />
+        <img src='/images/placeholder.png' alt='' className='h-40' />
       </section>
 
       <section className='flex flex-row-reverse gap-6 items-center'>
@@ -22,7 +22,7 @@ function Instructions() {
             -Colocar una canica en cualquier celda vacía del tablero de 4x4.<br />
             -Activar el mecanismo &quot;Orbito&quot;, que mueve todas las canicas del tablero en patrones predefinidos, cambiando sus posiciones.</p>
         </div>
-        <img src='images/placeholder.png' alt='' className='h-40' />
+        <img src='/images/placeholder.png' alt='' className='h-40' />
       </section>
 
       <section className='flex gap-6'>
@@ -30,7 +30,7 @@ function Instructions() {
           <p className="text-3xl font-primary">El Tablero Dinámico</p>
           <p>El tablero se actualiza automáticamente cuando se activa el mecanismo &quot;Orbito&quot;. Las canicas del anillo exterior se desplazan en una dirección, mientras que las del anillo interior lo hacen en la dirección opuesta. Este movimiento puede romper alineaciones o crear nuevas oportunidades estratégicas.</p>
         </div>
-        <img src='images/placeholder.png' alt='' className='h-40' />
+        <img src='/images/placeholder.png' alt='' className='h-40' />
       </section>
 
       <section className='flex flex-row-reverse gap-6 items-center'>
@@ -38,7 +38,7 @@ function Instructions() {
           <p className="text-3xl font-primary">Condiciones de Victoria</p>
           <p>El primer jugador que logre alinear cuatro canicas de su color gana la partida. En caso de que no haya más canicas por colocar, se activará el mecanismo &quot;Orbito&quot; 5 veces. Si en ninguno de esos 5 movimientos se consigue alinear 4 canicas, el juego acabará en empate.</p>
         </div>
-        <img src='images/placeholder.png' alt='' className='h-40' />
+        <img src='/images/placeholder.png' alt='' className='h-40' />
       </section>
 
       <section className='flex flex-col gap-2'>

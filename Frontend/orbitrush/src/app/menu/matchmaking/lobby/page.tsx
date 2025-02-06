@@ -15,7 +15,7 @@ const sampleUsers = [
 
 export default function MatchmakingPage() {
   return (
-    <section className="">
+    <section className="text-center w-[100%]">
       <LobbyBox users={sampleUsers} /> 
     </section>
   );
