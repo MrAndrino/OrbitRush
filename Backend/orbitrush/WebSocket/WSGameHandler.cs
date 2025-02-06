@@ -1,4 +1,5 @@
-﻿using orbitrush.Database.Repositories;
+﻿using orbitrush.Database.Entities;
+using orbitrush.Database.Repositories;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
@@ -6,6 +7,8 @@ using System.Text.Json;
 
 public class WSGameHandler
 {
+    private readonly ConcurrentDictionary<string, string> pendingInvitations = new();
+    private readonly ConcurrentDictionary<string, Lobby> activeLobbies = new();
     private readonly ConcurrentQueue<string> waitingPlayers = new();
     private readonly ConcurrentDictionary<string, string> activeMatches = new();
     //private readonly ConcurrentDictionary<string, GameSession> activeGames = new();
@@ -22,6 +25,7 @@ public class WSGameHandler
     {
         public string Action { get; set; } = string.Empty;
         public string TargetId { get; set; } = string.Empty;
+        public string Response { get; set; } = string.Empty;
     }
 
     public async Task ProcessGameMessageAsync(string userId, string message)
@@ -34,13 +38,17 @@ public class WSGameHandler
             {
                 switch (messageData.Action)
                 {
-                    case "invite":
+                    case "sendGameRequest":
                         await HandleInvitation(messageData.TargetId, userId);
                         break;
 
-                    //case "start":
-                    //    await StartGame(userId);
-                    //    break;
+                    case "answerGameRequest":
+                        await HandleAnswerInvitation(messageData.TargetId, userId, messageData.Response);
+                        break;
+
+                    case "startGame":
+                        await HandleStartGame(userId);
+                        break;
 
                     //case "move":
                     //    await HandlePlayerMove(userId, messageData);
@@ -72,6 +80,112 @@ public class WSGameHandler
         }
     }
 
+    public async Task HandleAnswerInvitation(string targetPlayer, string userId, string response)
+    {
+        using (var scope = _serviceProvider.CreateScope())
+        {
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+            string senderName = await unitOfWork.UserRepository.GetNameByIdAsync(int.Parse(userId));
+            if (_connectionManager.TryGetConnection(targetPlayer, out var socket))
+            {
+                var responseMessage = new
+                {
+                    Action = "answerGameRequest",
+                    TargetId = targetPlayer,
+                    Response = response
+                };
+                var message = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(responseMessage));
+                await socket.SendAsync(new ArraySegment<byte>(message), WebSocketMessageType.Text, true, CancellationToken.None);
+
+                pendingInvitations.TryRemove(targetPlayer, out _);
+                if (response == "accept")
+                {
+                    var lobbyId = Guid.NewGuid().ToString();
+                    Lobby lobby = new Lobby(lobbyId, targetPlayer, userId)
+                    {
+                        Player1Ready = true,
+                        Player2Ready = true,
+                    };
+                    activeLobbies.TryAdd(lobbyId, lobby);
+                    Console.WriteLine($"Cantidad de lobbies activos: {activeLobbies.Count}");
+                    await NotifyPlayerCanStartGame(targetPlayer, lobby);
+                }
+                else if (response == "reject")
+                {
+                    var rejectMessage = new
+                    {
+                        Action = "rejectGameRequest",
+                        TargetId = targetPlayer,
+                        Response = $"{targetPlayer} ha rechazado tu invitación."
+                    };
+                    var rejectBuffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(rejectMessage));
+                    await socket.SendAsync(new ArraySegment<byte>(rejectBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                }
+            }
+        }
+    }
+
+    private async Task NotifyPlayerCanStartGame(string playerId, Lobby lobby)
+    {
+        if (_connectionManager.TryGetConnection(playerId, out var socket) && socket.State == WebSocketState.Open)
+        {
+            var startGameMessage = new
+            {
+                Action = "canStartGame",
+                LobbyId = lobby.Id,
+                Message = "Ambos jugadores están listos. Puedes iniciar la partida."
+            };
+
+            var buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(startGameMessage));
+            await socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+    }
+
+    private async Task HandleStartGame(string userId)
+    {
+        var lobby = activeLobbies.Values.FirstOrDefault(l => l.Player1Id == userId);
+
+        if (lobby == null)
+        {
+            Console.WriteLine("No se encontró ningún lobby.");
+            return;
+        }
+        if(lobby.Player1Id != userId)
+        {
+            Console.WriteLine("Este usuario no tiene permisos para iniciar partida");
+            return;
+        }
+        await StartGame(lobby.Player1Id, lobby.Player2Id);
+        activeLobbies.TryRemove(lobby.Id, out _ );
+    }
+
+    private async Task StartGame(string player1Id, string player2Id)
+    {
+        var startMessagePlayer1 = new
+        {
+            Action = "gameStarted",
+            Opponent = player2Id
+        };
+
+        var startMessagePlayer2 = new
+        {
+            Action = "gameStarted",
+            Opponent = player1Id
+        };
+
+        if (_connectionManager.TryGetConnection(player1Id, out var player1Socket) && player1Socket.State == WebSocketState.Open)
+        {
+            var buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(startMessagePlayer1));
+            await player1Socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
+        if (_connectionManager.TryGetConnection(player2Id, out var player2Socket) && player2Socket.State == WebSocketState.Open)
+        {
+            var buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(startMessagePlayer2));
+            await player2Socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+    }
+
     public async Task<string> AddPlayerToQueue(string playerId)
     {
         if (!waitingPlayers.Contains(playerId))
@@ -91,7 +205,6 @@ public class WSGameHandler
                 return matchId;
             }
         }
-
         return null;
     }
 

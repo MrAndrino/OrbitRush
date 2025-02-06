@@ -135,6 +135,20 @@ export const WebSocketProvider = ({ children }) => {
     ws.send(mensaje);
   };
 
+  // ----- Envío de solicitud de partida -----
+  const sendGameRequest = (targetId) => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("Web Socket no conectado");
+      return;
+    }
+    const mensaje = JSON.stringify({
+      Action: "sendGameRequest",
+      TargetId: `${targetId}`
+    });
+    console.log("mensaje: ", mensaje);
+    ws.send(mensaje);
+  };
+
   // ----- Aceptar solicitud de amistad -----
   const acceptFriendRequest = (targetId) => {
     if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -188,6 +202,7 @@ export const WebSocketProvider = ({ children }) => {
     acceptFriendRequest,
     deleteFriend,
     onlineCount,
+    sendGameRequest
   };
 
   return (

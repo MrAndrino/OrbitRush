@@ -28,19 +28,23 @@ interface FriendCardProps {
 }
 
 const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) => {
-  const { sendFriendRequest, deleteFriend } = useWebSocket();
+  const { sendFriendRequest, deleteFriend, sendGameRequest } = useWebSocket();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-
   const openSecondModal = () => setIsSecondModalOpen(true);
   const closeSecondModal = () => setIsSecondModalOpen(false);
 
-  const handleSendRequest = () => {
+  const handleFriendRequest = () => {
     sendFriendRequest(user.id);
     toast.success(`Enviaste solicitud de amistad a ${user.name}.`);
+  };
+
+  const handleGameRequest = () => {
+    sendGameRequest(user.id);
+    toast.success(`Invitaste a ${user.name} a jugar.`);
   };
 
   const handleRemoveFriend = () => {
@@ -69,7 +73,7 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
         <div className={styles.extraButtons}>
           {type === "friend" ? (
             <>
-              <button className={styles.extraButton}>Invitar</button>
+              <button className={styles.extraButton} onClick={handleGameRequest}>Invitar</button>
               <button className={styles.extraButton} onClick={openModal}>Perfil</button>
               <button className={styles.extraButtonErase} onClick={openSecondModal}>
                 Borrar
@@ -77,7 +81,7 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
             </>
           ) : (
             <>
-              <button className={styles.extraButton} onClick={handleSendRequest}>
+              <button className={styles.extraButton} onClick={handleFriendRequest}>
                 Agregar
               </button>
               <button className={styles.extraButton} onClick={openModal}>Perfil</button>

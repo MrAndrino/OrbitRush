@@ -36,7 +36,7 @@ public class WebSocketService
                 {
                     var messageData = JsonSerializer.Deserialize<GameRequestMessage>(message);
 
-                    if (messageData?.Action == "invite")
+                    if (messageData?.Action == "sendGameRequest" || messageData?.Action == "answerGameRequest" || messageData?.Action == "startGame")
                     {
                         await _gameHandler.ProcessGameMessageAsync(userId, message);
                     }
