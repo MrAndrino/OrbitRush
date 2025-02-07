@@ -16,3 +16,8 @@
 .hlogo:hover {
   transform: scale(1.1);
 }
+
+.hlogo:active{
+  transform: translateY(2px);
+  transition: all 0.2s ease;
+}

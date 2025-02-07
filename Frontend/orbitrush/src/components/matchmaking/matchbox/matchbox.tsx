@@ -51,7 +51,7 @@ const MatchBox = ({ variant }: MatchBoxProps) => {
           <div>
             <p className={styles.matchTitle}>Crear Partida</p>
             <p className={styles.matchText}>Crea una partida privada y reta a un amigo en un duelo personalizado. Solo uno podrá llevarse la victoria, ¿quién demostrará ser el mejor?</p></div>
-          <Button color="orange" href={"/menu/matchmaking/lobby"} className="w-[7rem] h-[3rem] text-3xl">Jugar</Button>
+          <Button color="orange" href={"/menu/lobby"} className="w-[7rem] h-[3rem] text-3xl">Jugar</Button>
         </div>}
     </section>
   );

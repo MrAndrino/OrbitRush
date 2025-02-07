@@ -17,8 +17,8 @@ const GameCard = ({ user, className = "", color = "blue" }: GameCardProps) => {
   const imageUrl = user.image ? `${BASE_URL}/${user.image}` : "/images/OrbitRush-TrashCan.jpg";
 
   return (
-    <div className={`${styles.userInfo} ${styles[color]} ${className}`}>
-      <img src={imageUrl} alt="" className={styles.userImage} />
+    <div className={`${styles.userInfo} ${styles[color]}`}>
+      <img src={imageUrl} alt="" className={`${styles.userImage} ${styles[color]}`} />
       <span>{user.name}</span>
     </div>
   );

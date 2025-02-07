@@ -5,15 +5,15 @@ import LobbyBox from "@/components/matchmaking/lobbybox/lobbybox";
 const sampleUsers = [
   {
     name: "Alice Smith",
-    image: "https://picsum.photos/seed/alice/200/200", 
+    image: "/images/OrbitRush-TrashCan.jpg", 
   },
   {
     name: "Bob Johnson",
-    image: "https://picsum.photos/seed/bob/200/200", 
+    image: "/images/OrbitRush-TrashCan.jpg", 
   },
 ];
 
-export default function MatchmakingPage() {
+export default function LobbyPage() {
   return (
     <section className="text-center w-[100%]">
       <LobbyBox users={sampleUsers} /> 

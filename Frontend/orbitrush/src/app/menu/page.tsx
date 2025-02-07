@@ -1,12 +1,16 @@
 'use client';
 
-import Instructions from '@/components/miscelaneus/instructions/instructions';
+import MatchBox from "@/components/matchmaking/matchbox/matchbox";
 
 export default function MenuPage() {
 
   return (
-    <section className="w-[80%] overflow-auto scrollbar-hidden text-center py-12">
-      <Instructions/>
+    <section className="flex gap-[10vh] py-12 text-center pr-12">
+
+      <MatchBox variant="bot"/>
+      <MatchBox variant="random"/>
+      <MatchBox variant="friend"/>
+
     </section>
   );
 }

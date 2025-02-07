@@ -16,11 +16,11 @@ export default function MenuLayout({
       <Header />
 
       <section className='flex'>
-        <div className='w-[15%] z-10'>
+        <div className='w-[17%] z-10'>
           <Friendbox />
         </div>
 
-        <div className="flex justify-center w-[85%] h-[81vh] pr-12">
+        <div className="flex justify-center w-[83%] h-[81vh]">
           {children}
         </div>
 

@@ -51,6 +51,90 @@ public class MatchResultSeeder
                 UserId = 5,
                 Result = MatchResultEnum.Draw
             },
+            new MatchResult{
+                Id = 7,
+                MatchId = 4,
+                UserId = 1,
+                Result = MatchResultEnum.Victory
+            },
+            new MatchResult{
+                Id = 8,
+                MatchId = 4,
+                UserId = 2,
+                Result = MatchResultEnum.Defeat
+            },
+            new MatchResult{
+                Id = 9,
+                MatchId = 5,
+                UserId = 1,
+                Result = MatchResultEnum.Defeat
+            },
+            new MatchResult{
+                Id = 10,
+                MatchId = 5,
+                UserId = 4,
+                Result = MatchResultEnum.Defeat
+            },
+            new MatchResult{
+                Id = 11,
+                MatchId = 6,
+                UserId = 4,
+                Result = MatchResultEnum.Draw
+            },
+            new MatchResult{
+                Id = 12,
+                MatchId = 6,
+                UserId = 5,
+                Result = MatchResultEnum.Draw
+            },
+            new MatchResult{
+                Id = 13,
+                MatchId = 7,
+                UserId = 1,
+                Result = MatchResultEnum.Victory
+            },
+            new MatchResult{
+                Id = 14,
+                MatchId = 7,
+                UserId = 2,
+                Result = MatchResultEnum.Defeat
+            },
+            new MatchResult{
+                Id = 15,
+                MatchId = 8,
+                UserId = 1,
+                Result = MatchResultEnum.Victory
+            },
+            new MatchResult{
+                Id = 16,
+                MatchId = 8,
+                UserId = 4,
+                Result = MatchResultEnum.Victory
+            },
+            new MatchResult{
+                Id = 17,
+                MatchId = 9,
+                UserId = 4,
+                Result = MatchResultEnum.Draw
+            },
+            new MatchResult{
+                Id = 18,
+                MatchId = 9,
+                UserId = 5,
+                Result = MatchResultEnum.Draw
+            },
+            new MatchResult{
+                Id = 19,
+                MatchId = 10,
+                UserId = 1,
+                Result = MatchResultEnum.Draw
+            },
+            new MatchResult{
+                Id = 20,
+                MatchId = 10,
+                UserId = 2,
+                Result = MatchResultEnum.Defeat
+            },
         ];
 
         _context.MatchResults.AddRange(results);

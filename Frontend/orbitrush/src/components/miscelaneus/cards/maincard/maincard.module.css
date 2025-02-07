@@ -14,15 +14,21 @@
   cursor: pointer;
 }
 
-.userInfo:hover, 
-.userInfo.active {
+.userInfo:hover {
   transform: scale(1.1);
 }
 
+.userInfo:active {
+  transform: translateY(2px);
+  transition: all 0.2s ease;
+}
+
 .userImage {
-  width: 3.2rem;
-  height: 3.2rem;
+  width: 3.5rem;
+  height: 3.5rem;
   border-radius: 50%;
+  border: 2px solid rgb(0, 153, 255);
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
 }
 
 /* Menú contextual */
