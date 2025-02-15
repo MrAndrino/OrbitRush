@@ -1,6 +1,7 @@
 ﻿using orbitrush.Database.Entities;
 using orbitrush.Database.Repositories;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -10,7 +11,6 @@ public class WSGameHandler
     private readonly ConcurrentDictionary<string, string> pendingInvitations = new();
     private readonly ConcurrentDictionary<string, Lobby> activeLobbies = new();
     private readonly ConcurrentQueue<string> waitingPlayers = new();
-    private readonly ConcurrentDictionary<string, string> activeMatches = new();
     //private readonly ConcurrentDictionary<string, GameSession> activeGames = new();
     private readonly WSConnectionManager _connectionManager;
     private readonly IServiceProvider _serviceProvider;
@@ -39,11 +39,24 @@ public class WSGameHandler
                 switch (messageData.Action)
                 {
                     case "sendGameRequest":
-                        await HandleInvitation(messageData.TargetId, userId);
+                        await HandleInvitation(userId, messageData);
                         break;
 
                     case "answerGameRequest":
                         await HandleAnswerInvitation(messageData.TargetId, userId, messageData.Response);
+                        break;
+
+                    case "queueForMatch":
+                        await AddPlayerToQueue(userId);
+                        break;
+
+                    case "randomMatchResponse":
+                        await HandleRandomMatchAcceptance(userId, messageData.Response);
+                        break;
+
+
+                    case "playWithBot":
+                        await StartGameWithBot(userId);
                         break;
 
                     case "startGame":
@@ -65,20 +78,52 @@ public class WSGameHandler
         }
     }
 
-    private async Task HandleInvitation(string targetPlayer, string userId)
+
+
+    private async Task HandleInvitation(string senderId, GameRequestMessage request)
     {
         using (var scope = _serviceProvider.CreateScope())
         {
             var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
-            string senderName = await unitOfWork.UserRepository.GetNameByIdAsync(int.Parse(userId));
 
-            if (_connectionManager.TryGetConnection(targetPlayer, out var targetSocket))
+            if (pendingInvitations.ContainsKey(senderId) && pendingInvitations[senderId] == request.TargetId)
             {
-                var invitationMessage = Encoding.UTF8.GetBytes($"{senderName} Quiere jugar contigo");
-                await targetSocket.SendAsync(new ArraySegment<byte>(invitationMessage), WebSocketMessageType.Text, true, CancellationToken.None);
+                string errorMessage = JsonSerializer.Serialize(new
+                {
+                    Action = "invitationError",
+                    Success = false,
+                    ResponseMessage = $"Ya has enviado una invitación a {request.TargetId}."
+                });
+
+                if (_connectionManager.TryGetConnection(senderId, out WebSocket senderSocket))
+                {
+                    await SendAsync(senderSocket, errorMessage);
+                }
+
+                return;
+            }
+
+            pendingInvitations[senderId] = request.TargetId;
+
+            if (_connectionManager.TryGetConnection(request.TargetId, out WebSocket targetSocket))
+            {
+                string senderName = await unitOfWork.UserRepository.GetNameByIdAsync(int.Parse(senderId));
+                string notification = JsonSerializer.Serialize(new
+                {
+                    Action = "invitationReceived",
+                    FromUserId = senderId,
+                    Message = $"{senderName} quiere jugar contigo."
+                });
+
+                await SendAsync(targetSocket, notification);
+            }
+            else
+            {
+                Console.WriteLine($"{request.TargetId} no está conectado.");
             }
         }
     }
+
 
     public async Task HandleAnswerInvitation(string targetPlayer, string userId, string response)
     {
@@ -86,6 +131,50 @@ public class WSGameHandler
         {
             var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
             string senderName = await unitOfWork.UserRepository.GetNameByIdAsync(int.Parse(userId));
+
+            // Verificar si realmente existe una invitación pendiente
+            if (!pendingInvitations.ContainsKey(targetPlayer) || pendingInvitations[targetPlayer] != userId)
+            {
+                string errorMessage = JsonSerializer.Serialize(new
+                {
+                    Action = "answerGameRequestError",
+                    Success = false,
+                    ResponseMessage = $"No tienes una invitación pendiente de {targetPlayer}."
+                });
+
+                if (_connectionManager.TryGetConnection(userId, out WebSocket userSocket))
+                {
+                    await SendAsync(userSocket, errorMessage);
+                }
+                return;
+            }
+
+            // Verificar si el usuario ya está en un lobby activo
+            var existingLobby = activeLobbies.FirstOrDefault(l => l.Value.Player1Id == userId || l.Value.Player2Id == userId);
+            if (!string.IsNullOrEmpty(existingLobby.Key))
+            {
+                var lobby = existingLobby.Value;
+                string opponentId = lobby.Player1Id == userId ? lobby.Player2Id : lobby.Player1Id;
+
+                // Notificar al oponente que su compañero abandonó la partida
+                if (_connectionManager.TryGetConnection(opponentId, out WebSocket opponentSocket))
+                {
+                    var abandonMessage = JsonSerializer.Serialize(new
+                    {
+                        Action = "lobbyAbandoned",
+                        Message = $"{senderName} ha abandonado la partida.",
+                        Suggestion = "Puedes regresar a la cola de emparejamiento o invitar a otro jugador."
+                    });
+
+                    await SendAsync(opponentSocket, abandonMessage);
+                }
+
+                // Eliminar el lobby anterior
+                activeLobbies.TryRemove(existingLobby.Key, out _);
+                Console.WriteLine($"Usuario {userId} salió de un lobby anterior. Notificando a {opponentId}.");
+            }
+
+            // Procesar la respuesta a la invitación
             if (_connectionManager.TryGetConnection(targetPlayer, out var socket))
             {
                 var responseMessage = new
@@ -97,11 +186,10 @@ public class WSGameHandler
                 var message = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(responseMessage));
                 await socket.SendAsync(new ArraySegment<byte>(message), WebSocketMessageType.Text, true, CancellationToken.None);
 
-                pendingInvitations.TryRemove(targetPlayer, out _);
                 if (response == "accept")
                 {
                     var lobbyId = Guid.NewGuid().ToString();
-                    Lobby lobby = new Lobby(lobbyId, targetPlayer, userId)
+                    Lobby lobby = new Lobby(lobbyId, targetPlayer, userId, false)
                     {
                         Player1Ready = true,
                         Player2Ready = true,
@@ -121,9 +209,13 @@ public class WSGameHandler
                     var rejectBuffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(rejectMessage));
                     await socket.SendAsync(new ArraySegment<byte>(rejectBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
                 }
+
+                pendingInvitations.TryRemove(userId, out _);
+                pendingInvitations.TryRemove(targetPlayer, out _);
             }
         }
     }
+
 
     private async Task NotifyPlayerCanStartGame(string playerId, Lobby lobby)
     {
@@ -143,21 +235,28 @@ public class WSGameHandler
 
     private async Task HandleStartGame(string userId)
     {
+        Console.WriteLine($"🔍 Buscando lobby para el usuario: {userId}");
+
         var lobby = activeLobbies.Values.FirstOrDefault(l => l.Player1Id == userId);
 
         if (lobby == null)
         {
-            Console.WriteLine("No se encontró ningún lobby.");
+            Console.WriteLine("❌ No se encontró ningún lobby para iniciar la partida.");
             return;
         }
-        if(lobby.Player1Id != userId)
+
+        if (lobby.Player1Id != userId)
         {
-            Console.WriteLine("Este usuario no tiene permisos para iniciar partida");
+            Console.WriteLine("❌ Usuario sin permisos para iniciar la partida.");
             return;
         }
+
+        Console.WriteLine($"✅ Iniciando partida entre {lobby.Player1Id} y {lobby.Player2Id}");
+        lobby.IsActive = true; // Ahora el lobby representa la partida activa
         await StartGame(lobby.Player1Id, lobby.Player2Id);
-        activeLobbies.TryRemove(lobby.Id, out _ );
     }
+
+
 
     private async Task StartGame(string player1Id, string player2Id)
     {
@@ -186,32 +285,165 @@ public class WSGameHandler
         }
     }
 
-    public async Task<string> AddPlayerToQueue(string playerId)
+    public async Task HandleRandomMatchAcceptance(string playerId, string response)
     {
-        if (!waitingPlayers.Contains(playerId))
+        Console.WriteLine($"⚖️ Jugador {playerId} ha respondido al emparejamiento aleatorio: {response}");
+
+        var lobbyEntry = activeLobbies.FirstOrDefault(l => l.Value.Player1Id == playerId || l.Value.Player2Id == playerId);
+
+        if (!string.IsNullOrEmpty(lobbyEntry.Key))
         {
-            waitingPlayers.Enqueue(playerId);
+            var matchId = lobbyEntry.Key;
+            var lobby = lobbyEntry.Value;
+            string opponentId = lobby.Player1Id == playerId ? lobby.Player2Id : lobby.Player1Id;
 
-            if (waitingPlayers.Count >= 2)
+            if (response == "accept")
             {
-                waitingPlayers.TryDequeue(out string player1);
-                waitingPlayers.TryDequeue(out string player2);
+                Console.WriteLine($"✅ Jugador {playerId} ha aceptado la partida.");
+                lobby.IsActive = true;
 
-                var matchId = Guid.NewGuid().ToString();
-                activeMatches.TryAdd(matchId, $"{player1},{player2}");
+                if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket))
+                {
+                    var acceptMessage = JsonSerializer.Serialize(new
+                    {
+                        Action = "randomMatchAccepted",
+                        Message = "Tu oponente ha aceptado la partida."
+                    });
+                    await SendAsync(opponentSocket, acceptMessage);
+                }
 
-                await NotifyPlayersOfMatch(player1, player2, matchId);
+                // Verificar si ambos jugadores han aceptado antes de iniciar la partida
+                if (lobby.Player1Id == playerId)
+                {
+                    lobby.Player1Ready = true;
+                }
+                else if (lobby.Player2Id == playerId)
+                {
+                    lobby.Player2Ready = true;
+                }
 
-                return matchId;
+                if (lobby.Player1Ready && lobby.Player2Ready)
+                {
+                    if (_connectionManager.TryGetConnection(lobby.Player1Id, out var p1Socket) &&
+                        _connectionManager.TryGetConnection(lobby.Player2Id, out var p2Socket))
+                    {
+                        await StartGame(lobby.Player1Id, lobby.Player2Id);
+                    }
+                }
+            }
+            else if (response == "reject")
+            {
+                Console.WriteLine($"❌ Jugador {playerId} ha rechazado la partida.");
+                activeLobbies.TryRemove(matchId, out _);
+
+                if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket))
+                {
+                    var rejectMessage = JsonSerializer.Serialize(new
+                    {
+                        Action = "randomMatchRejected",
+                        Message = "Tu oponente ha rechazado la partida. Volviendo a la cola..."
+                    });
+                    await SendAsync(opponentSocket, rejectMessage);
+                }
+
+                // 🔹 Eliminar al jugador que rechazó de la cola
+                Console.WriteLine($"🚪 Jugador {playerId} ha rechazado y será eliminado de la cola.");
+                RemovePlayerFromQueue(playerId);
+
+                // 🔹 Volver a agregar al oponente a la cola de emparejamiento
+                Console.WriteLine($"🔄 {opponentId} vuelve a la cola de emparejamiento.");
+                await AddPlayerToQueue(opponentId);
             }
         }
-        return null;
+        else
+        {
+            Console.WriteLine("❌ No se encontró un lobby activo para este jugador.");
+        }
     }
+
+
+    public async Task AddPlayerToQueue(string playerId)
+    {
+        try
+        {
+            if (!waitingPlayers.Contains(playerId))
+            {
+                waitingPlayers.Enqueue(playerId);
+                Console.WriteLine($"Jugador {playerId} agregado a la cola. Total en cola: {waitingPlayers.Count}");
+
+                if (waitingPlayers.Count >= 2)
+                {
+                    waitingPlayers.TryDequeue(out string player1);
+                    waitingPlayers.TryDequeue(out string player2);
+
+                    if (!_connectionManager.TryGetConnection(player1, out var player1Socket) || player1Socket.State != WebSocketState.Open)
+                    {
+                        Console.WriteLine($"❌ Jugador {player1} se desconectó antes de iniciar. {player2} regresa a la cola.");
+                        waitingPlayers.Enqueue(player2);
+                        return;
+                    }
+
+                    if (!_connectionManager.TryGetConnection(player2, out var player2Socket) || player2Socket.State != WebSocketState.Open)
+                    {
+                        Console.WriteLine($"❌ Jugador {player2} se desconectó antes de iniciar. {player1} regresa a la cola.");
+                        waitingPlayers.Enqueue(player1);
+                        return;
+                    }
+
+                    var matchId = Guid.NewGuid().ToString();
+                    Lobby lobby = new Lobby(matchId, player1, player2, true);
+                    activeLobbies.TryAdd(matchId, lobby);
+
+                    Console.WriteLine($"✅ Partida encontrada: {matchId} entre {player1} y {player2}");
+
+
+                    var matchRequest = JsonSerializer.Serialize(new
+                    {
+                        Action = "randomMatchFound",
+                        Opponent = player2,
+                        MatchId = matchId,
+                        Message = "Se ha encontrado un oponente. ¿Aceptas la partida?"
+                    });
+
+                    await SendAsync(player1Socket, matchRequest);
+
+                    var matchRequestForPlayer2 = JsonSerializer.Serialize(new
+                    {
+                        Action = "randomMatchFound",
+                        Opponent = player1,
+                        MatchId = matchId,
+                        Message = "Se ha encontrado un oponente. ¿Aceptas la partida?"
+                    });
+
+                    await SendAsync(player2Socket, matchRequestForPlayer2);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error en AddPlayerToQueue: {ex.Message}");
+        }
+    }
+
 
     public string RemovePlayerFromQueue(string playerId)
     {
-        waitingPlayers.TryDequeue(out _);
-        return $"Player {playerId} removed from queue.";
+        var newQueue = new ConcurrentQueue<string>();
+
+        while (waitingPlayers.TryDequeue(out string currentPlayer))
+        {
+            if (currentPlayer != playerId)
+            {
+                newQueue.Enqueue(currentPlayer);
+            }
+        }
+
+        while (newQueue.TryDequeue(out string remainingPlayer))
+        {
+            waitingPlayers.Enqueue(remainingPlayer);
+        }
+
+        return $"El jugador ha sido retirado de la lista de espera.";
     }
 
     private async Task NotifyPlayersOfMatch(string player1, string player2, string matchId)
@@ -229,6 +461,121 @@ public class WSGameHandler
             var buffer = Encoding.UTF8.GetBytes(message);
             await player2Socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
         }
+    }
+
+    public async Task<string> StartGameWithBot(string playerId)
+    {
+        Console.WriteLine($"🎮 {playerId} ha iniciado una partida contra un bot.");
+
+        string botId = "BOT_" + Guid.NewGuid().ToString();
+        var matchId = Guid.NewGuid().ToString();
+
+        Lobby lobby = new Lobby(matchId, playerId, botId, true)
+        {
+            Player1Ready = true,
+            Player2Ready = true,
+            IsActive = true
+        };
+        activeLobbies.TryAdd(matchId, lobby);
+
+        if (_connectionManager.TryGetConnection(playerId, out var playerSocket) && playerSocket.State == WebSocketState.Open)
+        {
+            var message = new
+            {
+                Action = "gameStarted",
+                Opponent = "Bot",
+                Message = "Has iniciado una partida contra un bot."
+            };
+            var buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
+            await playerSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
+        Console.WriteLine($"🤖 Bot {botId} asignado a la partida {matchId}.");
+
+        return matchId;
+    }
+
+    public async Task HandlePlayerDisconnection(string playerId)
+    {
+        Console.WriteLine($"❌ Jugador {playerId} se ha desconectado. Verificando si estaba en una partida...");
+
+        var lobbyEntry = activeLobbies.FirstOrDefault(l => l.Value.Player1Id == playerId || l.Value.Player2Id == playerId);
+
+        if (!string.IsNullOrEmpty(lobbyEntry.Key))
+        {
+            var matchId = lobbyEntry.Key;
+            var lobby = lobbyEntry.Value;
+            string opponentId = lobby.Player1Id == playerId ? lobby.Player2Id : lobby.Player1Id;
+
+            Console.WriteLine($"🔍 Partida encontrada ({matchId}). Verificando qué hacer...");
+
+            if (lobby.Player2Id.StartsWith("BOT_"))
+            {
+                activeLobbies.TryRemove(matchId, out _);
+                Console.WriteLine("🗑️ Partida contra el bot eliminada ya que el jugador se desconectó.");
+            }
+            else if (lobby.IsRandomMatch && !lobby.IsActive)
+            {
+                Console.WriteLine($"🔄 Partida {matchId} era aleatoria y aún no ha comenzado. Enviando {opponentId} de vuelta a la cola...");
+                activeLobbies.TryRemove(matchId, out _);
+
+                if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket) && opponentSocket.State == WebSocketState.Open)
+                {
+                    var message = new
+                    {
+                        Action = "opponentDisconnected",
+                        Message = "Tu oponente se ha desconectado. Volviendo a la cola de emparejamiento..."
+                    };
+
+                    var buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
+                    await opponentSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+
+                    await AddPlayerToQueue(opponentId);
+                }
+            }
+            else if (lobby.IsActive)
+            {
+                Console.WriteLine($"⚠️ La partida {matchId} ya ha comenzado. No se devolverá a la cola.");
+
+                if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket) && opponentSocket.State == WebSocketState.Open)
+                {
+                    var message = new
+                    {
+                        Action = "opponentDisconnected",
+                        Message = "Tu oponente se ha desconectado de la partida en curso."
+                    };
+
+                    var buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
+                    await opponentSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                }
+            }
+            else
+            {
+                Console.WriteLine($"🎭 Partida por invitación. {opponentId} se convierte en el anfitrión.");
+
+                if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket) && opponentSocket.State == WebSocketState.Open)
+                {
+                    var message = new
+                    {
+                        Action = "opponentDisconnected",
+                        Message = "Tu oponente se ha desconectado. Ahora eres el anfitrión y puedes invitar a otro jugador."
+                    };
+
+                    var buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
+                    await opponentSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                }
+
+                lobby.Player1Id = opponentId;
+                lobby.Player2Id = null;
+            }
+        }
+    }
+
+
+    private async Task SendAsync(WebSocket webSocket, string message)
+    {
+        byte[] bytes = System.Text.Encoding.UTF8.GetBytes(message);
+        await webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
     }
 
     //private async Task StartGame(string userId)

@@ -1,9 +1,18 @@
 ﻿using System.Net.WebSockets;
 using System.Collections.Concurrent;
+using Microsoft.Extensions.DependencyInjection;
 
 public class WSConnectionManager
 {
     private readonly ConcurrentDictionary<string, WebSocket> _connections = new();
+    private readonly IServiceProvider _serviceProvider;
+
+
+    public WSConnectionManager(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
 
     public void AddConnection(string userId, WebSocket webSocket)
     {
@@ -12,7 +21,15 @@ public class WSConnectionManager
 
     public void RemoveConnection(string userId)
     {
-        _connections.TryRemove(userId, out _);
+        if (_connections.TryRemove(userId, out _))
+        {
+            Console.WriteLine($"🔴 Jugador {userId} desconectado.");
+
+            using var scope = _serviceProvider.CreateScope();
+            var gameHandler = scope.ServiceProvider.GetRequiredService<WSGameHandler>();
+
+            gameHandler.HandlePlayerDisconnection(userId).ConfigureAwait(false);
+        }
     }
 
     public bool TryGetConnection(string userId, out WebSocket webSocket)
@@ -27,7 +44,7 @@ public class WSConnectionManager
 
     public WebSocket GetConnectionById(string userId)
     {
-        return _connections.TryGetValue(userId, out var socket) ? socket :null;
+        return _connections.TryGetValue(userId, out var socket) ? socket : null;
     }
     public IEnumerable<WebSocket> GetAllConnections()
     {

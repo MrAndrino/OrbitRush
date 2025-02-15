@@ -28,6 +28,16 @@ public class WebSocketService
 
         try
         {
+            var gameActions = new HashSet<string>
+            {
+                "sendGameRequest",
+                "answerGameRequest",
+                "queueForMatch",
+                "randomMatchResponse",
+                "playWithBot",
+                "startGame"
+             };
+
             while (webSocket.State == WebSocketState.Open)
             {
                 string message = await ReadAsync(webSocket);
@@ -36,7 +46,7 @@ public class WebSocketService
                 {
                     var messageData = JsonSerializer.Deserialize<GameRequestMessage>(message);
 
-                    if (messageData?.Action == "sendGameRequest" || messageData?.Action == "answerGameRequest" || messageData?.Action == "startGame")
+                    if (messageData != null && gameActions.Contains(messageData.Action))
                     {
                         await _gameHandler.ProcessGameMessageAsync(userId, message);
                     }
@@ -88,4 +98,5 @@ public class WebSocketService
 
         return fullMessage;
     }
+
 }
