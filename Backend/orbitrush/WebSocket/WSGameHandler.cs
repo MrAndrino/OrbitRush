@@ -112,6 +112,7 @@ public class WSGameHandler
                 {
                     Action = "invitationReceived",
                     FromUserId = senderId,
+                    FromUserName = senderName,
                     Message = $"{senderName} quiere jugar contigo."
                 });
 

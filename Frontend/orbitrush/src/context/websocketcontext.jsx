@@ -11,6 +11,7 @@ export const WebSocketProvider = ({ children }) => {
   const [ws, setWs] = useState(null);
   const [connected, setConnected] = useState(false);
   const [request, setRequest] = useState([]);
+  const [gameInvites, setGameInvites] = useState([]);
   const [onlineCount, setOnlineCount] = useState(0);
 
   // ----- Conexión del WebSocket -----
@@ -32,6 +33,31 @@ export const WebSocketProvider = ({ children }) => {
       const data = JSON.parse(event.data);
       console.log("data: ", data)
       switch (data.Action) {
+
+        case "invitationReceived":
+          setGameInvites((prev) => [...prev, { id: Date.now(), sender: data.FromUserName, senderId: data.FromUserId }]);
+          toast.custom(
+            <div style={{
+              backgroundColor: 'var(--backgroundtoast)',
+              color: 'var(--foreground)',
+              fontSize: '16px',
+              borderRadius: '8px',
+              padding: '10px 20px',
+              border: '2px solid rgba(255, 140, 0)',
+              boxShadow: '0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6)',
+            }}>
+              {data.Message}
+            </div>
+          );
+          break;
+
+        case "answerGameRequest":
+          setGameInvites((prev) => {
+            const updatedInvites = prev.filter(inv => inv.senderId !== data.TargetId);
+            return updatedInvites;
+          });
+          break;
+
         case "friendRequestReceived":
           handleFriendRequest(data);
           const friendRequestEvent = new CustomEvent("friendRequestReceived", {
@@ -138,7 +164,7 @@ export const WebSocketProvider = ({ children }) => {
   // ----- Envío de solicitud de partida -----
   const sendGameRequest = (targetId) => {
     if (!ws || ws.readyState !== WebSocket.OPEN) {
-      console.error("Web Socket no conectado");
+      console.error("WebSocket no conectado");
       return;
     }
     const mensaje = JSON.stringify({
@@ -147,6 +173,29 @@ export const WebSocketProvider = ({ children }) => {
     });
     console.log("mensaje: ", mensaje);
     ws.send(mensaje);
+  };
+
+  // ----- Responder solicitud de partida -----
+  const respondToGameRequest = (targetId, response) => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("WebSocket no conectado");
+      return;
+    }
+    const mensaje = JSON.stringify({
+      Action: "answerGameRequest",
+      TargetId: `${targetId}`,
+      Response: response
+    });
+    console.log("mensaje: ", mensaje);
+    ws.send(mensaje);
+
+    if (response === "accept") {
+      toast.success("Has aceptado la invitación");
+    } else {
+      toast.error("Has rechazado la invitación");
+    }
+
+    setGameInvites((prev) => prev.filter(inv => inv.senderId !== targetId));
   };
 
   // ----- Aceptar solicitud de amistad -----
@@ -201,8 +250,10 @@ export const WebSocketProvider = ({ children }) => {
     sendFriendRequest,
     acceptFriendRequest,
     deleteFriend,
+    sendGameRequest,
+    respondToGameRequest,
     onlineCount,
-    sendGameRequest
+    gameInvites
   };
 
   return (
