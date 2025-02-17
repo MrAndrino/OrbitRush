@@ -35,7 +35,9 @@ public class WebSocketService
                 "queueForMatch",
                 "randomMatchResponse",
                 "playWithBot",
-                "startGame"
+                "startGame",
+                "cancelMatchmaking",
+                "getLobbyInfo"
              };
 
             while (webSocket.State == WebSocketState.Open)

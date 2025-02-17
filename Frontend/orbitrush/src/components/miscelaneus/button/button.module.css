@@ -77,3 +77,14 @@
     linear-gradient(45deg, rgba(0, 0, 0, 0.8), rgba(30, 30, 30, 0.9));
   box-shadow: 0 0 25px rgba(255, 0, 0, 1), 0 0 35px rgba(255, 0, 0, 0.9);
 }
+
+.disabled {
+  background: #808080;
+  border: 2px solid #a0a0a0;
+  border-radius: 5px;
+  color: #c0c0c0;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  transition: none;
+}

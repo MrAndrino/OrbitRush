@@ -2,6 +2,7 @@
 
 import { createContext, useState, useEffect, useContext } from "react";
 import { toast } from 'react-hot-toast';
+import { useRouter } from "next/navigation";
 
 const WebSocketContext = createContext();
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -13,6 +14,7 @@ export const WebSocketProvider = ({ children }) => {
   const [request, setRequest] = useState([]);
   const [gameInvites, setGameInvites] = useState([]);
   const [onlineCount, setOnlineCount] = useState(0);
+  const router = useRouter();
 
   // ----- Conexión del WebSocket -----
   const connectWebSocket = (userId) => {
@@ -33,6 +35,32 @@ export const WebSocketProvider = ({ children }) => {
       const data = JSON.parse(event.data);
       console.log("data: ", data)
       switch (data.Action) {
+
+        case "lobbyCreated":
+          console.log("✅ Lobby creado, redirigiendo...");
+          localStorage.setItem("lobbyId", data.LobbyId);
+          router.push("/menu/lobby");
+          break;
+
+        case "lobbyUpdated":
+          console.log("✅ Lobby actualizado:", data);
+          break;
+
+        case "randomMatchFound":
+          toast.success(data.Message);
+          break;
+
+        case "matchmakingCancelled":
+          toast.error(data.Message);
+          break;
+
+        case "randomMatchRejected":
+          toast.error(data.Message);
+          break;
+
+        case "randomMatchAccepted":
+          toast.success(data.Message);
+          break;
 
         case "invitationReceived":
           setGameInvites((prev) => [...prev, { id: Date.now(), sender: data.FromUserName, senderId: data.FromUserId }]);
@@ -226,6 +254,60 @@ export const WebSocketProvider = ({ children }) => {
     ws.send(mensaje);
   };
 
+  // ----- Entrar en la cola para matchmaking -----
+  const queueForMatch = () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("WebSocket no conectado");
+      return;
+    }
+
+    const mensaje = JSON.stringify({
+      Action: "queueForMatch",
+    });
+
+    console.log("Enviando mensaje: ", mensaje);
+    ws.send(mensaje);
+    toast.success("Buscando partida...");
+  };
+
+  // ----- Cancelar matchmaking -----
+  const cancelMatchmaking = () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("WebSocket no conectado");
+      return;
+    }
+
+    const mensaje = JSON.stringify({
+      Action: "cancelMatchmaking",
+    });
+
+    console.log("Enviando mensaje: ", mensaje);
+    ws.send(mensaje);
+  };
+
+
+  // ----- useEffect para redirección al crear lobby -----
+  useEffect(() => {
+    if (!ws) return;
+
+    const handleMessage = (event) => {
+      const message = JSON.parse(event.data);
+
+      if (message.Action === "lobbyCreated") {
+        console.log("Redirigiendo al lobby...");
+        router.push("/menu/lobby");
+      }
+    };
+
+    ws.addEventListener("message", handleMessage);
+
+    return () => {
+      ws.removeEventListener("message", handleMessage);
+    };
+  }, [ws]);
+
+
+
   // ----- useEffect para manejo del cierre del WebSocket al salir de la página -----
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -252,6 +334,8 @@ export const WebSocketProvider = ({ children }) => {
     deleteFriend,
     sendGameRequest,
     respondToGameRequest,
+    queueForMatch,
+    cancelMatchmaking,
     onlineCount,
     gameInvites
   };
