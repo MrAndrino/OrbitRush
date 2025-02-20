@@ -10,12 +10,16 @@ interface MatchBoxProps {
 }
 
 const MatchBox = ({ variant, isSearching, setIsSearching }: MatchBoxProps) => {
-  const { queueForMatch, cancelMatchmaking } = useWebSocket();
+  const { playWithBot, queueForMatch, cancelMatchmaking } = useWebSocket();
 
   const images = {
     bot: "/images/MatchBot.jpeg",
     random: "/images/MatchRandom.jpeg",
     friend: "/images/MatchCustom.jpeg",
+  };
+
+  const handlePlayBot = () => {
+    playWithBot();
   };
 
   const handleClick = () => {
@@ -42,7 +46,7 @@ const MatchBox = ({ variant, isSearching, setIsSearching }: MatchBoxProps) => {
               Perfecto para practicar estrategias sin presión y mejorar antes de enfrentarte a otros jugadores.
             </p>
           </div>
-          <Button color={isSearching ? "disabled" : "orange"} className="w-[7rem] h-[3rem] text-3xl">
+          <Button color={isSearching ? "disabled" : "orange"} onClick={isSearching ? undefined : handlePlayBot} className="w-[7rem] h-[3rem] text-3xl">
             Jugar
           </Button>
         </div>

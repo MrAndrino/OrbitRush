@@ -80,17 +80,31 @@ public class WSGameHandler
         }
     }
 
+    private const string BotName = "Mr. Orbit";
+    private const string BotImage = "/images/profiles/MatchBot.jpeg";
+
     private async Task SendLobbyInfo(string userId, string lobbyId)
     {
         using (var scope = _serviceProvider.CreateScope())
         {
-            var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
             var userService = scope.ServiceProvider.GetRequiredService<UserService>();
 
             if (activeLobbies.TryGetValue(lobbyId, out var lobby))
             {
                 var player1Profile = await userService.GetUserProfile(int.Parse(lobby.Player1Id));
-                var player2Profile = string.IsNullOrEmpty(lobby.Player2Id) ? null : await userService.GetUserProfile(int.Parse(lobby.Player2Id));
+                string player2Name, player2Image;
+
+                if (lobby.Player2Id != null && lobby.Player2Id.StartsWith("BOT_"))
+                {
+                    player2Name = BotName;
+                    player2Image = BotImage;
+                }
+                else
+                {
+                    var player2Profile = string.IsNullOrEmpty(lobby.Player2Id) ? null : await userService.GetUserProfile(int.Parse(lobby.Player2Id));
+                    player2Name = player2Profile?.Name ?? "Esperando...";
+                    player2Image = player2Profile?.Image ?? "/images/OrbitRush-TrashCan.jpg";
+                }
 
                 var response = new
                 {
@@ -100,8 +114,8 @@ public class WSGameHandler
                     Player1Name = player1Profile?.Name ?? "Desconocido",
                     Player1Image = player1Profile?.Image ?? "/images/OrbitRush-TrashCan.jpg",
                     Player2Id = lobby.Player2Id,
-                    Player2Name = player2Profile?.Name ?? "Esperando...",
-                    Player2Image = player2Profile?.Image ?? "/images/OrbitRush-TrashCan.jpg"
+                    Player2Name = player2Name,
+                    Player2Image = player2Image
                 };
 
                 if (_connectionManager.TryGetConnection(userId, out WebSocket socket))
@@ -281,23 +295,23 @@ public class WSGameHandler
 
     private async Task HandleStartGame(string userId)
     {
-        Console.WriteLine($"🔍 Buscando lobby para el usuario: {userId}");
+        Console.WriteLine($"Buscando lobby para el usuario: {userId}");
 
         var lobby = activeLobbies.Values.FirstOrDefault(l => l.Player1Id == userId);
 
         if (lobby == null)
         {
-            Console.WriteLine("❌ No se encontró ningún lobby para iniciar la partida.");
+            Console.WriteLine("No se encontró ningún lobby para iniciar la partida.");
             return;
         }
 
         if (lobby.Player1Id != userId)
         {
-            Console.WriteLine("❌ Usuario sin permisos para iniciar la partida.");
+            Console.WriteLine("Usuario sin permisos para iniciar la partida.");
             return;
         }
 
-        Console.WriteLine($"✅ Iniciando partida entre {lobby.Player1Id} y {lobby.Player2Id}");
+        Console.WriteLine($"Iniciando partida entre {lobby.Player1Id} y {lobby.Player2Id}");
         lobby.IsActive = true; // Ahora el lobby representa la partida activa
         await StartGame(lobby.Player1Id, lobby.Player2Id);
     }
@@ -333,7 +347,7 @@ public class WSGameHandler
 
     public async Task HandleRandomMatchAcceptance(string playerId, string response)
     {
-        Console.WriteLine($"⚖️ Jugador {playerId} ha respondido al emparejamiento aleatorio: {response}");
+        Console.WriteLine($"Jugador {playerId} ha respondido al emparejamiento aleatorio: {response}");
 
         var lobbyEntry = activeLobbies.FirstOrDefault(l => l.Value.Player1Id == playerId || l.Value.Player2Id == playerId);
 
@@ -345,7 +359,7 @@ public class WSGameHandler
 
             if (response == "accept")
             {
-                Console.WriteLine($"✅ Jugador {playerId} ha aceptado la partida.");
+                Console.WriteLine($"Jugador {playerId} ha aceptado la partida.");
                 lobby.IsActive = true;
 
                 if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket))
@@ -379,7 +393,7 @@ public class WSGameHandler
             }
             else if (response == "reject")
             {
-                Console.WriteLine($"❌ Jugador {playerId} ha rechazado la partida.");
+                Console.WriteLine($"Jugador {playerId} ha rechazado la partida.");
                 activeLobbies.TryRemove(matchId, out _);
 
                 if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket))
@@ -393,17 +407,17 @@ public class WSGameHandler
                 }
 
                 // 🔹 Eliminar al jugador que rechazó de la cola
-                Console.WriteLine($"🚪 Jugador {playerId} ha rechazado y será eliminado de la cola.");
+                Console.WriteLine($"Jugador {playerId} ha rechazado y será eliminado de la cola.");
                 RemovePlayerFromQueue(playerId);
 
                 // 🔹 Volver a agregar al oponente a la cola de emparejamiento
-                Console.WriteLine($"🔄 {opponentId} vuelve a la cola de emparejamiento.");
+                Console.WriteLine($"Jugador {opponentId} vuelve a la cola de emparejamiento.");
                 await AddPlayerToQueue(opponentId);
             }
         }
         else
         {
-            Console.WriteLine("❌ No se encontró un lobby activo para este jugador.");
+            Console.WriteLine(" No se encontró un lobby activo para este jugador.");
         }
     }
 
@@ -424,14 +438,14 @@ public class WSGameHandler
 
                     if (!_connectionManager.TryGetConnection(player1, out var player1Socket) || player1Socket.State != WebSocketState.Open)
                     {
-                        Console.WriteLine($"❌ Jugador {player1} se desconectó antes de iniciar. {player2} regresa a la cola.");
+                        Console.WriteLine($"Jugador {player1} se desconectó antes de iniciar. {player2} regresa a la cola.");
                         waitingPlayers.Enqueue(player2);
                         return;
                     }
 
                     if (!_connectionManager.TryGetConnection(player2, out var player2Socket) || player2Socket.State != WebSocketState.Open)
                     {
-                        Console.WriteLine($"❌ Jugador {player2} se desconectó antes de iniciar. {player1} regresa a la cola.");
+                        Console.WriteLine($"Jugador {player2} se desconectó antes de iniciar. {player1} regresa a la cola.");
                         waitingPlayers.Enqueue(player1);
                         return;
                     }
@@ -440,7 +454,7 @@ public class WSGameHandler
                     Lobby lobby = new Lobby(matchId, player1, player2, true);
                     activeLobbies.TryAdd(matchId, lobby);
 
-                    Console.WriteLine($"✅ Partida encontrada: {matchId} entre {player1} y {player2}");
+                    Console.WriteLine($"Partida encontrada: {matchId} entre {player1} y {player2}");
 
 
                     var matchRequest = JsonSerializer.Serialize(new
@@ -467,14 +481,14 @@ public class WSGameHandler
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Error en AddPlayerToQueue: {ex.Message}");
+            Console.WriteLine($"Error en AddPlayerToQueue: {ex.Message}");
         }
     }
 
     public async Task CancelMatchmaking(string playerId)
     {
         string result = RemovePlayerFromQueue(playerId);
-        Console.WriteLine($"⏹️ {playerId} ha cancelado el matchmaking. {result}");
+        Console.WriteLine($" {playerId} ha cancelado el matchmaking. {result}");
 
         if (_connectionManager.TryGetConnection(playerId, out WebSocket playerSocket))
         {
@@ -527,16 +541,16 @@ public class WSGameHandler
 
     public async Task<string> StartGameWithBot(string playerId)
     {
-        Console.WriteLine($"🎮 {playerId} ha iniciado una partida contra un bot.");
+        Console.WriteLine($"{playerId} ha iniciado una partida contra un bot.");
 
         string botId = "BOT_" + Guid.NewGuid().ToString();
-        var matchId = Guid.NewGuid().ToString();
+        var matchId = Guid.NewGuid().ToString();    
 
-        Lobby lobby = new Lobby(matchId, playerId, botId, true)
+        Lobby lobby = new Lobby(matchId, playerId, botId, false)
         {
-            Player1Ready = true,
+            Player1Ready = false,
             Player2Ready = true,
-            IsActive = true
+            IsActive = false
         };
         activeLobbies.TryAdd(matchId, lobby);
 
@@ -544,22 +558,24 @@ public class WSGameHandler
         {
             var message = new
             {
-                Action = "gameStarted",
-                Opponent = "Bot",
-                Message = "Has iniciado una partida contra un bot."
+                Action = "lobbyCreated",
+                LobbyId = matchId,
+                Player1Id = playerId,
+                Player2Id = botId,
+                Message = "Se ha creado un lobby contra un bot. Esperando que inicies la partida."
             };
             var buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
             await playerSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
         }
 
-        Console.WriteLine($"🤖 Bot {botId} asignado a la partida {matchId}.");
+        Console.WriteLine($"Bot {botId} asignado a la partida {matchId}.");
 
         return matchId;
     }
 
     public async Task HandlePlayerDisconnection(string playerId)
     {
-        Console.WriteLine($"❌ Jugador {playerId} se ha desconectado. Verificando si estaba en una partida...");
+        Console.WriteLine($"Jugador {playerId} se ha desconectado. Verificando si estaba en una partida...");
 
         var lobbyEntry = activeLobbies.FirstOrDefault(l => l.Value.Player1Id == playerId || l.Value.Player2Id == playerId);
 
@@ -569,16 +585,16 @@ public class WSGameHandler
             var lobby = lobbyEntry.Value;
             string opponentId = lobby.Player1Id == playerId ? lobby.Player2Id : lobby.Player1Id;
 
-            Console.WriteLine($"🔍 Partida encontrada ({matchId}). Verificando qué hacer...");
+            Console.WriteLine($"Partida encontrada ({matchId}). Verificando qué hacer...");
 
             if (lobby.Player2Id.StartsWith("BOT_"))
             {
                 activeLobbies.TryRemove(matchId, out _);
-                Console.WriteLine("🗑️ Partida contra el bot eliminada ya que el jugador se desconectó.");
+                Console.WriteLine("Partida contra el bot eliminada ya que el jugador se desconectó.");
             }
             else if (lobby.IsRandomMatch && !lobby.IsActive)
             {
-                Console.WriteLine($"🔄 Partida {matchId} era aleatoria y aún no ha comenzado. Enviando {opponentId} de vuelta a la cola...");
+                Console.WriteLine($"Partida {matchId} era aleatoria y aún no ha comenzado. Enviando {opponentId} de vuelta a la cola...");
                 activeLobbies.TryRemove(matchId, out _);
 
                 if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket) && opponentSocket.State == WebSocketState.Open)
@@ -597,7 +613,7 @@ public class WSGameHandler
             }
             else if (lobby.IsActive)
             {
-                Console.WriteLine($"⚠️ La partida {matchId} ya ha comenzado. No se devolverá a la cola.");
+                Console.WriteLine($"La partida {matchId} ya ha comenzado. No se devolverá a la cola.");
 
                 if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket) && opponentSocket.State == WebSocketState.Open)
                 {
@@ -613,7 +629,7 @@ public class WSGameHandler
             }
             else
             {
-                Console.WriteLine($"🎭 Partida por invitación. {opponentId} se convierte en el anfitrión.");
+                Console.WriteLine($"Partida por invitación. {opponentId} se convierte en el anfitrión.");
 
                 if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket) && opponentSocket.State == WebSocketState.Open)
                 {

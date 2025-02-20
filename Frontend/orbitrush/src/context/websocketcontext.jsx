@@ -285,6 +285,34 @@ export const WebSocketProvider = ({ children }) => {
     ws.send(mensaje);
   };
 
+  // ----- Jugar vs Bot -----
+  const playWithBot = () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("❌ WebSocket no conectado");
+      return;
+    }
+
+    console.log("🎮 Enviando solicitud para jugar contra un bot...");
+    ws.send(JSON.stringify({ Action: "playWithBot" }));
+
+    const handleMessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.Action === "lobbyCreated") {
+        console.log("✅ Lobby contra bot creado. Redirigiendo...");
+        localStorage.setItem("lobbyId", data.LobbyId);
+        router.push("/menu/lobby");
+      }
+    };
+
+    ws.addEventListener("message", handleMessage);
+
+    return () => {
+      ws.removeEventListener("message", handleMessage);
+    };
+  };
+
+
 
   // ----- useEffect para redirección al crear lobby -----
   useEffect(() => {
@@ -337,7 +365,8 @@ export const WebSocketProvider = ({ children }) => {
     queueForMatch,
     cancelMatchmaking,
     onlineCount,
-    gameInvites
+    gameInvites,
+    playWithBot
   };
 
   return (
