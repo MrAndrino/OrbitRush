@@ -3,6 +3,7 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { toast } from 'react-hot-toast';
 import { useRouter } from "next/navigation";
+import MatchFoundModal from "@/components/miscelaneus/modal/matchfound/matchfound";
 
 const WebSocketContext = createContext();
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -14,6 +15,7 @@ export const WebSocketProvider = ({ children }) => {
   const [request, setRequest] = useState([]);
   const [gameInvites, setGameInvites] = useState([]);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [matchData, setMatchData] = useState(null);
   const router = useRouter();
 
   // ----- Conexión del WebSocket -----
@@ -39,6 +41,7 @@ export const WebSocketProvider = ({ children }) => {
         case "lobbyCreated":
           console.log("✅ Lobby creado, redirigiendo...");
           localStorage.setItem("lobbyId", data.LobbyId);
+          setMatchData(null);
           router.push("/menu/lobby");
           break;
 
@@ -46,20 +49,41 @@ export const WebSocketProvider = ({ children }) => {
           console.log("✅ Lobby actualizado:", data);
           break;
 
+          case "playerLeftLobby":
+          console.log("Un jugador ha abandonado el lobby");
+          break;
+
+        case "gameStarted":
+          console.log("✅ La partida ha comenzado, redirigiendo al lobby...");
+          localStorage.setItem("lobbyId", matchData?.matchId || ""); // Guardar ID del lobby
+          setMatchData(null); // Cerrar el modal
+          router.push("/menu/lobby"); // 🔹 Redirigir al lobby
+          break;
+
         case "randomMatchFound":
-          toast.success(data.Message);
-          break;
-
-        case "matchmakingCancelled":
-          toast.error(data.Message);
-          break;
-
-        case "randomMatchRejected":
-          toast.error(data.Message);
+          setMatchData({ matchId: data.MatchId, opponentId: data.Opponent });
           break;
 
         case "randomMatchAccepted":
           toast.success(data.Message);
+
+          // 🔹 Marcar que el jugador actual ha aceptado la partida
+          setMatchData((prev) => {
+            if (prev) {
+              return { ...prev, acceptedByMe: true };
+            }
+            return prev;
+          });
+          break;
+
+        case "randomMatchRejected":
+          toast.error(data.Message);
+          setMatchData(null);
+          break;
+
+        case "matchmakingCancelled":
+          toast.error(data.Message);
+          setMatchData(null);
           break;
 
         case "invitationReceived":
@@ -285,6 +309,20 @@ export const WebSocketProvider = ({ children }) => {
     ws.send(mensaje);
   };
 
+  // ----- Respuesta matchmaking -----
+  const sendMatchResponse = (matchId, response) => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+    const message = JSON.stringify({
+      Action: "randomMatchResponse",
+      MatchId: matchId,
+      Response: response
+    });
+
+    console.log("📤 Enviando respuesta: ", message);
+    ws.send(message);
+  };
+
   // ----- Jugar vs Bot -----
   const playWithBot = () => {
     if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -366,12 +404,22 @@ export const WebSocketProvider = ({ children }) => {
     cancelMatchmaking,
     onlineCount,
     gameInvites,
-    playWithBot
+    playWithBot,
+    sendMatchResponse
   };
 
   return (
     <WebSocketContext.Provider value={contextValue}>
       {children}
+      {matchData && (
+        <MatchFoundModal
+          isOpen={!!matchData}
+          onClose={() => setMatchData(null)}
+          matchId={matchData.matchId}
+          opponentId={matchData.opponentId}
+          sendResponse={sendMatchResponse}
+        />
+      )}
     </WebSocketContext.Provider>
   );
 };
