@@ -2,6 +2,7 @@
 using orbitrush.Database.Repositories;
 using orbitrush.Dtos;
 using orbitrush.Mappers;
+using orbitrush.Utils;
 
 namespace orbitrush.Services;
 
@@ -99,5 +100,71 @@ public class UserService
             return null;
 
         return UserMapper.UserToProfileDto(user);
+    }
+
+    public async Task UpdateUserProfileInDatabase(int userId, UpdateUserDto userDto)
+    {
+        if (userDto == null)
+            throw new ArgumentNullException(nameof(userDto), "El objeto UserDto no puede ser nulo.");
+
+        User existingUser = await _unitOfWork.UserRepository.GetByIdAsync(userId)
+            ?? throw new KeyNotFoundException("Usuario no encontrado.");
+
+        await ValidateAndUpdateUser(existingUser, userDto, userId);
+
+        if (userDto.Image != null)
+        {
+            if (existingUser.Image == null || existingUser.Image != userDto.Image.FileName)
+            {
+
+                DeleteOldImage(existingUser.Image);
+
+                string newImagePath = await GetUsedImageAsync(userDto.Image, existingUser.Image ?? "images/profiles/default.jpg", existingUser.Name);
+                existingUser.Image = newImagePath;
+            }
+        }
+
+        await _unitOfWork.SaveAsync();
+    }
+
+
+    private async Task ValidateAndUpdateUser(User existingUser, UpdateUserDto userDto, int userId)
+    {
+        if (!string.IsNullOrEmpty(userDto.Name) && userDto.Name != existingUser.Name)
+        {
+            bool nameExists = await _unitOfWork.UserRepository.ExistName(userDto.Name, userId);
+            if (nameExists)
+            {
+                throw new InvalidOperationException("El nombre de usuario ya está en uso.");
+            }
+            existingUser.Name = userDto.Name;
+        }
+
+        if (!string.IsNullOrEmpty(userDto.Email) && userDto.Email != existingUser.Email)
+        {
+            bool emailExists = await _unitOfWork.UserRepository.ExistEmail(userDto.Email, userId);
+            if (emailExists)
+            {
+                throw new InvalidOperationException("El correo electrónico ya está en uso.");
+            }
+            existingUser.Email = userDto.Email;
+        }
+
+        if (!string.IsNullOrEmpty(userDto.Password))
+        {
+            existingUser.HashPassword = PasswordHelper.Hash(userDto.Password);
+        }
+    }
+
+    private void DeleteOldImage(string oldImagePath)
+    {
+        if (!string.IsNullOrEmpty(oldImagePath) && !oldImagePath.Contains("default.jpg"))
+        {
+            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldImagePath);
+            if (File.Exists(fullPath))
+            {
+                File.Delete(fullPath);
+            }
+        }
     }
 }

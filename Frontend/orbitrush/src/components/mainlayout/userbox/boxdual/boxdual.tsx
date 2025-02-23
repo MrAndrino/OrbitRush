@@ -60,7 +60,8 @@ const BoxDual = () => {
 
   return (
     <section className={styles.container} ref={containerRef}>
-      {/* Panel lateral: se muestra/oculta según botón presionado */}
+
+      {/* Panel lateral */}
       <div className={`${styles.menu} ${activeMenu ? styles.menuVisible : ""} ${menuStyleClass}`}>
         {activeMenu === "user" && (
           <>
@@ -77,7 +78,8 @@ const BoxDual = () => {
         )}
         {activeMenu === "notification" && (
           <div className={styles.notifContent}>
-            {/* Botones para alternar entre notificaciones de partida y amistad */}
+
+            {/* Botones partida/amistad */}
             <div className={styles.notifButtonsContainer}>
               <button onClick={() => setNotifType("game")} className={`${styles.notifButton} ${notifType === "game" ? styles.activeNotif : ""}`}>
                 Partida
@@ -91,7 +93,7 @@ const BoxDual = () => {
         )}
       </div>
 
-      {/* Contenedor de botones (notificaciones y usuarios) */}
+      {/* Botones generales */}
       <div className={`${styles.buttonContainer} ${activeMenu ? styles.buttonsShifted : ""}`}>
         <button onClick={handleNotifClick} className={`${styles.buttonBlue} ${activeMenu === "notification" ? styles.activeBlue : ""}`}>
           <Bell className={styles.icon} />

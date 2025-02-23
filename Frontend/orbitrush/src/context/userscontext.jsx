@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { FRIENDLIST_URL, USERLIST_URL, SEARCH_URL, GET_REQUEST_URL, DELETE_REQUEST_URL, SELF_PROFILE_URL, USER_PROFILE_URL } from "@/config";
-import { getFriendList, getUserList, searchUsers, getSelfProfile, getUserProfile } from "@/lib/users";
+import { FRIENDLIST_URL, USERLIST_URL, SEARCH_URL, GET_REQUEST_URL, DELETE_REQUEST_URL, SELF_PROFILE_URL, USER_PROFILE_URL, EDIT_PROFILE_URL } from "@/config";
+import { getFriendList, getUserList, searchUsers, getSelfProfile, getUserProfile, updateUserProfile } from "@/lib/users";
 import { getFriendRequests, rejectFriendRequest } from "@/lib/request";
 
 export const UsersContext = createContext();
@@ -50,8 +50,6 @@ export const UsersProvider = ({ children }) => {
       window.removeEventListener("storage", loadToken);
     };
   }, []);
-
-  // ========== Funciones de API ==========
 
   // ----- Obtener lista de amigos -----
   const getFriends = async () => {
@@ -141,6 +139,24 @@ export const UsersProvider = ({ children }) => {
     }
   };
 
+  // ----- Actualizar el perfil del usuario -----
+  const updateUserProfileData = async (formData) => {
+    if (!token) {
+      console.error("No se encontró el token de autenticación.");
+      return;
+    }
+
+    try {
+      const response = await updateUserProfile(EDIT_PROFILE_URL, token, formData);
+      console.log(response.message);
+
+      // Opcionalmente, recargar el perfil del usuario después de la actualización
+      await getSelfProfileData();
+    } catch (error) {
+      console.error("Error al actualizar el perfil del usuario:", error);
+    }
+  };
+
 
   // ----- Efecto para actualizar notificaciones a tiempo real -----
   useEffect(() => {
@@ -213,6 +229,7 @@ export const UsersProvider = ({ children }) => {
     getFriendReq,
     getSelfProfileData,
     getUserProfileData,
+    updateUserProfileData,
     selfProfile,
     userProfile
   };

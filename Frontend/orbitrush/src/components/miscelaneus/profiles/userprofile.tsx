@@ -97,25 +97,16 @@ const UserProfile = ({ id }: UserProfileProps) => {
         <p className={styles.profileName}>Historial de partidas:</p>
         <ul className={styles.matchesList}>
           {userProfile.matches && userProfile.matches.length > 0 ? (
-            userProfile.matches.map((match: Match, index: number) => {
+            userProfile.matches.map((match: Match) => {
               const resultInfo = getResultInfo(match.result);
               return (
-                <li key={index} className={styles.matchItem}>
+                <li key={match.id} className={styles.matchItem}>
                   <div className={styles.matchItemPart}>
                     <p className={resultInfo.className}>{resultInfo.text}</p>
                     <p>vs {match.opponentName}</p>
                   </div>
                   <div className={styles.matchItemPart}>
-                    <p>
-                      Fecha: {(() => {
-                        try {
-                          const normalizedDate = match.matchDate.split(".")[0];
-                          return new Date(normalizedDate).toLocaleDateString();
-                        } catch (error) {
-                          return "Fecha inválida";
-                        }
-                      })()}
-                    </p>
+                    <p>Fecha: {new Date(match.matchDate.split(".")[0]).toLocaleDateString()}</p>
                     <p>Duración: {match.duration}</p>
                   </div>
                 </li>
@@ -125,9 +116,10 @@ const UserProfile = ({ id }: UserProfileProps) => {
             <p>No has jugado ningún partido aún.</p>
           )}
         </ul>
+
       </div>
 
-      {/* Modal de confirmación para eliminar amigo */}
+      {/* Modal para eliminar amigo */}
       <Modal
         isOpen={isConfirmModalOpen}
         closeModal={() => setIsConfirmModalOpen(false)}

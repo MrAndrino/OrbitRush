@@ -14,7 +14,7 @@ interface Match {
 }
 
 const SelfProfile = () => {
-  const { selfProfile, getSelfProfileData } = useUsers();
+  const { selfProfile, getSelfProfileData, updateUserProfileData } = useUsers();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -23,6 +23,16 @@ const SelfProfile = () => {
     image: null as File | null
   });
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const getResultInfo = (result: number) => {
+    if (result === 0) {
+      return { text: "Victoria", className: styles.resultWin };
+    } else if (result === 1) {
+      return { text: "Derrota", className: styles.resultLoss };
+    } else {
+      return { text: "Empate", className: styles.resultDraw };
+    }
+  };
 
   useEffect(() => {
     getSelfProfileData();
@@ -74,9 +84,23 @@ const SelfProfile = () => {
     }
   };
 
-  const handleSave = () => {
-    console.log("Guardar cambios:", formData);
-    setIsEditing(false);
+  const handleSave = async () => {
+    const updatedFormData = new FormData();
+    updatedFormData.append("name", formData.name);
+    updatedFormData.append("email", formData.email);
+    updatedFormData.append("password", formData.password);
+    updatedFormData.append("image", formData.image || "");
+
+    try {
+      updatedFormData.forEach((value, key) => {
+        console.log(`${key}:`, value);
+      });
+      await updateUserProfileData(updatedFormData);
+      setIsEditing(false);
+      getSelfProfileData();
+    } catch (error) {
+      console.error("Error al actualizar el perfil:", error);
+    }
   };
 
   const handleCancel = () => {
@@ -169,18 +193,21 @@ const SelfProfile = () => {
         <p className={styles.profileName}>Historial de partidas:</p>
         <ul className={styles.matchesList}>
           {selfProfile.matches && selfProfile.matches.length > 0 ? (
-            selfProfile.matches.map((match: Match) => (
-              <li key={match.id} className={styles.matchItem}>
-                <div className={styles.matchItemPart}>
-                  <p>{match.result === 0 ? "Victoria" : match.result === 1 ? "Derrota" : "Empate"}</p>
-                  <p>vs {match.opponentName}</p>
-                </div>
-                <div className={styles.matchItemPart}>
-                  <p>Fecha: {new Date(match.matchDate.split(".")[0]).toLocaleDateString()}</p>
-                  <p>Duración: {match.duration}</p>
-                </div>
-              </li>
-            ))
+            selfProfile.matches.map((match: Match) => {
+              const resultInfo = getResultInfo(match.result);
+              return (
+                <li key={match.id} className={styles.matchItem}>
+                  <div className={styles.matchItemPart}>
+                    <p className={resultInfo.className}>{resultInfo.text}</p>
+                    <p>vs {match.opponentName}</p>
+                  </div>
+                  <div className={styles.matchItemPart}>
+                    <p>Fecha: {new Date(match.matchDate.split(".")[0]).toLocaleDateString()}</p>
+                    <p>Duración: {match.duration}</p>
+                  </div>
+                </li>
+              );
+            })
           ) : (
             <p>No has jugado ningún partido aún.</p>
           )}

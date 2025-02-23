@@ -18,3 +18,4 @@ export const SEARCH_URL = `${API_BASE_URL}/User/search`
 //Perfiles de usuarios
 export const SELF_PROFILE_URL = `${API_BASE_URL}/User/selfprofile`
 export const USER_PROFILE_URL = `${API_BASE_URL}/User/userprofile`
+export const EDIT_PROFILE_URL = `${API_BASE_URL}/User/updateprofile`

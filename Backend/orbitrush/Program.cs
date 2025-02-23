@@ -14,6 +14,10 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        try
+        {
+
+        
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddScoped<MyDbContext>();
@@ -124,5 +128,11 @@ public class Program
 
         SeedDatabase(app.Services);
         app.Run();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error crítico en el servidor: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
+        }
     }
 }

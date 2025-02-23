@@ -23,28 +23,16 @@ public class UserRepository : Repository<User, int>
         return user;
     }
 
-    public async Task<bool> ExistName(string name)
+    public async Task<bool> ExistName(string name, int userId = 0)
     {
-        User user = await GetQueryable()
-            .FirstOrDefaultAsync(user => user.Name.ToLower() == name.ToLower());
-
-        if (user == null)
-        {
-            return false;
-        }
-        return true;
+        return await GetQueryable()
+            .AnyAsync(user => user.Name.ToLower() == name.ToLower() && (userId == 0 || user.Id != userId));
     }
 
-    public async Task<bool> ExistEmail(string email)
+    public async Task<bool> ExistEmail(string email, int userId = 0)
     {
-        User user = await GetQueryable()
-            .FirstOrDefaultAsync(user => user.Email.ToLower() == email.ToLower());
-
-        if (user == null)
-        {
-            return false;
-        }
-        return true;
+        return await GetQueryable()
+            .AnyAsync(user => user.Email.ToLower() == email.ToLower() && (userId == 0 || user.Id != userId));
     }
 
     public async Task<List<UserDto>> GetFriendList(int id)
@@ -157,11 +145,20 @@ public class UserRepository : Repository<User, int>
 
     public async Task<User> GetUserWithMatchesAsync(int userId)
     {
-        return await Context.Users
-            .Include(u => u.MatchResults)
+        var user = await Context.Users
+        .Include(u => u.MatchResults)
             .ThenInclude(mr => mr.Match)
             .ThenInclude(m => m.Results)
             .ThenInclude(r => r.User)
-            .FirstOrDefaultAsync(u => u.Id == userId);
+        .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user != null)
+        {
+            user.MatchResults = user.MatchResults
+                .OrderByDescending(mr => mr.Match.MatchDate)
+                .ToList();
+        }
+
+        return user;
     }
 }

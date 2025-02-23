@@ -27,7 +27,7 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
   const currentUserId = decodedToken?.id?.toString();
   const isPlayer1 = currentUserId === player1Id;
   const isPlayer2Bot = player2Id?.startsWith("BOT_") || false;
-  const hasPlayer2 = !!player2Id; // Será false si player2Id es null o undefined
+  const hasPlayer2 = !!player2Id;
 
   const [players, setPlayers] = useState<User[]>([
     { name: "Esperando...", image: "/images/OrbitRush-TrashCan.jpg" },
@@ -41,7 +41,6 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
     if (player2Id && !player2Id.startsWith("BOT_")) getUserProfileData(player2Id);
   }, [player1Id, player2Id]);
 
-  // 🔹 Escuchar eventos WebSocket para actualizar el lobby en tiempo real
   useEffect(() => {
     if (!ws) return;
 
@@ -60,16 +59,15 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
             ? { name: "BOT", image: "/images/MatchBot.jpeg" }
             : data.Player2Id
               ? { name: data.Player2Name, image: data.Player2Image }
-              : { name: "Esperando...", image: "/images/OrbitRush-TrashCan.jpg" }, // Si no hay player2
+              : { name: "Esperando...", image: "/images/OrbitRush-TrashCan.jpg" },
         ]);
       }
 
-      // 🔹 Si el oponente se desconecta, actualizar el Player1
       if (data.Action === "opponentDisconnected") {
         console.log("🔄 Oponente desconectado. Ahora el usuario actual es el anfitrión.");
         setPlayers((prev) => [
-          prev[1], // Player 2 se convierte en Player 1
-          { name: "Esperando...", image: "/images/OrbitRush-TrashCan.jpg" } // Esperando nuevo Player 2
+          prev[1],
+          { name: "Esperando...", image: "/images/OrbitRush-TrashCan.jpg" }
         ]);
       }
     };
@@ -81,7 +79,6 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
     };
   }, [ws, lobbyId]);
 
-  // 🔹 Actualizar perfil cuando cambia `userProfile`
   useEffect(() => {
     if (userProfile) {
       setPlayers((prev) => [
@@ -121,7 +118,7 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
           className="h-12 w-44 text-xl"
           onClick={isPlayer1 && hasPlayer2 ? undefined : undefined}
         >
-          {isPlayer1 ?  "Empezar partida" : "Esperando al Host"}
+          {isPlayer1 ? "Empezar partida" : "Esperando al Host"}
         </Button>
       </div>
 

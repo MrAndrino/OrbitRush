@@ -120,4 +120,27 @@ public class UserController : BaseController
             return StatusCode(500, new { message = ex.Message, details = ex.ToString() });
         }
     }
+
+    [HttpPut("updateprofile")]
+    [Authorize]
+    public async Task<IActionResult> UpdateUserprofile([FromForm] UpdateUserDto userDto)
+    {
+        try
+        {
+            int userId = GetUserId();
+
+            await _userService.UpdateUserProfileInDatabase(userId, userDto);
+
+            return NoContent();
+
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al actualizar el usuario.", detail = ex.Message });
+        }
+    }
 }

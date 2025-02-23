@@ -1,5 +1,4 @@
 export async function getFriendList(url, token) {
-  
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -18,7 +17,6 @@ export async function getFriendList(url, token) {
 
 
 export async function getUserList(url, token) {
-
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -40,7 +38,6 @@ export async function getUserList(url, token) {
 
 
 export async function searchUsers(url, token, search, includeFriends) {
-
   const queryParams = new URLSearchParams({ search, includeFriends });
   const response = await fetch(`${url}?${queryParams.toString()}`, {
     method: "GET",
@@ -60,7 +57,6 @@ export async function searchUsers(url, token, search, includeFriends) {
 
 
 export async function deleteFriend(url, token, friendId) {
-  
   const response = await fetch(url, {
     method: "DELETE",
     headers: {
@@ -110,4 +106,19 @@ export async function getUserProfile(url, token, userId) {
 
   const data = await response.json();
   return data;
+}
+
+export async function updateUserProfile(url, token, formData) {
+  const response = await fetch(url, {
+    method: "PUT",
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al modificar el perfil del usuario");
+  }
+  return {message : "Datos cambiados exitosamente"}
 }
