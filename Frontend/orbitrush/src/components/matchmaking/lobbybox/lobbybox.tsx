@@ -17,7 +17,7 @@ interface LobbyBoxProps {
 
 const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
   const { getUserProfileData, userProfile } = useUsers();
-  const { ws } = useWebSocket();
+  const { ws, leaveLobby } = useWebSocket();
   const { decodedToken } = useAuth();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -44,13 +44,13 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
   // 🔹 Escuchar eventos WebSocket para actualizar el lobby en tiempo real
   useEffect(() => {
     if (!ws) return;
-  
+
     const handleLobbyUpdate = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
-  
+
       if (data.Action === "lobbyUpdated" && data.LobbyId === lobbyId) {
         console.log("📢 Lobby actualizado:", data);
-  
+
         setPlayers([
           {
             name: data.Player1Name,
@@ -59,11 +59,11 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
           data.Player2Id?.startsWith("BOT_")
             ? { name: "BOT", image: "/images/MatchBot.jpeg" }
             : data.Player2Id
-            ? { name: data.Player2Name, image: data.Player2Image }
-            : { name: "Esperando...", image: "/images/OrbitRush-TrashCan.jpg" }, // Si no hay player2
+              ? { name: data.Player2Name, image: data.Player2Image }
+              : { name: "Esperando...", image: "/images/OrbitRush-TrashCan.jpg" }, // Si no hay player2
         ]);
       }
-  
+
       // 🔹 Si el oponente se desconecta, actualizar el Player1
       if (data.Action === "opponentDisconnected") {
         console.log("🔄 Oponente desconectado. Ahora el usuario actual es el anfitrión.");
@@ -73,9 +73,9 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
         ]);
       }
     };
-  
+
     ws.addEventListener("message", handleLobbyUpdate);
-  
+
     return () => {
       ws.removeEventListener("message", handleLobbyUpdate);
     };
@@ -101,10 +101,10 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
     <div className={styles.lobbyBox}>
       <div className={styles.side}>
         <div className="flex gap-8 font-center">
-          <Button color="blue" className="h-12 w-16 text-xl flex items-center justify-center">
+          <Button onClick={openModal} color="blue" className="h-12 w-16 text-xl flex items-center justify-center">
             <BookOpen />
           </Button>
-          <Button color="red" className="h-12 w-16 text-xl flex items-center justify-center">
+          <Button onClick={leaveLobby} color="red" className="h-12 w-16 text-xl flex items-center justify-center">
             <LogOut />
           </Button>
         </div>
@@ -121,9 +121,7 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
           className="h-12 w-44 text-xl"
           onClick={isPlayer1 && hasPlayer2 ? undefined : undefined}
         >
-          {isPlayer1 
-            ? hasPlayer2 ? "Empezar partida" : "Esperando jugador..."
-            : "Esperando al Host"}
+          {isPlayer1 ?  "Empezar partida" : "Esperando al Host"}
         </Button>
       </div>
 

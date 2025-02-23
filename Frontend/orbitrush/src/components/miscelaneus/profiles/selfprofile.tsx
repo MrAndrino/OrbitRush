@@ -43,7 +43,7 @@ const SelfProfile = () => {
     <div className={styles.profileContainer}>
 
       <div className={styles.profileData}>
-        <img src={profileImage} alt="Imagen de perfil" className={styles.profileImage} />
+        <img src={profileImage} alt="Imagen de perfil" className={styles.selfProfileImage} />
         <div>
           <p className={styles.profileName}>{selfProfile.name}</p>
           <p>{selfProfile.email}</p>

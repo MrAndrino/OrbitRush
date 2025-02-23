@@ -47,7 +47,7 @@ const UserProfile = ({id}:UserProfileProps) => {
     <div className={styles.profileContainer}>
 
       <div className={styles.profileData}>
-        <img src={profileImage} alt="Imagen de perfil" className={styles.profileImage} />
+        <img src={profileImage} alt="Imagen de perfil" className={styles.otherProfileImage} />
         <div>
           <p className={styles.profileName}>{userProfile.name}</p>
           <p>{userProfile.email}</p>

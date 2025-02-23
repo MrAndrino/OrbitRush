@@ -58,7 +58,7 @@ const MainCard = () => {
       )}
 
       {/* Modal */}
-      <Modal isOpen={isModalOpen} closeModal={closeModal} color='orange'>
+      <Modal isOpen={isModalOpen} closeModal={closeModal} color='blue'>
         <SelfProfile />
       </Modal>
     </div>

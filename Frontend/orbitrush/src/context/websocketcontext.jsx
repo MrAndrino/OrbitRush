@@ -16,6 +16,7 @@ export const WebSocketProvider = ({ children }) => {
   const [gameInvites, setGameInvites] = useState([]);
   const [onlineCount, setOnlineCount] = useState(0);
   const [matchData, setMatchData] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
 
   // ----- Conexión del WebSocket -----
@@ -49,15 +50,20 @@ export const WebSocketProvider = ({ children }) => {
           console.log("✅ Lobby actualizado:", data);
           break;
 
-          case "playerLeftLobby":
+        case "playerLeftLobby":
           console.log("Un jugador ha abandonado el lobby");
           break;
 
-        case "gameStarted":
-          console.log("✅ La partida ha comenzado, redirigiendo al lobby...");
-          localStorage.setItem("lobbyId", matchData?.matchId || ""); // Guardar ID del lobby
-          setMatchData(null); // Cerrar el modal
-          router.push("/menu/lobby"); // 🔹 Redirigir al lobby
+        case "leftLobby":
+          console.log("✅ Has salido del lobby. Redirigiendo...");
+          localStorage.removeItem("lobbyId");
+          router.push("/menu");
+          toast.success(data.Message);
+          break;
+
+        case "playerLeftLobby":
+          console.log("❌ Tu oponente ha abandonado el lobby.");
+          toast.error("Tu oponente ha salido del lobby.");
           break;
 
         case "randomMatchFound":
@@ -67,7 +73,6 @@ export const WebSocketProvider = ({ children }) => {
         case "randomMatchAccepted":
           toast.success(data.Message);
 
-          // 🔹 Marcar que el jugador actual ha aceptado la partida
           setMatchData((prev) => {
             if (prev) {
               return { ...prev, acceptedByMe: true };
@@ -77,13 +82,10 @@ export const WebSocketProvider = ({ children }) => {
           break;
 
         case "randomMatchRejected":
-          toast.error(data.Message);
-          setMatchData(null);
-          break;
-
         case "matchmakingCancelled":
           toast.error(data.Message);
           setMatchData(null);
+          setIsSearching(false);
           break;
 
         case "invitationReceived":
@@ -284,15 +286,16 @@ export const WebSocketProvider = ({ children }) => {
       console.error("WebSocket no conectado");
       return;
     }
-
     const mensaje = JSON.stringify({
       Action: "queueForMatch",
     });
-
     console.log("Enviando mensaje: ", mensaje);
     ws.send(mensaje);
     toast.success("Buscando partida...");
+    console.log("setIsSearching(true) llamado");
+    setIsSearching(true);
   };
+
 
   // ----- Cancelar matchmaking -----
   const cancelMatchmaking = () => {
@@ -305,6 +308,7 @@ export const WebSocketProvider = ({ children }) => {
       Action: "cancelMatchmaking",
     });
 
+    setIsSearching(false);
     console.log("Enviando mensaje: ", mensaje);
     ws.send(mensaje);
   };
@@ -350,7 +354,20 @@ export const WebSocketProvider = ({ children }) => {
     };
   };
 
+  // ----- Salir del lobby -----
+  const leaveLobby = () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("❌ WebSocket no conectado");
+      return;
+    }
 
+    const mensaje = JSON.stringify({
+      Action: "leaveLobby",
+    });
+
+    console.log("📤 Enviando mensaje para salir del lobby: ", mensaje);
+    ws.send(mensaje);
+  };
 
   // ----- useEffect para redirección al crear lobby -----
   useEffect(() => {
@@ -402,10 +419,13 @@ export const WebSocketProvider = ({ children }) => {
     respondToGameRequest,
     queueForMatch,
     cancelMatchmaking,
+    isSearching,
+    setIsSearching,
     onlineCount,
     gameInvites,
     playWithBot,
-    sendMatchResponse
+    sendMatchResponse,
+    leaveLobby
   };
 
   return (

@@ -1,3 +1,5 @@
+'useclient'
+
 import React from "react";
 import styles from "./matchbox.module.css";
 import Button from "@/components/miscelaneus/button/button";
@@ -6,12 +8,13 @@ import { useWebSocket } from "@/context/websocketcontext";
 interface MatchBoxProps {
   variant: "bot" | "random" | "friend";
   isSearching: boolean;
-  setIsSearching: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const MatchBox = ({ variant, isSearching, setIsSearching }: MatchBoxProps) => {
-  const { playWithBot, queueForMatch, cancelMatchmaking } = useWebSocket();
+const MatchBox = ({ variant, isSearching }: MatchBoxProps) => {
+  const { playWithBot, queueForMatch, cancelMatchmaking, setIsSearching  } = useWebSocket();
 
+  console.log(`Render MatchBox (${variant}), isSearching =`, isSearching);
+  
   const images = {
     bot: "/images/MatchBot.jpeg",
     random: "/images/MatchRandom.jpeg",
@@ -26,10 +29,8 @@ const MatchBox = ({ variant, isSearching, setIsSearching }: MatchBoxProps) => {
     if (variant === "random") {
       if (isSearching) {
         cancelMatchmaking();
-        setIsSearching(false);
       } else {
         queueForMatch();
-        setIsSearching(true);
       }
     }
   };
