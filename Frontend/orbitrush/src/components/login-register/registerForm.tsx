@@ -101,7 +101,7 @@ function RegisterForm() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="input-style form-container register"
-              maxLength={10} // Limita a 10 caracteres al escribir
+              maxLength={10}
             />
           </div>
           <div>

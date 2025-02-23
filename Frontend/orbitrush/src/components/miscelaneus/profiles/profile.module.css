@@ -4,7 +4,22 @@
   border-radius: 5px;
   gap: 5rem;
   align-items: center;
-  height: 50vh;
+  height: 60vh;
+}
+
+.profileContainer input {
+  font-family: var(--font-secondary);
+  font-size: 0.9rem;
+  border-radius: 5px;
+  color: var(--foreground);
+  padding: 0.2rem;
+  border: 2px solid rgb(0, 153, 255, 0.7);
+  background-color: rgba(0, 153, 255, 0.2);
+}
+
+.profileContainer input:hover {
+  background: linear-gradient(135deg, rgba(0, 153, 255, 0.4), rgba(0, 153, 255, 0.7)),
+    linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
 }
 
 .profileData {
@@ -20,6 +35,16 @@
   height: 10.5rem;
   border: 2px solid rgba(0, 153, 255);
   box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+}
+
+.editProfileImage{
+  border-radius: 50%;
+  width: 10.5rem;
+  height: 10.5rem;
+  border: 2px solid rgba(0, 153, 255);
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+  position: relative;
+  overflow: hidden;
 }
 
 .otherProfileImage{

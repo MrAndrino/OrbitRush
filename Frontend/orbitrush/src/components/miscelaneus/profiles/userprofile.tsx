@@ -1,7 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useUsers } from "@/context/userscontext";
+import { useWebSocket } from "@/context/websocketcontext";
 import { BASE_URL } from "@/config";
-import styles from './profile.module.css';
+import { UserPlus, UserMinus } from "lucide-react";
+import styles from "./profile.module.css";
+import Button from "@/components/miscelaneus/button/button";
+import toast from "react-hot-toast";
+import Modal from "@/components/miscelaneus/modal/modal";
 
 interface Match {
   id: number;
@@ -15,12 +20,14 @@ interface UserProfileProps {
   id: number;
 }
 
-const UserProfile = ({id}:UserProfileProps) => {
-  const { userProfile, getUserProfileData } = useUsers();
+const UserProfile = ({ id }: UserProfileProps) => {
+  const { userProfile, getUserProfileData, friendList } = useUsers();
+  const { sendFriendRequest, deleteFriend } = useWebSocket();
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   useEffect(() => {
     getUserProfileData(id);
-  }, []);
+  }, [id]);
 
   if (!userProfile) {
     return <div>No se pudieron cargar los datos de este perfil.</div>;
@@ -29,6 +36,23 @@ const UserProfile = ({id}:UserProfileProps) => {
   const profileImage = userProfile.image
     ? `${BASE_URL}/${userProfile.image}`
     : "/images/OrbitRush-TrashCan.jpg";
+
+  const isFriend = friendList.some((friend: { id: number }) => friend.id === userProfile.id);
+
+  const handleFriendButtonClick = () => {
+    if (isFriend) {
+      setIsConfirmModalOpen(true);
+    } else {
+      sendFriendRequest(userProfile.id);
+      toast.success(`Enviaste solicitud de amistad a ${userProfile.name}.`);
+    }
+  };
+
+  const handleRemoveFriend = () => {
+    deleteFriend(userProfile.id);
+    toast.success(`Eliminaste a ${userProfile.name} correctamente.`);
+    setIsConfirmModalOpen(false);
+  };
 
   const getResultInfo = (result: number) => {
     switch (result) {
@@ -45,13 +69,28 @@ const UserProfile = ({id}:UserProfileProps) => {
 
   return (
     <div className={styles.profileContainer}>
-
       <div className={styles.profileData}>
         <img src={profileImage} alt="Imagen de perfil" className={styles.otherProfileImage} />
         <div>
           <p className={styles.profileName}>{userProfile.name}</p>
-          <p>{userProfile.email}</p>
         </div>
+        <Button
+          color={isFriend ? "red" : "orange"}
+          onClick={handleFriendButtonClick}
+          className="p-2 flex items-center gap-2"
+        >
+          {isFriend ? (
+            <>
+              <UserMinus />
+              Eliminar amigo
+            </>
+          ) : (
+            <>
+              <UserPlus />
+              Agregar amigo
+            </>
+          )}
+        </Button>
       </div>
 
       <div className={styles.matchesHistory}>
@@ -62,7 +101,6 @@ const UserProfile = ({id}:UserProfileProps) => {
               const resultInfo = getResultInfo(match.result);
               return (
                 <li key={index} className={styles.matchItem}>
-
                   <div className={styles.matchItemPart}>
                     <p className={resultInfo.className}>{resultInfo.text}</p>
                     <p>vs {match.opponentName}</p>
@@ -72,8 +110,7 @@ const UserProfile = ({id}:UserProfileProps) => {
                       Fecha: {(() => {
                         try {
                           const normalizedDate = match.matchDate.split(".")[0];
-                          const formattedDate = new Date(normalizedDate).toLocaleDateString();
-                          return formattedDate;
+                          return new Date(normalizedDate).toLocaleDateString();
                         } catch (error) {
                           return "Fecha inválida";
                         }
@@ -81,7 +118,6 @@ const UserProfile = ({id}:UserProfileProps) => {
                     </p>
                     <p>Duración: {match.duration}</p>
                   </div>
-
                 </li>
               );
             })
@@ -90,6 +126,28 @@ const UserProfile = ({id}:UserProfileProps) => {
           )}
         </ul>
       </div>
+
+      {/* Modal de confirmación para eliminar amigo */}
+      <Modal
+        isOpen={isConfirmModalOpen}
+        closeModal={() => setIsConfirmModalOpen(false)}
+        color="red"
+        className="w-[40%]"
+      >
+        <div className="flex flex-col gap-12">
+          <p className="text-2xl">
+            ¿Seguro que quieres eliminar a "{userProfile.name}" de tu lista de amigos?
+          </p>
+          <div className="flex justify-center gap-[5rem] select-none">
+            <Button color="red" onClick={handleRemoveFriend} className="w-[10rem] h-[4rem] text-2xl">
+              Eliminar
+            </Button>
+            <Button color="blue" onClick={() => setIsConfirmModalOpen(false)} className="w-[10rem] h-[4rem] text-2xl">
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
