@@ -5,12 +5,14 @@ public class GameService
     public Board Board { get; private set; }
     public string Player1Id { get; private set; }
     public string Player2Id { get; private set; }
-    public GameState State { get; private set; } // 🔹 Manejamos el estado del juego
+    public GameState State { get; private set; } 
+    public CellState Player1Piece { get; private set; }
+    public CellState Player2Piece { get; private set; }
 
     public GameService()
     {
         Board = new Board();
-        State = GameState.Laying; // 🔹 Estado inicial
+        State = GameState.Laying;
     }
 
     public void InitializeGame(string player1Id, string player2Id, string sessionId)
@@ -19,19 +21,40 @@ public class GameService
         Player2Id = player2Id;
         CurrentSessionId = sessionId;
         Board.Initialize();
+        Player1Piece = CellState.Black;
+        Player2Piece = CellState.White;
         State = GameState.Laying;
     }
 
-    public void PlayMove(int row, int col)
+    public string PlayMove(string playerId, int row, int col)
     {
-        if (State != GameState.Laying)
-            throw new InvalidOperationException("No es el momento de jugar una ficha.");
+        try
+        {
+            if (State != GameState.Laying)
+                return "{ \"error\": \"No es el momento de jugar una ficha.\" }";
 
-        if (Board.Grid[row, col] != CellState.Empty)
-            throw new InvalidOperationException("Casilla ocupada.");
+            if (row < 0 || row >= 4 || col < 0 || col >= 4)
+                return "{ \"error\": \"Movimiento fuera de los límites del tablero.\" }";
 
-        Board.Grid[row, col] = Board.CurrentPlayer;
-        State = GameState.WaitingForOrbit; // 🔹 Ahora el turno espera la órbita
+            if (Board.Grid[row, col] != CellState.Empty)
+                return "{ \"error\": \"Casilla ocupada.\" }";
+
+            // 🔹 Determinar qué jugador está jugando
+            var currentPlayerPiece = (playerId == Player1Id) ? Player1Piece : Player2Piece;
+
+            if (Board.CurrentPlayer != currentPlayerPiece)
+                return "{ \"error\": \"No es tu turno.\" }";
+
+            // Si el movimiento es válido, actualizamos el tablero
+            Board.Grid[row, col] = currentPlayerPiece;
+            State = GameState.WaitingForOrbit;
+
+            return "{ \"message\": \"Movimiento realizado con éxito.\" }";
+        }
+        catch (Exception ex)
+        {
+            return $"{{ \"error\": \"Error inesperado: {ex.Message}\" }}";
+        }
     }
 
     public void PerformOrbit()

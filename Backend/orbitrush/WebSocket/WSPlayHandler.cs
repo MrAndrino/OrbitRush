@@ -36,11 +36,12 @@ public class WSPlayHandler
             {
                 var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
                 var gameService = gameManager.GetOrCreateGame(playMessage.SessionId);
+                string responseMessage = "";
 
                 switch (playMessage.Action)
                 {
                     case "playMove":
-                        gameService.PlayMove(playMessage.Row, playMessage.Col);
+                        responseMessage = gameService.PlayMove(userId, playMessage.Row, playMessage.Col);
                         await BroadcastGameStateAsync(playMessage.SessionId);
                         break;
 
@@ -54,13 +55,28 @@ public class WSPlayHandler
                         break;
 
                     default:
-                        throw new InvalidOperationException("Acción no válida");
+                        responseMessage = "Error: Acción no válida.";
+                        break;
+                }
+
+                // 🔹 Enviar la respuesta al jugador sin cerrar la conexión
+                if (!string.IsNullOrEmpty(responseMessage))
+                {
+                    await SendMessageToPlayerAsync(userId, responseMessage);
                 }
             }
         }
         catch (JsonException)
         {
-            throw new InvalidOperationException("Formato de mensaje inválido");
+            await SendMessageToPlayerAsync(userId, "Error: Formato de mensaje inválido.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            await SendMessageToPlayerAsync(userId, $"Error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            await SendMessageToPlayerAsync(userId, $"Error inesperado: {ex.Message}");
         }
     }
 
@@ -125,6 +141,16 @@ public class WSPlayHandler
                     await socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
                 }
             }
+        }
+    }
+    private async Task SendMessageToPlayerAsync(string userId, string message)
+    {
+        var socket = _connectionManager.GetConnectionById(userId);
+        if (socket != null && socket.State == WebSocketState.Open)
+        {
+            var jsonMessage = JsonSerializer.Serialize(new { message });
+            var buffer = Encoding.UTF8.GetBytes(jsonMessage);
+            await socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
         }
     }
 }
