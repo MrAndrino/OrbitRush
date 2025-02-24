@@ -1,4 +1,5 @@
 ﻿using orbitrush.Database.Entities.Enums;
+using orbitrush.WebSocket;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -9,14 +10,16 @@ public class WebSocketService
     private readonly WSConnectionManager _connectionManager;
     private readonly WSFriendHandler _friendHandler;
     private readonly WSGameHandler _gameHandler;
+    private readonly WSPlayHandler _playHandler;
     private readonly WSOnlineCount _onlineCount;
 
-    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler friendHandler, WSOnlineCount onlineCount, WSGameHandler gameHandler)
+    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler friendHandler, WSOnlineCount onlineCount, WSGameHandler gameHandler, WSPlayHandler playHandler)
     {
         _connectionManager = connectionManager;
         _friendHandler = friendHandler;
         _onlineCount = onlineCount;
         _gameHandler = gameHandler;
+        _playHandler = playHandler;
     }
 
     public async Task HandleAsync(WebSocket webSocket, string userId)
@@ -41,6 +44,12 @@ public class WebSocketService
                 "leaveLobby"
              };
 
+            var playActions = new HashSet<string>
+            {
+                "playMove",
+                "orbit"
+             };
+
             while (webSocket.State == WebSocketState.Open)
             {
                 string message = await ReadAsync(webSocket);
@@ -52,6 +61,10 @@ public class WebSocketService
                     if (messageData != null && gameActions.Contains(messageData.Action))
                     {
                         await _gameHandler.ProcessGameMessageAsync(userId, message);
+                    }
+                    else if (messageData != null && playActions.Contains(messageData.Action))
+                    {
+                        await _playHandler.ProcessPlayMessageAsync(userId, message);
                     }
                     else
                     {
