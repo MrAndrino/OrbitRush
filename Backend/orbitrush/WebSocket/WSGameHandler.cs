@@ -1,5 +1,6 @@
 ﻿using orbitrush.Database.Entities;
 using orbitrush.Database.Repositories;
+using orbitrush.Domain;
 using orbitrush.Services;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
@@ -297,40 +298,47 @@ public class WSGameHandler
 
     private async Task HandleStartGame(string userId)
     {
-        Console.WriteLine($"Buscando lobby para el usuario: {userId}");
+        var lobbyEntry = activeLobbies.FirstOrDefault(l => l.Value.Player1Id == userId);
+        if (string.IsNullOrEmpty(lobbyEntry.Key)) return;
 
-        var lobby = activeLobbies.Values.FirstOrDefault(l => l.Player1Id == userId);
+        var lobbyId = lobbyEntry.Key;
+        var lobby = lobbyEntry.Value;
 
-        if (lobby == null)
+        if (lobby.Player1Id != userId) return;
+
+        string sessionId = Guid.NewGuid().ToString();
+
+        using (var scope = _serviceProvider.CreateScope())
         {
-            Console.WriteLine("No se encontró ningún lobby para iniciar la partida.");
-            return;
+            var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
+
+            // 🔹 Crear una instancia única de GameService por sesión
+            var gameService = gameManager.GetOrCreateGame(sessionId);
+            gameService.InitializeGame(lobby.Player1Id, lobby.Player2Id, sessionId);
+
+            Console.WriteLine($"✅ Partida iniciada con SessionId: {sessionId}");
+
+            await StartGame(lobby.Player1Id, lobby.Player2Id, sessionId);
         }
 
-        if (lobby.Player1Id != userId)
-        {
-            Console.WriteLine("Usuario sin permisos para iniciar la partida.");
-            return;
-        }
-
-        Console.WriteLine($"Iniciando partida entre {lobby.Player1Id} y {lobby.Player2Id}");
-        lobby.IsActive = true; // Ahora el lobby representa la partida activa
-        await StartGame(lobby.Player1Id, lobby.Player2Id);
+        activeLobbies.TryRemove(lobbyId, out _);
     }
 
 
-    private async Task StartGame(string player1Id, string player2Id)
+    private async Task StartGame(string player1Id, string player2Id, string sessionId)
     {
         var startMessagePlayer1 = new
         {
             Action = "gameStarted",
-            Opponent = player2Id
+            Opponent = player2Id,
+            SessionId = sessionId
         };
 
         var startMessagePlayer2 = new
         {
             Action = "gameStarted",
-            Opponent = player1Id
+            Opponent = player1Id,
+            SessionId = sessionId
         };
 
         if (_connectionManager.TryGetConnection(player1Id, out var player1Socket) && player1Socket.State == WebSocketState.Open)
@@ -374,22 +382,12 @@ public class WSGameHandler
                 }
 
                 // Verificar si ambos jugadores han aceptado antes de iniciar la partida
-                if (lobby.Player1Id == playerId)
-                {
-                    lobby.Player1Ready = true;
-                }
-                else if (lobby.Player2Id == playerId)
-                {
-                    lobby.Player2Ready = true;
-                }
+                lobby.Player1Ready = (lobby.Player1Id == playerId) ? true : lobby.Player1Ready;
+                lobby.Player2Ready = (lobby.Player2Id == playerId) ? true : lobby.Player2Ready;
 
                 if (lobby.Player1Ready && lobby.Player2Ready)
                 {
-                    if (_connectionManager.TryGetConnection(lobby.Player1Id, out var p1Socket) &&
-                        _connectionManager.TryGetConnection(lobby.Player2Id, out var p2Socket))
-                    {
-                        await StartGame(lobby.Player1Id, lobby.Player2Id);
-                    }
+                    await HandleStartGame(lobby.Player1Id);
                 }
             }
             else if (response == "reject")

@@ -1,17 +1,13 @@
 ﻿namespace orbitrush.Domain;
 
 public enum CellState { Empty, Black, White }
-public enum GameState { Laying, WaitingForOrbit, ChooseMoving, Moving, GameOver }
-
+public enum GameState { Laying, WaitingForOrbit, GameOver }
 
 public class Board
 {
-    public CellState[,] Grid { get; private set; }
+    public CellState[,] Grid { get; private set; } // 🔹 Representación del tablero
     public CellState CurrentPlayer { get; private set; }
-    public GameState State { get; set; }
 
-
-    // Coordenadas para la rotación (cadena externa e interna)
     private readonly (int row, int col)[] outerChain = new (int, int)[]
     {
         (0,0), (1,0), (2,0), (3,0),
@@ -25,8 +21,12 @@ public class Board
         (1,1), (2,1), (2,2), (1,2), (1,1)
     };
 
-
     public Board()
+    {
+        Initialize();
+    }
+
+    public void Initialize()
     {
         Grid = new CellState[4, 4];
         for (int i = 0; i < 4; i++)
@@ -37,12 +37,34 @@ public class Board
             }
         }
         CurrentPlayer = CellState.Black;
-        State = GameState.Laying;
     }
 
     public void SwitchPlayer()
     {
         CurrentPlayer = (CurrentPlayer == CellState.Black) ? CellState.White : CellState.Black;
+    }
+
+    public void Orbit()
+    {
+        var newGrid = (CellState[,])Grid.Clone();
+
+        // Rotación de la cadena externa
+        for (int i = 1; i < outerChain.Length; i++)
+        {
+            var (row, col) = outerChain[i];
+            var (prevRow, prevCol) = outerChain[i - 1];
+            newGrid[row, col] = Grid[prevRow, prevCol];
+        }
+
+        // Rotación de la cadena interna
+        for (int i = 1; i < innerChain.Length; i++)
+        {
+            var (row, col) = innerChain[i];
+            var (prevRow, prevCol) = innerChain[i - 1];
+            newGrid[row, col] = Grid[prevRow, prevCol];
+        }
+
+        Grid = newGrid;
     }
 
     public CellState CheckWinner()
@@ -51,8 +73,7 @@ public class Board
         if (winner != CellState.Empty) return winner;
         winner = CheckColumns();
         if (winner != CellState.Empty) return winner;
-        winner = CheckDiagonals();
-        return winner;
+        return CheckDiagonals();
     }
 
     private CellState CheckRows()
@@ -96,28 +117,5 @@ public class Board
             return Grid[0, 3];
 
         return CellState.Empty;
-    }
-
-    public void Orbit()
-    {
-        var newGrid = (CellState[,])Grid.Clone();
-
-        // Rotación de la cadena externa
-        for (int i = 1; i < outerChain.Length; i++)
-        {
-            var (row, col) = outerChain[i];
-            var (prevRow, prevCol) = outerChain[i - 1];
-            newGrid[row, col] = Grid[prevRow, prevCol];
-        }
-
-        // Rotación de la cadena interna
-        for (int i = 1; i < innerChain.Length; i++)
-        {
-            var (row, col) = innerChain[i];
-            var (prevRow, prevCol) = innerChain[i - 1];
-            newGrid[row, col] = Grid[prevRow, prevCol];
-        }
-
-        Grid = newGrid;
     }
 }

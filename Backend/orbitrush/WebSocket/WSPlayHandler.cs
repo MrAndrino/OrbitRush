@@ -21,36 +21,40 @@ public class WSPlayHandler
         public string Action { get; set; }
         public int Row { get; set; }
         public int Col { get; set; }
+        public string SessionId { get; set; }
     }
 
     public async Task ProcessPlayMessageAsync(string userId, string message)
     {
         try
         {
+            var playMessage = JsonSerializer.Deserialize<PlayMessage>(message);
+            if (playMessage == null || string.IsNullOrEmpty(playMessage.SessionId))
+                throw new InvalidOperationException("Mensaje inválido o falta SessionId");
+
             using (var scope = _serviceProvider.CreateScope())
             {
-                var _gameService = scope.ServiceProvider.GetRequiredService<GameService>();
-                var playMessage = JsonSerializer.Deserialize<PlayMessage>(message);
-                if (playMessage != null)
+                var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
+                var gameService = gameManager.GetOrCreateGame(playMessage.SessionId);
+
+                switch (playMessage.Action)
                 {
-                    switch (playMessage.Action)
-                    {
-                        case "playMove":
-                            _gameService.PlayMove(playMessage.Row, playMessage.Col);
-                            await BroadcastGameStateAsync();
-                            break;
-                        case "orbit":
-                            _gameService.PerformOrbit();
-                            await BroadcastGameStateAsync();
-                            if (_gameService.Board.State == GameState.GameOver)
-                            {
-                                await NotifyGameOverAsync();
-                            }
-                            break;
-                        // Puedes agregar más acciones según sea necesario
-                        default:
-                            break;
-                    }
+                    case "playMove":
+                        gameService.PlayMove(playMessage.Row, playMessage.Col);
+                        await BroadcastGameStateAsync(playMessage.SessionId);
+                        break;
+
+                    case "orbit":
+                        gameService.PerformOrbit();
+                        await BroadcastGameStateAsync(playMessage.SessionId);
+                        if (gameService.State == GameState.GameOver)
+                        {
+                            await NotifyGameOverAsync(playMessage.SessionId);
+                        }
+                        break;
+
+                    default:
+                        throw new InvalidOperationException("Acción no válida");
                 }
             }
         }
@@ -60,26 +64,33 @@ public class WSPlayHandler
         }
     }
 
-    // Método para notificar el estado actual del juego a todos los jugadores
-    private async Task BroadcastGameStateAsync()
+    private async Task BroadcastGameStateAsync(string sessionId)
     {
         using (var scope = _serviceProvider.CreateScope())
         {
-            var _gameService = scope.ServiceProvider.GetRequiredService<GameService>();
-
+            var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
+            var gameService = gameManager.GetOrCreateGame(sessionId);
+            var boardState = new CellState[16];
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    boardState[i * 4 + j] = gameService.Board.Grid[i, j];
+                }
+            }
             var gameState = new
             {
                 action = "gameState",
-                board = _gameService.Board.Grid,
-                currentPlayer = _gameService.Board.CurrentPlayer.ToString(),
-                state = _gameService.Board.State.ToString()
+                sessionId = sessionId,
+                board = boardState,
+                currentPlayer = gameService.Board.CurrentPlayer.ToString(),
+                state = gameService.State.ToString()
             };
 
             var jsonMessage = JsonSerializer.Serialize(gameState);
             var buffer = Encoding.UTF8.GetBytes(jsonMessage);
 
-            // Enviar a todos los sockets conectados (asumiendo que WSConnectionManager tiene este método)
-            foreach (var socket in _connectionManager.GetAllConnections())
+            foreach (var socket in _connectionManager.GetAllConnections()) 
             {
                 if (socket.State == WebSocketState.Open)
                 {
@@ -89,23 +100,25 @@ public class WSPlayHandler
         }
     }
 
-    // Notificar a los jugadores que la partida terminó y quién es el ganador
-    private async Task NotifyGameOverAsync()
+    private async Task NotifyGameOverAsync(string sessionId)
     {
         using (var scope = _serviceProvider.CreateScope())
         {
-            var _gameService = scope.ServiceProvider.GetRequiredService<GameService>();
-            var winner = _gameService.Board.CheckWinner();
+            var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
+            var gameService = gameManager.GetOrCreateGame(sessionId);
+            var winner = gameService.Board.CheckWinner();
+
             var gameOverMessage = new
             {
                 action = "gameOver",
+                sessionId = sessionId,
                 winner = winner.ToString()
             };
 
             var jsonMessage = JsonSerializer.Serialize(gameOverMessage);
             var buffer = Encoding.UTF8.GetBytes(jsonMessage);
 
-            foreach (var socket in _connectionManager.GetAllConnections())
+            foreach (var socket in _connectionManager.GetAllConnections()) 
             {
                 if (socket.State == WebSocketState.Open)
                 {
