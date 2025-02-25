@@ -1,5 +1,4 @@
 ﻿using orbitrush.Database.Entities.Enums;
-using orbitrush.WebSocket;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -47,7 +46,8 @@ public class WebSocketService
             var playActions = new HashSet<string>
             {
                 "playMove",
-                "orbit"
+                "orbit",
+                "leaveGame"
              };
 
             while (webSocket.State == WebSocketState.Open)

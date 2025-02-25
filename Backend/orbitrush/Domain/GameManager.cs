@@ -11,6 +11,11 @@ public class GameManager
         return _activeGames.GetOrAdd(sessionId, _ => new GameService()); 
     }
 
+    public ConcurrentDictionary<string, GameService> GetAllActiveGames()
+    {
+        return _activeGames;
+    }
+
     public void RemoveGame(string sessionId)
     {
         _activeGames.TryRemove(sessionId, out _);

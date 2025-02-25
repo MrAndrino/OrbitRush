@@ -1,13 +1,13 @@
 ﻿namespace orbitrush.Domain;
 public class GameService
 {
-    public string CurrentSessionId { get; private set; }
+    public string CurrentSessionId { get; set; }
     public Board Board { get; private set; }
-    public string Player1Id { get; private set; }
-    public string Player2Id { get; private set; }
-    public GameState State { get; private set; } 
-    public CellState Player1Piece { get; private set; }
-    public CellState Player2Piece { get; private set; }
+    public string Player1Id { get; set; }
+    public string Player2Id { get; set; }
+    public GameState State { get; set; }
+    public CellState Player1Piece { get; set; }
+    public CellState Player2Piece { get; set; }
 
     public GameService()
     {

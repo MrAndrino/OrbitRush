@@ -3,6 +3,7 @@ using orbitrush.Database.Repositories;
 using orbitrush.Domain;
 using orbitrush.Services;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -656,19 +657,14 @@ public class WSGameHandler
 
     public async Task HandlePlayerDisconnection(string playerId)
     {
-        Console.WriteLine($"Jugador {playerId} se ha desconectado. Esperando reconexión...");
-
-        await Task.Delay(3000); // 🔹 Esperar 3 segundos antes de considerar la desconexión definitiva
-
-        if (_connectionManager.TryGetConnection(playerId, out _))
-        {
-            Console.WriteLine($"✅ Jugador {playerId} se ha reconectado a tiempo. No se eliminará del lobby.");
-            return;
-        }
-
-        await HandlePlayerExit(playerId, isDisconnection: true);
+        var connectionManager = _serviceProvider.GetRequiredService<WSConnectionManager>();
+        await connectionManager.HandleDisconnection(playerId, DisconnectionType.Lobby);
     }
 
+    public bool IsPlayerInLobby(string userId)
+    {
+        return activeLobbies.Values.Any(lobby => lobby.Player1Id.Contains(userId) || lobby.Player2Id.Contains(userId));
+    }
 
     private async Task SendAsync(WebSocket webSocket, string message)
     {
