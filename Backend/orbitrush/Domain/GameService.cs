@@ -1,6 +1,15 @@
-﻿namespace orbitrush.Domain;
+﻿using orbitrush.Database;
+using orbitrush.Database.Entities;
+using orbitrush.Database.Entities.Enums;
+using orbitrush.Database.Repositories;
+using System.Diagnostics;
+
+namespace orbitrush.Domain;
 public class GameService
 {
+    private readonly UnitOfWork _unitOfWork;
+    private readonly Stopwatch _stopwatch;
+
     public string CurrentSessionId { get; set; }
     public Board Board { get; private set; }
     public string Player1Id { get; set; }
@@ -9,10 +18,12 @@ public class GameService
     public CellState Player1Piece { get; set; }
     public CellState Player2Piece { get; set; }
 
-    public GameService()
+    public GameService(Unit unitOfWork)
     {
+        _unitOfWork = unitOfWork;
         Board = new Board();
         State = GameState.Laying;
+        _stopwatch = new Stopwatch();
     }
 
     public void InitializeGame(string player1Id, string player2Id, string sessionId)
@@ -24,6 +35,7 @@ public class GameService
         Player1Piece = CellState.Black;
         Player2Piece = CellState.White;
         State = GameState.Laying;
+        _stopwatch.Restart();
     }
 
     public string PlayMove(string playerId, int row, int col)
@@ -31,29 +43,27 @@ public class GameService
         try
         {
             if (State != GameState.Laying)
-                return "{ \"error\": \"No es el momento de jugar una ficha.\" }";
+                return "No es el momento de jugar una ficha.";
 
             if (row < 0 || row >= 4 || col < 0 || col >= 4)
-                return "{ \"error\": \"Movimiento fuera de los límites del tablero.\" }";
+                return "Movimiento fuera de los límites del tablero.";
 
             if (Board.Grid[row, col] != CellState.Empty)
-                return "{ \"error\": \"Casilla ocupada.\" }";
+                return "Casilla ocupada.";
 
-            // 🔹 Determinar qué jugador está jugando
             var currentPlayerPiece = (playerId == Player1Id) ? Player1Piece : Player2Piece;
 
             if (Board.CurrentPlayer != currentPlayerPiece)
-                return "{ \"error\": \"No es tu turno.\" }";
+                return "No es tu turno.";
 
-            // Si el movimiento es válido, actualizamos el tablero
             Board.Grid[row, col] = currentPlayerPiece;
             State = GameState.WaitingForOrbit;
 
-            return "{ \"message\": \"Movimiento realizado con éxito.\" }";
+            return "Movimiento realizado con éxito.";
         }
         catch (Exception ex)
         {
-            return $"{{ \"error\": \"Error inesperado: {ex.Message}\" }}";
+            return $"Error inesperado: {ex.Message}";
         }
     }
 
@@ -68,40 +78,40 @@ public class GameService
         if (winner != CellState.Empty)
         {
             State = GameState.GameOver;
-            return; // 🔹 Termina el juego si hay ganador después del primer giro normal
+            SaveMatchData(winner);
+            return;
         }
 
-        // 🔹 Si el tablero está lleno y no hay ganador, activamos los giros extra (máximo 5)
         if (IsBoardFull())
         {
-            int maxRotations = 5; // 🔹 Máximo de 5 giros adicionales
+            int maxRotations = 5;
             int rotationCount = 0;
 
             while (rotationCount < maxRotations)
             {
+                System.Threading.Tasks.Task.Delay(2500).Wait();
                 Board.Orbit();
                 winner = Board.CheckWinner();
 
                 if (winner != CellState.Empty)
                 {
                     State = GameState.GameOver;
-                    return; // 🔹 Termina el juego si hay ganador después de una rotación extra
+                    SaveMatchData(winner);
+                    return;
                 }
 
                 rotationCount++;
             }
 
-            // 🔹 Si después de 5 giros aún no hay ganador, se considera empate
             State = GameState.GameOver;
+            SaveMatchData(CellState.Empty);
             return;
         }
 
-        // 🔹 Si el tablero NO está lleno, el juego continúa normalmente
         Board.SwitchPlayer();
         State = GameState.Laying;
     }
 
-    // 🔹 `IsBoardFull()` ahora está en `GameService`
     private bool IsBoardFull()
     {
         for (int i = 0; i < 4; i++)
@@ -113,5 +123,38 @@ public class GameService
             }
         }
         return true;
+    }
+
+    public void SaveMatchData(CellState winner)
+    {
+        _stopwatch.Stop();
+
+        var match = new Match
+        {
+            MatchDate = DateTime.UtcNow,
+            Duration = _stopwatch.Elapsed
+        };
+
+        _dbContext.Matches.Add(match);
+        _dbContext.SaveChanges();
+
+        var results = new List<MatchResult>();
+
+        if (winner == CellState.Empty)
+        {
+            results.Add(new MatchResult { MatchId = match.Id, UserId = int.Parse(Player1Id), Result = MatchResultEnum.Draw });
+            results.Add(new MatchResult { MatchId = match.Id, UserId = int.Parse(Player2Id), Result = MatchResultEnum.Draw });
+        }
+        else
+        {
+            var winnerId = (winner == Player1Piece) ? int.Parse(Player1Id) : int.Parse(Player2Id);
+            var loserId = (winner == Player1Piece) ? int.Parse(Player2Id) : int.Parse(Player1Id);
+
+            results.Add(new MatchResult { MatchId = match.Id, UserId = winnerId, Result = MatchResultEnum.Victory });
+            results.Add(new MatchResult { MatchId = match.Id, UserId = loserId, Result = MatchResultEnum.Defeat });
+        }
+
+        _dbContext.MatchResults.AddRange(results);
+        _dbContext.SaveChanges();
     }
 }

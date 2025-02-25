@@ -657,8 +657,7 @@ public class WSGameHandler
 
     public async Task HandlePlayerDisconnection(string playerId)
     {
-        var connectionManager = _serviceProvider.GetRequiredService<WSConnectionManager>();
-        await connectionManager.HandleDisconnection(playerId, DisconnectionType.Lobby);
+        await HandlePlayerExit(playerId, isDisconnection: true);
     }
 
     public bool IsPlayerInLobby(string userId)

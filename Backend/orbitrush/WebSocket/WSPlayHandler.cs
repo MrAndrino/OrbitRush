@@ -160,8 +160,8 @@ public class WSPlayHandler
     private async Task HandlePlayerExitFromGame(string playerId, bool isDisconnection)
     {
         Console.WriteLine(isDisconnection
-            ? $"⚠ Jugador {playerId} se ha desconectado de la partida."
-            : $"🚪 Jugador {playerId} ha salido de la partida.");
+            ? $"Jugador {playerId} se ha desconectado de la partida."
+            : $"Jugador {playerId} ha salido de la partida.");
 
         using (var scope = _serviceProvider.CreateScope())
         {
@@ -171,7 +171,7 @@ public class WSPlayHandler
 
             if (string.IsNullOrEmpty(gameEntry.Key))
             {
-                Console.WriteLine($"⛔ No se encontró partida activa para el jugador {playerId}");
+                Console.WriteLine($"No se encontró partida activa para el jugador {playerId}");
                 return;
             }
 
@@ -194,7 +194,7 @@ public class WSPlayHandler
             if (!string.IsNullOrEmpty(gameService.Player2Id) && gameService.Player2Id.StartsWith("BOT_"))
             {
                 gameManager.RemoveGame(sessionId);
-                Console.WriteLine($"🗑 Partida {sessionId} eliminada porque el jugador humano salió y el oponente era un bot.");
+                Console.WriteLine($"Partida {sessionId} eliminada porque el jugador humano salió y el oponente era un bot.");
                 return;
             }
 
@@ -204,7 +204,8 @@ public class WSPlayHandler
                 if (!string.IsNullOrEmpty(opponentId))
                 {
                     gameService.State = GameState.GameOver;
-                    Console.WriteLine($"🏆 {opponentId} ha ganado automáticamente la partida {sessionId} porque su oponente abandonó.");
+                    Console.WriteLine($"{opponentId} ha ganado automáticamente la partida {sessionId} porque su oponente abandonó.");
+                    gameService.SaveMatchData(gameService.Player1Id == playerId ? gameService.Player2Piece : gameService.Player1Piece);
 
                     if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket))
                     {
@@ -225,14 +226,14 @@ public class WSPlayHandler
                 {
                     // 🗑 Si no hay oponente, eliminar la partida
                     gameManager.RemoveGame(sessionId);
-                    Console.WriteLine($"🗑 Partida {sessionId} eliminada porque no hay más jugadores.");
+                    Console.WriteLine($"Partida {sessionId} eliminada porque no hay más jugadores.");
                 }
             }
             else
             {
                 // 🚪 Si el Player2 se va, simplemente asignamos la victoria al Player1
                 gameService.State = GameState.GameOver;
-                Console.WriteLine($"🚪 Jugador {playerId} ha salido de la partida {sessionId}. {gameService.Player1Id} gana automáticamente.");
+                Console.WriteLine($"Jugador {playerId} ha salido de la partida {sessionId}. {gameService.Player1Id} gana automáticamente.");
 
                 if (_connectionManager.TryGetConnection(gameService.Player1Id, out var hostSocket))
                 {
@@ -290,8 +291,7 @@ public class WSPlayHandler
 
     public async Task HandlePlayerGameDisconnection(string playerId)
     {
-        var connectionManager = _serviceProvider.GetRequiredService<WSConnectionManager>();
-        await connectionManager.HandleDisconnection(playerId, DisconnectionType.Game);
+        await HandlePlayerExitFromGame(playerId, isDisconnection: true);
     }
 
     private async Task SendAsync(WebSocket webSocket, string message)

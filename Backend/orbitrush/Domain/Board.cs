@@ -5,7 +5,7 @@ public enum GameState { Laying, WaitingForOrbit, GameOver }
 
 public class Board
 {
-    public CellState[,] Grid { get; private set; } // 🔹 Representación del tablero
+    public CellState[,] Grid { get; private set; }
     public CellState CurrentPlayer { get; private set; }
 
     private readonly (int row, int col)[] outerChain = new (int, int)[]
