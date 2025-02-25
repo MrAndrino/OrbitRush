@@ -17,8 +17,6 @@ public class Program
     {
         try
         {
-
-
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddScoped<MyDbContext>();
@@ -36,7 +34,7 @@ public class Program
             builder.Services.AddSingleton<WSPlayHandler>();
             builder.Services.AddSingleton<WSOnlineCount>();
             builder.Services.AddSingleton<WebSocketService>();
-            builder.Services.AddSingleton<GameManager>();
+            builder.Services.AddScoped<GameManager>();
 
 
             builder.Services.AddControllers();

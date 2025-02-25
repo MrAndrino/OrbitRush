@@ -18,7 +18,7 @@ public class GameService
     public CellState Player1Piece { get; set; }
     public CellState Player2Piece { get; set; }
 
-    public GameService(Unit unitOfWork)
+    public GameService(UnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
         Board = new Board();
@@ -125,7 +125,7 @@ public class GameService
         return true;
     }
 
-    public void SaveMatchData(CellState winner)
+    public async Task SaveMatchData(CellState winner)
     {
         _stopwatch.Stop();
 
@@ -135,8 +135,8 @@ public class GameService
             Duration = _stopwatch.Elapsed
         };
 
-        _dbContext.Matches.Add(match);
-        _dbContext.SaveChanges();
+        await _unitOfWork.MatchRepository.InsertAsync(match);
+        await _unitOfWork.SaveAsync();
 
         var results = new List<MatchResult>();
 
@@ -154,7 +154,7 @@ public class GameService
             results.Add(new MatchResult { MatchId = match.Id, UserId = loserId, Result = MatchResultEnum.Defeat });
         }
 
-        _dbContext.MatchResults.AddRange(results);
-        _dbContext.SaveChanges();
+        await _unitOfWork.MatchResultRepository.InsertRangeAsync(results);
+        await _unitOfWork.SaveAsync();
     }
 }
