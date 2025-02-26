@@ -8,28 +8,29 @@ const GameBoard = () => {
     const { ws, sessionId, board, currentPlayer, gameState, connectWebSocket } = useWebSocket();
     const [localSessionId, setLocalSessionId] = useState<string | null>(null);
 
-    // 🔄 Actualizar `localSessionId` cuando `sessionId` cambia
     useEffect(() => {
-        if (sessionId) {
-            console.log("✅ sessionId recibido en GameBoard:", sessionId);
-            setLocalSessionId(sessionId);
-        }
+        console.log("🔄 Verificando actualización de sessionId en el contexto:", sessionId);
     }, [sessionId]);
 
-    // 🔥 Asegura que sessionId se almacene solo cuando cambia realmente
     useEffect(() => {
-        if (sessionId && sessionId !== localSessionId) {
-            console.log("✅ sessionId actualizado en GameBoard:", sessionId);
-            setLocalSessionId(sessionId);
+        const storedSessionId = localStorage.getItem("sessionId");
+        if (!sessionId && storedSessionId) {
+            console.log("🔄 Restaurando sessionId desde localStorage:", storedSessionId);
+            setLocalSessionId(storedSessionId);
         }
-    }, [sessionId]); // ✅ Solo reacciona cuando sessionId cambia
-
+    }, [sessionId]);
 
 
     // 🔥 Manejo de clic en celda
     const handleCellClick = (rowIndex: number, colIndex: number) => {
         console.log("🖱️ Click detectado en:", rowIndex, colIndex);
 
+        if (!ws) {
+            console.error("❌ WebSocket es null.");
+            return;
+        }
+
+        console.log("🔍 Estado actual del WebSocket:", ws.readyState);
         if (!ws || ws.readyState !== WebSocket.OPEN) {
             console.error("❌ WebSocket no está conectado.");
             return;
@@ -45,11 +46,15 @@ const GameBoard = () => {
             return;
         }
 
+        console.log("📌 currentPlayer:", currentPlayer);
+        console.log("📌 gameState:", gameState);
+        console.log("📌 Casilla seleccionada:", board[rowIndex][colIndex]);
+
         const message = JSON.stringify({
             Action: "playMove",
             Row: rowIndex,
             Col: colIndex,
-            SessionId: localSessionId, // ✅ Usamos `localSessionId` que ya está seguro
+            SessionId: localSessionId,
         });
 
         console.log("📤 Intentando enviar movimiento:", message);

@@ -467,8 +467,6 @@ export const WebSocketProvider = ({ children }) => {
       }
     };
 
-
-
     ws.addEventListener("message", handleGameUpdate);
     return () => {
       ws.removeEventListener("message", handleGameUpdate);
