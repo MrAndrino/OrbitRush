@@ -331,15 +331,17 @@ public class WSGameHandler
         var startMessagePlayer1 = new
         {
             Action = "gameStarted",
-            Opponent = player2Id,
-            SessionId = sessionId
+            SessionId = sessionId,
+            Player1Id = player1Id, 
+            Player2Id = player2Id 
         };
 
         var startMessagePlayer2 = new
         {
             Action = "gameStarted",
-            Opponent = player1Id,
-            SessionId = sessionId
+            SessionId = sessionId,
+            Player1Id = player1Id,
+            Player2Id = player2Id
         };
 
         if (_connectionManager.TryGetConnection(player1Id, out var player1Socket) && player1Socket.State == WebSocketState.Open)

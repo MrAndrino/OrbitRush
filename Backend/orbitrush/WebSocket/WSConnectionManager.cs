@@ -26,7 +26,6 @@ public class WSConnectionManager
             Console.WriteLine($"🔴 Jugador {userId} desconectado.");
             DisconnectionType type = DetermineDisconnectionType(userId);
 
-            // 🔹 Ahora llamamos al método unificado en lugar de manejar solo el Lobby
             await HandleDisconnection(userId, type);
         }
     }
@@ -35,17 +34,14 @@ public class WSConnectionManager
     {
         using var scope = _serviceProvider.CreateScope();
         var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
-        var gameHandler = scope.ServiceProvider.GetRequiredService<WSGameHandler>(); // 🔹 Accedemos a WSGameHandler
+        var gameHandler = scope.ServiceProvider.GetRequiredService<WSGameHandler>();
 
-        // 🔹 1. Verificar si el jugador estaba en una partida activa
         if (gameManager.GetAllActiveGames().Any(g => g.Value.Player1Id == userId || g.Value.Player2Id == userId))
             return DisconnectionType.Game;
 
-        // 🔹 2. Verificar si el jugador estaba en el lobby usando el diccionario de WSGameHandler
         if (gameHandler.IsPlayerInLobby(userId))
             return DisconnectionType.Lobby;
 
-        // 🔹 3. Si no estaba en juego ni en lobby, devolvemos None (no hacer nada)
         return DisconnectionType.None;
     }
 
@@ -65,7 +61,6 @@ public class WSConnectionManager
         var gameHandler = scope.ServiceProvider.GetRequiredService<WSGameHandler>();
         var playHandler = scope.ServiceProvider.GetRequiredService<WSPlayHandler>();
 
-        // 🔹 Si el jugador está en una partida, manejarlo como desconexión de juego
         switch (type)
         {
             case DisconnectionType.Game:

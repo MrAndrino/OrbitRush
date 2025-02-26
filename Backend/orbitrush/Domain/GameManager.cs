@@ -15,9 +15,7 @@ public class GameManager
 
     public GameService GetOrCreateGame(string sessionId)
     {
-        using var scope = _serviceProvider.CreateScope();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
-        return _activeGames.GetOrAdd(sessionId, _ => new GameService(unitOfWork));
+        return _activeGames.GetOrAdd(sessionId, _ => new GameService(_serviceProvider));
     }
 
     public ConcurrentDictionary<string, GameService> GetAllActiveGames()

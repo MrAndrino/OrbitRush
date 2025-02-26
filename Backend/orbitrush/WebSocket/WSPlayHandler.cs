@@ -48,7 +48,8 @@ public class WSPlayHandler
                         await BroadcastGameStateAsync(playMessage.SessionId);
                         if (gameService.State == GameState.GameOver)
                         {
-                            await NotifyGameOverAsync(playMessage.SessionId);
+                            string winnerId = gameService.Board.CheckWinner().ToString();
+                            await NotifyGameOverAsync(playMessage.SessionId, winnerId);
                         }
                         break;
 
@@ -118,34 +119,6 @@ public class WSPlayHandler
         }
     }
 
-    private async Task NotifyGameOverAsync(string sessionId)
-    {
-        using (var scope = _serviceProvider.CreateScope())
-        {
-            var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
-            var gameService = gameManager.GetOrCreateGame(sessionId);
-            var winner = gameService.Board.CheckWinner();
-
-            var gameOverMessage = new
-            {
-                action = "gameOver",
-                sessionId = sessionId,
-                winner = winner.ToString()
-            };
-
-            var jsonMessage = JsonSerializer.Serialize(gameOverMessage);
-            var buffer = Encoding.UTF8.GetBytes(jsonMessage);
-
-            foreach (var socket in _connectionManager.GetAllConnections())
-            {
-                if (socket.State == WebSocketState.Open)
-                {
-                    await socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
-                }
-            }
-        }
-    }
-
     private async Task SendMessageToPlayerAsync(string userId, string message)
     {
         var socket = _connectionManager.GetConnectionById(userId);
@@ -190,21 +163,18 @@ public class WSPlayHandler
                 await SendAsync(userSocket, JsonSerializer.Serialize(leaveMessage));
             }
 
-            // 🔹 Si el oponente es un bot, eliminar la partida y salir
             if (!string.IsNullOrEmpty(gameService.Player2Id) && gameService.Player2Id.StartsWith("BOT_"))
             {
                 gameManager.RemoveGame(sessionId);
-                Console.WriteLine($"Partida {sessionId} eliminada porque el jugador humano salió y el oponente era un bot.");
                 return;
             }
 
-            // 🔹 Si el jugador que sale es el Player1
             if (gameService.Player1Id == playerId)
             {
                 if (!string.IsNullOrEmpty(opponentId))
                 {
                     gameService.State = GameState.GameOver;
-                    Console.WriteLine($"{opponentId} ha ganado automáticamente la partida {sessionId} porque su oponente abandonó.");
+
                     await gameService.SaveMatchData(gameService.Player1Id == playerId ? gameService.Player2Piece : gameService.Player1Piece);
 
                     if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket))
@@ -224,16 +194,13 @@ public class WSPlayHandler
                 }
                 else
                 {
-                    // 🗑 Si no hay oponente, eliminar la partida
                     gameManager.RemoveGame(sessionId);
-                    Console.WriteLine($"Partida {sessionId} eliminada porque no hay más jugadores.");
                 }
             }
             else
             {
-                // 🚪 Si el Player2 se va, simplemente asignamos la victoria al Player1
                 gameService.State = GameState.GameOver;
-                Console.WriteLine($"Jugador {playerId} ha salido de la partida {sessionId}. {gameService.Player1Id} gana automáticamente.");
+                await gameService.SaveMatchData(gameService.Player1Piece);
 
                 if (_connectionManager.TryGetConnection(gameService.Player1Id, out var hostSocket))
                 {
@@ -278,7 +245,6 @@ public class WSPlayHandler
                 }
             }
 
-            // 🔹 Eliminar la partida después de notificar a los jugadores
             gameManager.RemoveGame(sessionId);
         }
     }

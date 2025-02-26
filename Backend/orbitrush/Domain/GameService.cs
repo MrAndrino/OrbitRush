@@ -1,5 +1,4 @@
-﻿using orbitrush.Database;
-using orbitrush.Database.Entities;
+﻿using orbitrush.Database.Entities;
 using orbitrush.Database.Entities.Enums;
 using orbitrush.Database.Repositories;
 using System.Diagnostics;
@@ -7,8 +6,9 @@ using System.Diagnostics;
 namespace orbitrush.Domain;
 public class GameService
 {
-    private readonly UnitOfWork _unitOfWork;
+
     private readonly Stopwatch _stopwatch;
+    private readonly IServiceProvider _serviceProvider;
 
     public string CurrentSessionId { get; set; }
     public Board Board { get; private set; }
@@ -18,12 +18,12 @@ public class GameService
     public CellState Player1Piece { get; set; }
     public CellState Player2Piece { get; set; }
 
-    public GameService(UnitOfWork unitOfWork)
+    public GameService(IServiceProvider serviceProvider)
     {
-        _unitOfWork = unitOfWork;
         Board = new Board();
         State = GameState.Laying;
         _stopwatch = new Stopwatch();
+        _serviceProvider = serviceProvider;
     }
 
     public void InitializeGame(string player1Id, string player2Id, string sessionId)
@@ -128,6 +128,8 @@ public class GameService
     public async Task SaveMatchData(CellState winner)
     {
         _stopwatch.Stop();
+        using var scope = _serviceProvider.CreateScope();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
 
         var match = new Match
         {
@@ -135,8 +137,9 @@ public class GameService
             Duration = _stopwatch.Elapsed
         };
 
-        await _unitOfWork.MatchRepository.InsertAsync(match);
-        await _unitOfWork.SaveAsync();
+        await unitOfWork.MatchRepository.InsertAsync(match);
+        await unitOfWork.SaveAsync();
+
 
         var results = new List<MatchResult>();
 
@@ -154,7 +157,7 @@ public class GameService
             results.Add(new MatchResult { MatchId = match.Id, UserId = loserId, Result = MatchResultEnum.Defeat });
         }
 
-        await _unitOfWork.MatchResultRepository.InsertRangeAsync(results);
-        await _unitOfWork.SaveAsync();
+        await unitOfWork.MatchResultRepository.InsertRangeAsync(results);
+        await unitOfWork.SaveAsync();
     }
 }
