@@ -4,6 +4,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { toast } from 'react-hot-toast';
 import { useRouter } from "next/navigation";
 import MatchFoundModal from "@/components/miscelaneus/modal/matchfound/matchfound";
+import { CellState } from "@/types/game";
 
 const WebSocketContext = createContext();
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -17,6 +18,13 @@ export const WebSocketProvider = ({ children }) => {
   const [onlineCount, setOnlineCount] = useState(0);
   const [matchData, setMatchData] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [board, setBoard] = useState(Array.from({ length: 4 }, () => Array(4).fill("Empty")));
+  const [currentPlayer, setCurrentPlayer] = useState(null);
+  const [gameState, setGameState] = useState("Laying");
+  const [sessionId, setSessionId] = useState(null);
+  const [player1Id, setPlayer1Id] = useState(null);
+  const [player2Id, setPlayer2Id] = useState(null);
+
   const router = useRouter();
 
   // ----- Conexión del WebSocket -----
@@ -40,8 +48,16 @@ export const WebSocketProvider = ({ children }) => {
       switch (data.Action) {
 
         case "gameStarted":
-          console.log("🎮 Partida iniciada, redirigiendo a /menu/game...");
-          router.push("/menu/game");
+          console.log("🎮 Partida iniciada: ", data);
+
+          setSessionId(data.SessionId);
+          setPlayer1Id(data.Player1Id);
+          setPlayer2Id(data.Player2Id);
+
+          localStorage.setItem("sessionId", data.SessionId); // 🔥 Guardamos en localStorage
+          console.log("✅ sessionId guardado en contexto y localStorage:", data.SessionId);
+
+          router.push("/prueba");
           break;
 
         case "lobbyCreated":
@@ -380,15 +396,15 @@ export const WebSocketProvider = ({ children }) => {
       console.error("❌ WebSocket no conectado");
       return;
     }
-  
+
     const mensaje = JSON.stringify({
       Action: "startGame",
     });
-  
+
     console.log("📤 Enviando mensaje para iniciar partida: ", mensaje);
     ws.send(mensaje);
   };
-  
+
 
   // ----- useEffect para redirección al crear lobby -----
   useEffect(() => {
@@ -426,6 +442,39 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [ws]);
 
+  // ----- useEffect para manejo del juego -----
+  useEffect(() => {
+    if (!ws) return;
+
+    const handleGameUpdate = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.action === "gameState") {
+        console.log("📩 Actualización del juego recibida:", data);
+
+        const newBoard = data.board.map(row =>
+          row.map(cell => {
+            if (cell === "Black" || cell === "White" || cell === "Empty") {
+              return cell; // Convertimos a valores válidos
+            }
+            return "Empty"; // En caso de error, mantenemos la celda vacía
+          })
+        );
+
+        setBoard(newBoard);
+        setCurrentPlayer(data.currentPlayer);
+        setGameState(data.state);
+      }
+    };
+
+
+
+    ws.addEventListener("message", handleGameUpdate);
+    return () => {
+      ws.removeEventListener("message", handleGameUpdate);
+    };
+  }, [ws]);
+
 
   // ----- Valor del contexto y renderizado-----
   const contextValue = {
@@ -447,7 +496,11 @@ export const WebSocketProvider = ({ children }) => {
     playWithBot,
     sendMatchResponse,
     leaveLobby,
-    startGame
+    startGame,
+    board,
+    currentPlayer,
+    gameState,
+    sessionId
   };
 
   return (
