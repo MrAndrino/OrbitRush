@@ -44,7 +44,7 @@ public class WSPlayHandler
                         break;
 
                     case "orbit":
-                        gameService.PerformOrbit();
+                        await gameService.PerformOrbit();
                         await BroadcastGameStateAsync(playMessage.SessionId);
                         if (gameService.State == GameState.GameOver)
                         {

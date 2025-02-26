@@ -17,7 +17,7 @@ interface LobbyBoxProps {
 
 const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
   const { getUserProfileData, userProfile } = useUsers();
-  const { ws, leaveLobby } = useWebSocket();
+  const { ws, leaveLobby, startGame } = useWebSocket();
   const { decodedToken } = useAuth();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -116,7 +116,7 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
         <Button
           color={isPlayer1 && hasPlayer2 ? "orange" : "disabled"}
           className="h-12 w-44 text-xl"
-          onClick={isPlayer1 && hasPlayer2 ? undefined : undefined}
+          onClick={isPlayer1 && hasPlayer2 ? startGame : undefined}
         >
           {isPlayer1 ? "Empezar partida" : "Esperando al Host"}
         </Button>

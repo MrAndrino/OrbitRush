@@ -39,6 +39,11 @@ export const WebSocketProvider = ({ children }) => {
       console.log("data: ", data)
       switch (data.Action) {
 
+        case "gameStarted":
+          console.log("🎮 Partida iniciada, redirigiendo a /menu/game...");
+          router.push("/menu/game");
+          break;
+
         case "lobbyCreated":
           console.log("✅ Lobby creado, redirigiendo...");
           localStorage.setItem("lobbyId", data.LobbyId);
@@ -369,6 +374,22 @@ export const WebSocketProvider = ({ children }) => {
     ws.send(mensaje);
   };
 
+  // ----- Empezar Partida -----
+  const startGame = () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("❌ WebSocket no conectado");
+      return;
+    }
+  
+    const mensaje = JSON.stringify({
+      Action: "startGame",
+    });
+  
+    console.log("📤 Enviando mensaje para iniciar partida: ", mensaje);
+    ws.send(mensaje);
+  };
+  
+
   // ----- useEffect para redirección al crear lobby -----
   useEffect(() => {
     if (!ws) return;
@@ -425,7 +446,8 @@ export const WebSocketProvider = ({ children }) => {
     gameInvites,
     playWithBot,
     sendMatchResponse,
-    leaveLobby
+    leaveLobby,
+    startGame
   };
 
   return (

@@ -1,47 +1,55 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import LobbyBox from "@/components/matchmaking/lobbybox/lobbybox";
 import { useWebSocket } from "@/context/websocketcontext";
+import { useAuth } from "@/context/authcontext";
+import GameSession from "@/components/game/gamelayout/gamesession";
 
-interface LobbyData {
+interface SessionData {
+  sessionId: string;
   player1Id: string;
-  player2Id: string;
+  player2Id?: string | null;
 }
 
 export default function GamePage() {
   const { ws } = useWebSocket();
-  const [lobby, setLobby] = useState<LobbyData | null>(null);
+  const { decodedToken } = useAuth();
+  const [sessionData, setSessionData] = useState<SessionData | null>(null);
 
   useEffect(() => {
-    const lobbyId = localStorage.getItem("lobbyId");
-    if (!lobbyId || !ws) return;
+    if (!ws || !decodedToken?.id) return;
 
-    const requestLobbyInfo = () => {
-      ws.send(JSON.stringify({ Action: "getLobbyInfo", TargetId: lobbyId }));
-    };
+    const handleGameStart = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
 
-    const handleMessage = (event: MessageEvent) => {
-      const message = JSON.parse(event.data);
-      if (message.Action === "lobbyUpdated") {
-        setLobby({
-          player1Id: message.Player1Id,
-          player2Id: message.Player2Id,
+      if (data.Action === "gameStarted") {
+        console.log("🎮 Partida iniciada. Datos recibidos:", data);
+        setSessionData({
+          sessionId: data.SessionId,
+          player1Id: data.Player1Id,
+          player2Id: data.Player2Id ?? null,
         });
       }
     };
 
-    ws.addEventListener("message", handleMessage);
-    requestLobbyInfo();
+    ws.addEventListener("message", handleGameStart);
 
     return () => {
-      ws.removeEventListener("message", handleMessage);
+      ws.removeEventListener("message", handleGameStart);
     };
-  }, [ws]);
+  }, [ws, decodedToken?.id]);
 
   return (
-    <section className="text-center w-[100%]">
-      {lobby ? <LobbyBox player1Id={lobby.player1Id} player2Id={lobby.player2Id} /> : <p>Cargando lobby...</p>}
-    </section>
+    <div>
+      {sessionData ? (
+        <GameSession
+          sessionId={sessionData.sessionId}
+          player1Id={sessionData.player1Id}
+          player2Id={sessionData.player2Id}
+        />
+      ) : (
+        <p>Cargando la sesión de juego...</p>
+      )}
+    </div>
   );
 }

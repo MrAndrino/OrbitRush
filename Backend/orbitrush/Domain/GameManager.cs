@@ -6,16 +6,18 @@ namespace orbitrush.Domain;
 public class GameManager
 {
     private readonly ConcurrentDictionary<string, GameService> _activeGames = new();
-    private readonly UnitOfWork _unitOfWork;
+    private readonly IServiceProvider _serviceProvider;
 
-    public GameManager (UnitOfWork unitOfWork)
+    public GameManager(IServiceProvider serviceProvider)
     {
-        _unitOfWork = unitOfWork;
+        _serviceProvider = serviceProvider;
     }
 
     public GameService GetOrCreateGame(string sessionId)
     {
-        return _activeGames.GetOrAdd(sessionId, _ => new GameService(_unitOfWork)); 
+        using var scope = _serviceProvider.CreateScope();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+        return _activeGames.GetOrAdd(sessionId, _ => new GameService(unitOfWork));
     }
 
     public ConcurrentDictionary<string, GameService> GetAllActiveGames()
