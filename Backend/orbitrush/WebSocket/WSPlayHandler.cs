@@ -205,7 +205,7 @@ public class WSPlayHandler
                 {
                     gameService.State = GameState.GameOver;
                     Console.WriteLine($"{opponentId} ha ganado automáticamente la partida {sessionId} porque su oponente abandonó.");
-                    gameService.SaveMatchData(gameService.Player1Id == playerId ? gameService.Player2Piece : gameService.Player1Piece);
+                    await gameService.SaveMatchData(gameService.Player1Id == playerId ? gameService.Player2Piece : gameService.Player1Piece);
 
                     if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket))
                     {

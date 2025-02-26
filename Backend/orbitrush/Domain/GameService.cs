@@ -67,7 +67,7 @@ public class GameService
         }
     }
 
-    public void PerformOrbit()
+    public async Task PerformOrbit()
     {
         if (State != GameState.WaitingForOrbit)
             throw new InvalidOperationException("No es el momento de girar el tablero.");
@@ -78,7 +78,7 @@ public class GameService
         if (winner != CellState.Empty)
         {
             State = GameState.GameOver;
-            SaveMatchData(winner);
+            await SaveMatchData(winner);
             return;
         }
 
@@ -96,7 +96,7 @@ public class GameService
                 if (winner != CellState.Empty)
                 {
                     State = GameState.GameOver;
-                    SaveMatchData(winner);
+                    await SaveMatchData(winner);
                     return;
                 }
 
@@ -104,7 +104,7 @@ public class GameService
             }
 
             State = GameState.GameOver;
-            SaveMatchData(CellState.Empty);
+            await SaveMatchData(CellState.Empty);
             return;
         }
 
