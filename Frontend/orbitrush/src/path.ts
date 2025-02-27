@@ -9,3 +9,5 @@ export const LobbyPage = () => "/menu/lobby";
 export const GamePage = () => "/menu/game";
 
 export const PruebaPage = () => "/prueba"
+
+export const PruebaPage2 = () => "/pruebachat"

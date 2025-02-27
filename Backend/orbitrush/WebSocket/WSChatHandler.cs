@@ -2,16 +2,19 @@
 using System.Text;
 using System.Text.Json;
 using System.Collections.Concurrent;
+using orbitrush.Database.Repositories;
 
 public class WSChatHandler
 {
     private readonly WSConnectionManager _connectionManager;
-    private readonly ConcurrentDictionary<string, List<ChatMessage>> _chatMessages; 
+    private readonly ConcurrentDictionary<string, List<ChatMessage>> _chatMessages;
+    private readonly IServiceProvider _serviceProvider;
 
-    public WSChatHandler(WSConnectionManager connectionManager)
+    public WSChatHandler(WSConnectionManager connectionManager, IServiceProvider serviceProvider)
     {
         _connectionManager = connectionManager;
         _chatMessages = new ConcurrentDictionary<string, List<ChatMessage>>();
+        _serviceProvider = serviceProvider;
     }
 
     private class ChatRequest
@@ -24,6 +27,7 @@ public class WSChatHandler
     private class ChatMessage
     {
         public string SenderId { get; set; }
+        public string SenderName { get; set; }
         public string Message { get; set; }
         public DateTime Timestamp { get; set; }
     }
@@ -64,9 +68,14 @@ public class WSChatHandler
             return;
         }
 
+        using var scope = _serviceProvider.CreateScope();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+        string senderName = await unitOfWork.UserRepository.GetNameByIdAsync(int.Parse(userId));
+
         var chatMessage = new ChatMessage
         {
             SenderId = userId,
+            SenderName = senderName,
             Message = message,
             Timestamp = DateTime.UtcNow
         };
@@ -111,6 +120,7 @@ public class WSChatHandler
         {
             Action = "chatMessage",
             SenderId = chatMessage.SenderId,
+            SenderName = chatMessage.SenderName,
             Message = chatMessage.Message,
             Timestamp = chatMessage.Timestamp.ToString("HH:mm:ss")
         });

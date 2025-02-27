@@ -18,6 +18,8 @@ export const WebSocketProvider = ({ children }) => {
   const [onlineCount, setOnlineCount] = useState(0);
   const [matchData, setMatchData] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+
   const [board, setBoard] = useState(Array.from({ length: 4 }, () => Array(4).fill("Empty")));
   const [currentPlayer, setCurrentPlayer] = useState(null);
   const [gameState, setGameState] = useState("Laying");
@@ -47,6 +49,19 @@ export const WebSocketProvider = ({ children }) => {
       console.log("data: ", data)
       switch (data.Action) {
 
+        case "chatMessage":
+          setChatMessages((prev) => [...prev, {
+            senderId: data.SenderId,
+            senderName: data.SenderName,
+            message: data.Message,
+            timestamp: data.Timestamp,
+          }]);
+          break;
+
+        case "chatHistory":
+          setChatMessages(data.Messages || []);
+          break;
+
         case "gameStarted":
           console.log("🎮 Partida iniciada: ", data);
 
@@ -57,7 +72,7 @@ export const WebSocketProvider = ({ children }) => {
           localStorage.setItem("sessionId", data.SessionId); // 🔥 Guardamos en localStorage
           console.log("✅ sessionId guardado en contexto y localStorage:", data.SessionId);
 
-          router.push("/prueba");
+          router.push("/pruebachat");
           break;
 
         case "lobbyCreated":
@@ -426,7 +441,36 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [ws]);
 
+  // ----- FUNCIÓN PARA ENVIAR MENSAJE -----
+  const sendChatMessage = (message) => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("WebSocket no conectado");
+      return;
+    }
 
+    const mensaje = JSON.stringify({
+      Action: "chatMessage",
+      SessionId: sessionId, // Usa la sesión actual
+      Message: message,
+    });
+
+    ws.send(mensaje);
+  };
+
+  // ----- FUNCIÓN PARA PEDIR HISTORIAL -----
+  const requestChatHistory = () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("WebSocket no conectado");
+      return;
+    }
+
+    const mensaje = JSON.stringify({
+      Action: "getChatHistory",
+      SessionId: sessionId,
+    });
+
+    ws.send(mensaje);
+  };
 
   // ----- useEffect para manejo del cierre del WebSocket al salir de la página -----
   useEffect(() => {
@@ -498,7 +542,10 @@ export const WebSocketProvider = ({ children }) => {
     board,
     currentPlayer,
     gameState,
-    sessionId
+    sessionId,
+    sendChatMessage,
+    requestChatHistory,
+    chatMessages
   };
 
   return (
