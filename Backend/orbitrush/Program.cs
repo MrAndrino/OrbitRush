@@ -35,6 +35,7 @@ public class Program
             builder.Services.AddSingleton<WSOnlineCount>();
             builder.Services.AddSingleton<WebSocketService>();
             builder.Services.AddSingleton<GameManager>();
+            builder.Services.AddSingleton<WSChatHandler>();
 
 
             builder.Services.AddControllers();
@@ -133,7 +134,7 @@ public class Program
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error crítico en el servidor: {ex.Message}");
+            Console.WriteLine($"Error crï¿½tico en el servidor: {ex.Message}");
             Console.WriteLine(ex.StackTrace);
         }
     }
