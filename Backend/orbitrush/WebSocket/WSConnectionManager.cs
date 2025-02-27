@@ -48,8 +48,10 @@ public class WSConnectionManager
     public async Task HandleDisconnection(string userId, DisconnectionType type)
     {
         Console.WriteLine($"🔴 Jugador {userId} se ha desconectado. Determinando el contexto...");
-
-        await Task.Delay(3000); // ⏳ Esperar para ver si se reconecta
+        if(type == DisconnectionType.Game)
+        {
+            await Task.Delay(3000); 
+        }
 
         if (TryGetConnection(userId, out _))
         {

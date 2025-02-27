@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { FRIENDLIST_URL, USERLIST_URL, SEARCH_URL, GET_REQUEST_URL, DELETE_REQUEST_URL, SELF_PROFILE_URL, USER_PROFILE_URL, EDIT_PROFILE_URL } from "@/config";
 import { getFriendList, getUserList, searchUsers, getSelfProfile, getUserProfile, updateUserProfile } from "@/lib/users";
 import { getFriendRequests, rejectFriendRequest } from "@/lib/request";
+import { useAuth } from "@/context/authcontext";
 
 export const UsersContext = createContext();
 export const useUsers = () => useContext(UsersContext);
@@ -24,6 +25,7 @@ export const UsersProvider = ({ children }) => {
   const [friendRequests, setFriendRequests] = useState([]);
   const [selfProfile, setSelfProfile] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const { logout } = useAuth();
 
   // ----- Función para mapear el estado del usuario -----
   const mapState = (stateValue) => {
@@ -152,6 +154,7 @@ export const UsersProvider = ({ children }) => {
 
       // Opcionalmente, recargar el perfil del usuario después de la actualización
       await getSelfProfileData();
+      logout();
     } catch (error) {
       console.error("Error al actualizar el perfil del usuario:", error);
     }

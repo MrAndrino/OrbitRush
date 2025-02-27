@@ -650,12 +650,10 @@ public class WSGameHandler
         }
     }
 
-
     public async Task LeaveLobby(string userId)
     {
         await HandlePlayerExit(userId, isDisconnection: false);
     }
-
 
     public async Task HandlePlayerDisconnection(string playerId)
     {

@@ -1,8 +1,9 @@
-﻿using System.Net.WebSockets;
+﻿using orbitrush.Database.Repositories;
+using orbitrush.Domain;
+using System.Collections.Concurrent;
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using System.Collections.Concurrent;
-using orbitrush.Database.Repositories;
 
 public class WSChatHandler
 {
@@ -116,22 +117,38 @@ public class WSChatHandler
 
     private async Task BroadcastMessage(string sessionId, ChatMessage chatMessage)
     {
-        var formattedMessage = JsonSerializer.Serialize(new
+        using (var scope = _serviceProvider.CreateScope())
         {
-            Action = "chatMessage",
-            SenderId = chatMessage.SenderId,
-            SenderName = chatMessage.SenderName,
-            Message = chatMessage.Message,
-            Timestamp = chatMessage.Timestamp.ToString("HH:mm:ss")
-        });
-
-        var buffer = Encoding.UTF8.GetBytes(formattedMessage);
-
-        foreach (var userId in _connectionManager.GetAllUserIds())
-        {
-            if (_connectionManager.TryGetConnection(userId, out var socket) && socket.State == WebSocketState.Open)
+            var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
+            var gameService = gameManager.GetOrCreateGame(sessionId);
+            if (gameService == null)
             {
-                await socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                Console.WriteLine($"⚠ No se encontró una partida activa con SessionId: {sessionId}");
+                return;
+            }
+
+            var formattedMessage = JsonSerializer.Serialize(new
+            {
+                Action = "chatMessage",
+                SenderId = chatMessage.SenderId,
+                SenderName = chatMessage.SenderName,
+                Message = chatMessage.Message,
+                Timestamp = chatMessage.Timestamp.ToString("HH:mm:ss")
+            });
+
+            var buffer = Encoding.UTF8.GetBytes(formattedMessage);
+
+            string player1Id = gameService.Player1Id;
+            string player2Id = gameService.Player2Id;
+
+            if (_connectionManager.TryGetConnection(player1Id, out WebSocket player1Socket) && player1Socket.State == WebSocketState.Open)
+            {
+                await player1Socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+            }
+
+            if (!string.IsNullOrEmpty(player2Id) && _connectionManager.TryGetConnection(player2Id, out WebSocket player2Socket) && player2Socket.State == WebSocketState.Open)
+            {
+                await player2Socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
             }
         }
     }

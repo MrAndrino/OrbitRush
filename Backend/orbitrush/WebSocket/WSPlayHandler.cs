@@ -89,6 +89,8 @@ public class WSPlayHandler
         {
             var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
             var gameService = gameManager.GetOrCreateGame(sessionId);
+            if (gameService == null) return;
+
             var boardState = new CellState[16];
             for (int i = 0; i < 4; i++)
             {
@@ -97,6 +99,7 @@ public class WSPlayHandler
                     boardState[i * 4 + j] = gameService.Board.Grid[i, j];
                 }
             }
+
             var gameState = new
             {
                 action = "gameState",
@@ -109,12 +112,17 @@ public class WSPlayHandler
             var jsonMessage = JsonSerializer.Serialize(gameState);
             var buffer = Encoding.UTF8.GetBytes(jsonMessage);
 
-            foreach (var socket in _connectionManager.GetAllConnections())
+            string player1Id = gameService.Player1Id;
+            string player2Id = gameService.Player2Id;
+
+            if (_connectionManager.TryGetConnection(player1Id, out WebSocket player1Socket) && player1Socket.State == WebSocketState.Open)
             {
-                if (socket.State == WebSocketState.Open)
-                {
-                    await socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
-                }
+                await player1Socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+            }
+
+            if (!string.IsNullOrEmpty(player2Id) && _connectionManager.TryGetConnection(player2Id, out WebSocket player2Socket) && player2Socket.State == WebSocketState.Open)
+            {
+                await player2Socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
             }
         }
     }
