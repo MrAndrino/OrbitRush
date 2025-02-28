@@ -50,16 +50,22 @@ export const WebSocketProvider = ({ children }) => {
       switch (data.Action) {
 
         case "chatMessage":
-          setChatMessages((prev) => [...prev, {
-            senderId: data.SenderId,
-            senderName: data.SenderName,
-            message: data.Message,
-            timestamp: data.Timestamp,
-          }]);
+          setChatMessages((prev) => {
+            return [...prev, {
+              senderId: data.SenderId,
+              senderName: data.SenderName,
+              message: data.Message,
+              timestamp: data.Timestamp,
+              sessionId: data.SessionId
+            }];
+          });
+
           break;
 
         case "chatHistory":
-          setChatMessages(data.Messages || []);
+          if (data.SessionId === sessionId) {
+            setChatMessages(data.Messages || []);
+          }
           break;
 
         case "gameStarted":
@@ -450,7 +456,7 @@ export const WebSocketProvider = ({ children }) => {
 
     const mensaje = JSON.stringify({
       Action: "chatMessage",
-      SessionId: sessionId, // Usa la sesión actual
+      SessionId: sessionId,
       Message: message,
     });
 

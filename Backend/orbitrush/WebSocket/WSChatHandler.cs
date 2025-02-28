@@ -100,9 +100,14 @@ public class WSChatHandler
             var history = messages.Select(m => new
             {
                 Action = "chatHistory",
-                SenderId = m.SenderId,
-                Message = m.Message,
-                Timestamp = m.Timestamp.ToString("HH:mm:ss")
+                SessionId = sessionId,
+                Messages = messages.Select(m => new
+                {
+                    SenderId = m.SenderId,
+                    SenderName = m.SenderName,
+                    Message = m.Message,
+                    Timestamp = m.Timestamp.ToString("HH:mm:ss")
+                }).ToList()
             });
 
             var jsonHistory = JsonSerializer.Serialize(history);
