@@ -320,6 +320,9 @@ public class WSGameHandler
             Console.WriteLine($"✅ Partida iniciada con SessionId: {sessionId}");
 
             await StartGame(lobby.Player1Id, lobby.Player2Id, sessionId);
+
+            var playHandler = scope.ServiceProvider.GetRequiredService<WSPlayHandler>();
+            await playHandler.BroadcastGameStateAsync(sessionId);
         }
 
         activeLobbies.TryRemove(lobbyId, out _);

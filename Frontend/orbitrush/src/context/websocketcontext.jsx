@@ -1,10 +1,9 @@
 'use client';
 
-import { createContext, useState, useEffect, useContext } from "react";
+import { createContext, useState, useEffect, useContext, useRef } from "react";
 import { toast } from 'react-hot-toast';
 import { useRouter } from "next/navigation";
 import MatchFoundModal from "@/components/miscelaneus/modal/matchfound/matchfound";
-import { CellState } from "@/types/game";
 
 const WebSocketContext = createContext();
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -21,7 +20,10 @@ export const WebSocketProvider = ({ children }) => {
   const [chatMessages, setChatMessages] = useState([]);
 
   const [board, setBoard] = useState(Array.from({ length: 4 }, () => Array(4).fill("Empty")));
-  const [currentPlayer, setCurrentPlayer] = useState(null);
+  const [currentPlayer, setCurrentPlayer] = useState(() => {
+    return sessionStorage.getItem("currentPlayer") || null;
+  });
+
   const [gameState, setGameState] = useState("Laying");
   const [sessionId, setSessionId] = useState(null);
   const [player1Id, setPlayer1Id] = useState(null);
@@ -78,7 +80,7 @@ export const WebSocketProvider = ({ children }) => {
           localStorage.setItem("sessionId", data.SessionId); // 🔥 Guardamos en localStorage
           console.log("✅ sessionId guardado en contexto y localStorage:", data.SessionId);
 
-          router.push("/pruebachat");
+          router.push("/prueba");
           break;
 
         case "lobbyCreated":
@@ -501,18 +503,21 @@ export const WebSocketProvider = ({ children }) => {
 
       if (data.action === "gameState") {
         console.log("📩 Actualización del juego recibida:", data);
+        console.log("🔎 Estado previo del tablero:", board);
 
-        const newBoard = data.board.map(row =>
-          row.map(cell => {
-            if (cell === "Black" || cell === "White" || cell === "Empty") {
-              return cell; // Convertimos a valores válidos
-            }
-            return "Empty"; // En caso de error, mantenemos la celda vacía
-          })
-        );
+        // Transformar el array plano en una matriz 4x4
+        const formattedBoard = [];
+        for (let i = 0; i < 4; i++) {
+          formattedBoard.push(data.board.slice(i * 4, i * 4 + 4));
+        }
 
-        setBoard(newBoard);
+        console.log("✅ Tablero formateado correctamente antes de setBoard:", formattedBoard);
+        setBoard(formattedBoard);
+
+        console.log("🔄 Actualizando currentPlayer a:", data.currentPlayer);
         setCurrentPlayer(data.currentPlayer);
+
+        console.log("📢 Actualizando gameState a:", data.state);
         setGameState(data.state);
       }
     };
@@ -523,6 +528,22 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [ws]);
 
+  // Guarda currentPlayer en sessionStorage cada vez que cambia
+  useEffect(() => {
+    if (currentPlayer !== null) {
+      sessionStorage.setItem("currentPlayer", currentPlayer);
+    }
+  }, [currentPlayer]);
+
+  // Recupera currentPlayer si se resetea a null
+  useEffect(() => {
+    if (currentPlayer === null) {
+      const storedPlayer = sessionStorage.getItem("currentPlayer");
+      if (storedPlayer) {
+        setCurrentPlayer(storedPlayer);
+      }
+    }
+  }, [currentPlayer]);
 
   // ----- Valor del contexto y renderizado-----
   const contextValue = {

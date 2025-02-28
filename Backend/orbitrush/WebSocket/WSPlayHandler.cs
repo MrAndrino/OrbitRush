@@ -83,8 +83,10 @@ public class WSPlayHandler
         }
     }
 
-    private async Task BroadcastGameStateAsync(string sessionId)
+    public async Task BroadcastGameStateAsync(string sessionId)
     {
+        Console.WriteLine($"📡 Enviando estado del juego para SessionId: {sessionId}");
+
         using (var scope = _serviceProvider.CreateScope())
         {
             var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();

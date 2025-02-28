@@ -20,6 +20,21 @@ const GameBoard = () => {
         }
     }, [sessionId]);
 
+    useEffect(() => {
+        console.log("📊 Tablero en GameBoard actualizado:", board);
+    }, [board]);
+    
+    useEffect(() => {
+        console.log("🎯 Jugador actual en GameBoard:", currentPlayer);
+    }, [currentPlayer]);
+    
+    useEffect(() => {
+        console.log("📢 Estado del juego en GameBoard:", gameState);
+    }, [gameState]);
+    
+    useEffect(() => {
+        console.log("🔄 currentPlayer actualizado en GameBoard.tsx:", currentPlayer);
+    }, [currentPlayer]);
 
     // 🔥 Manejo de clic en celda
     const handleCellClick = (rowIndex: number, colIndex: number) => {
@@ -61,6 +76,16 @@ const GameBoard = () => {
         ws.send(message);
     };
 
+    if (!currentPlayer) {
+        return <p className="text-white text-lg">Cargando datos del juego...</p>;
+    }
+
+    useEffect(() => {
+        setTimeout(() => {
+            console.log("⏳ Esperando re-render... currentPlayer:", currentPlayer);
+        }, 500);
+    }, [currentPlayer]);
+    
     return (
         <div className="flex flex-col items-center gap-4 p-4">
             <h1 className="text-2xl font-bold">🚀 Orbit Rush</h1>
