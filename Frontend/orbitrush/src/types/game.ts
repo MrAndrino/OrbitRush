@@ -1,5 +1,5 @@
 export enum CellState {
-    Empty = "Empty",
-    Black = "Black",
-    White = "White"
+    Empty = 0,
+    Black = 1,
+    White = 2
   }

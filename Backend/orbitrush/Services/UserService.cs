@@ -1,4 +1,5 @@
 ﻿using orbitrush.Database.Entities;
+using orbitrush.Database.Entities.Enums;
 using orbitrush.Database.Repositories;
 using orbitrush.Dtos;
 using orbitrush.Mappers;
@@ -24,10 +25,18 @@ public class UserService
         return await _unitOfWork.UserRepository.GetNameByIdAsync(id);
     }
 
-    public async Task<List<UserDto>> GetFriendList(int id)
+    public async Task<List<UserDto>> GetFriendList(int userId)
     {
-        return await _unitOfWork.UserRepository.GetFriendList(id);
+        var friends = await _unitOfWork.UserRepository.GetFriendList(userId);
+
+        friends = friends.OrderBy(user => user.State == StateEnum.Connected ? 0 :
+                                      user.State == StateEnum.Playing ? 1 : 2)
+                         .ThenBy(user => user.Name)
+                         .ToList();
+
+        return friends;
     }
+
 
     public async Task<string> GetUsedImageAsync(IFormFile image, string defaultImage, string name)
     {
@@ -50,8 +59,14 @@ public class UserService
 
     public async Task<List<UserDto>> GetUsersExcludingFriends(int userId)
     {
-        return await _unitOfWork.UserRepository.GetUsersExcludingFriends(userId);
+        var users = await _unitOfWork.UserRepository.GetUsersExcludingFriends(userId);
+
+        users = users.OrderBy(user => user.Name).ToList();
+
+        return users;
     }
+
+
 
     public async Task<List<UserDto>> SearchUsers(int userId, string search, bool includeFriends)
     {
@@ -167,4 +182,26 @@ public class UserService
             }
         }
     }
+
+    public async Task<List<UserDto>> GetAllUsersAsync(int userId)
+    {
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
+
+        users = users.Where(user => user.Id != userId)
+                     .OrderBy(user => user.Name)
+                     .ToList();
+
+        return _userMapper.UserToDtoList(users);
+    }
+
+    public async Task<bool> UpdateUserRole(int userId, string newRole)
+    {
+        return await _unitOfWork.UserRepository.UpdateUserRoleAsync(userId, newRole);
+    }
+
+    public async Task<bool> ToggleBanUser(int userId)
+    {
+        return await _unitOfWork.UserRepository.ToggleBanUserAsync(userId);
+    }
+
 }

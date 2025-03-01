@@ -120,5 +120,56 @@ export async function updateUserProfile(url, token, formData) {
   if (!response.ok) {
     throw new Error("Error al modificar el perfil del usuario");
   }
-  return {message : "Datos cambiados exitosamente"}
+  return { message: "Datos cambiados exitosamente" }
+}
+
+export async function getAllUsers(url, token) {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al obtener la lista de usuarios");
+  }
+
+  const data = await response.json();
+  return data;
+}
+
+export async function updateUserRole(url, token, newRole) {
+  const response = await fetch(url, {  // ✅ URL correcta sin newRole
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(newRole)  // ✅ Enviar el role en el body
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al actualizar el rol del usuario");
+  }
+
+  return await response.json();
+}
+
+
+export async function toggleBanUser(url, token) {
+  const response = await fetch(url, {  // ✅ URL correcta sin "undefined"
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al cambiar el estado de baneo del usuario");
+  }
+
+  return await response.json();
 }

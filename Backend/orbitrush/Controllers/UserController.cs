@@ -143,4 +143,43 @@ public class UserController : BaseController
             return StatusCode(500, new { message = "Error al actualizar el usuario.", detail = ex.Message });
         }
     }
+
+    [HttpGet("allusers")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        try
+        {
+            int userId = GetUserId();
+            var users = await _userService.GetAllUsersAsync(userId);
+            return Ok(users);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message, details = ex.ToString() });
+        }
+    }
+
+    [HttpPatch("updaterole/{userId}")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> UpdateUserRole(int userId, [FromBody] string newRole)
+    {
+        bool updated = await _userService.UpdateUserRole(userId, newRole);
+        if (!updated)
+            return NotFound(new { message = "Usuario no encontrado." });
+
+        return Ok(new { message = "Rol actualizado correctamente." });
+    }
+
+    [HttpPatch("toggleban/{userId}")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> ToggleBanUser(int userId)
+    {
+        bool updated = await _userService.ToggleBanUser(userId);
+        if (!updated)
+            return NotFound(new { message = "Usuario no encontrado." });
+
+        return Ok(new { message = "Estado de baneo cambiado correctamente." });
+    }
+
 }

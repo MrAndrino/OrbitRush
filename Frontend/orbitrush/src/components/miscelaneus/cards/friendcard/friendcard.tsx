@@ -96,7 +96,7 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
       </Modal>
 
 
-      <Modal isOpen={isSecondModalOpen} closeModal={closeSecondModal} color="red" className="w-[40%]">
+      <Modal isOpen={isSecondModalOpen} closeModal={closeSecondModal} color="red" className="flex flexcol w-[40%] justify-center">
         <div className="flex flex-col gap-12">
           <p className="text-2xl">
             Seguro que quieres eliminar a "{user.name}" de tu lista de amigos?

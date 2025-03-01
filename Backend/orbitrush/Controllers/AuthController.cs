@@ -51,6 +51,11 @@ public class AuthController : ControllerBase
                 return Unauthorized("Nombre de Usuario, email o contraseña inválidos");
             }
 
+            if (user.IsBanned)
+            {
+                return StatusCode(403, new { message = "Este usuario está baneado y no puede iniciar sesión." });
+            }
+
             string accessToken = GenerateToken(user.Id.ToString(), user.Name, user.Image, user.Role);
 
             return Ok(new AccessTokenJwt { AccessToken = accessToken });

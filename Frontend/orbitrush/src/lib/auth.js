@@ -5,6 +5,10 @@ export async function Login(url, request) {
     body: JSON.stringify(request)
   });
 
+  if (response.status === 403) {
+    throw new Error("Estás banead@, no puedes acceder.");
+  }
+
   if (!response.ok){
     throw new Error("Credenciales erróneas");
   }

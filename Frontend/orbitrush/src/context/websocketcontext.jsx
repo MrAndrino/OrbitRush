@@ -20,7 +20,7 @@ export const WebSocketProvider = ({ children }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
 
-  const [board, setBoard] = useState(Array(16).fill("Empty"));
+  const [board, setBoard] = useState(Array(16).fill(0));
   const [currentPlayer, setCurrentPlayer] = useState(() => {
     return sessionStorage.getItem("currentPlayer") || null;
   });
@@ -60,6 +60,10 @@ export const WebSocketProvider = ({ children }) => {
 
           console.log("✅ Mensaje validado:", data);
           switch (data.Action) {
+
+            case "gameState":
+              handleGameUpdate(data)
+              break;
 
             case "chatMessage":
               setChatMessages((prev) => {
@@ -503,39 +507,23 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [ws]);
 
-  // ----- useEffect para manejo del juego -----
-  useEffect(() => {
-    if (!ws) return;
+  // ----- Función para manejo del juego -----
+  const handleGameUpdate = (data) => {
+    console.log("📩 Actualización del juego recibida:", data);
 
-    const handleGameUpdate = (event) => {
-      const data = JSON.parse(event.data);
+    const formattedBoard = [];
+    for (let i = 0; i < 4; i++) {
+      formattedBoard.push(data.Board.slice(i * 4, i * 4 + 4));
+    }
 
-      if (data.action === "gameState") {
-        console.log("📩 Actualización del juego recibida:", data);
+    console.log("✅ Tablero formateado correctamente:", formattedBoard);
 
-        // Convertimos el array de 16 celdas en una matriz de 4x4
-        const formattedBoard = [];
-        for (let i = 0; i < 4; i++) {
-          formattedBoard.push(data.board.slice(i * 4, i * 4 + 4));
-        }
-
-        console.log("✅ Tablero formateado correctamente:", formattedBoard);
-
-        setBoard(formattedBoard);
-        setCurrentPlayer(data.currentPlayer);
-        setGameState(data.state);
-      }
-    };
-
-    ws.addEventListener("message", handleGameUpdate);
-    return () => {
-      ws.removeEventListener("message", handleGameUpdate);
-    };
-  }, [ws]);
-
-
-
-
+    setBoard(formattedBoard);
+    setCurrentPlayer(data.CurrentPlayer);
+    setGameState(data.State);
+  };
+  
+ 
   // Guarda currentPlayer en sessionStorage cada vez que cambia
   useEffect(() => {
     if (currentPlayer !== null) {

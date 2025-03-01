@@ -104,11 +104,11 @@ public class WSPlayHandler
 
             var gameState = new
             {
-                action = "gameState",
-                sessionId = sessionId,
-                board = boardState,
-                currentPlayer = gameService.Board.CurrentPlayer.ToString(),
-                state = gameService.State.ToString()
+                Action = "gameState",
+                SessionId = sessionId,
+                Board = boardState,
+                CurrentPlayer = gameService.Board.CurrentPlayer.ToString(),
+                State = gameService.State.ToString()
             };
 
             var jsonMessage = JsonSerializer.Serialize(gameState);
@@ -239,9 +239,9 @@ public class WSPlayHandler
 
             var gameOverMessage = new
             {
-                action = "gameOver",
-                sessionId = sessionId,
-                winner = winnerId
+                Action = "gameOver",
+                SessionId = sessionId,
+                Winner = winnerId
             };
 
             var jsonMessage = JsonSerializer.Serialize(gameOverMessage);

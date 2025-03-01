@@ -11,6 +11,7 @@ public class User
     public string Image { get; set; }
     public string Role { get; set; }
     public StateEnum State { get; set; }
+    public bool IsBanned { get; set; } = false;
 
 
     public List<UserFriend> Friends { get; set; }

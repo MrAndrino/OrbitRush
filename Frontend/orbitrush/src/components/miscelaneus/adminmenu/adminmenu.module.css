@@ -1,0 +1,82 @@
+.title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.userList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.userCard {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr 2fr 1fr 1fr 2fr;
+    align-items: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #1c2028, #151515);
+    gap: 1rem;
+    border: 1px solid rgba(0, 153, 255, 0.548);
+    border-radius: 5px;
+    
+}
+
+.userImage {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    border: 2px solid rgb(0, 153, 255);
+    box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+}
+
+.userName {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.userEmail {
+    color: gray;
+    font-size: 0.9rem;
+    font-family: var(--font-secondary);
+    min-width: 10rem;
+}
+
+.userRole {
+    font-size: 0.9rem;
+    font-family: var(--font-secondary);
+    min-width: 6rem;
+}
+
+.userEmail,
+.userRole,
+.banned,
+.active {
+    text-align: center;
+    /* Centra el texto dentro de su min-width */
+    display: flex;
+    justify-content: center;
+    /* Alinea el contenido en el centro */
+    align-items: center;
+    /* Asegura que también esté centrado verticalmente */
+    width: 100%;
+    /* Hace que use todo el espacio del grid */
+}
+
+.banned {
+    color: red;
+    font-size: 0.9rem;
+    min-width: 6rem;
+}
+
+.active {
+    color: hidden;
+    font-size: 0.9rem;
+    min-width: 6rem;
+}
+
+.buttonContainer {
+    display: flex;
+    gap: 0.75rem;
+}

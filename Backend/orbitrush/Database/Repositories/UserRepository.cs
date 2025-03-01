@@ -161,4 +161,32 @@ public class UserRepository : Repository<User, int>
 
         return user;
     }
+
+    public async Task<List<User>> GetAllUsersAsync()
+    {
+        return await Context.Users.ToListAsync();
+    }
+
+    public async Task<bool> UpdateUserRoleAsync(int userId, string newRole)
+    {
+        var user = await Context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+            return false;
+
+        user.Role = newRole;
+        await Context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> ToggleBanUserAsync(int userId)
+    {
+        var user = await Context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+            return false;
+
+        user.IsBanned = !user.IsBanned;
+        await Context.SaveChangesAsync();
+        return true;
+    }
+
 }

@@ -22,8 +22,11 @@ public class UserMapper
         {
             Id = user.Id,
             Name = user.Name,
+            Email = user.Email,
             Image = user.Image,
+            Role = user.Role,
             State = user.State,
+            IsBanned = user.IsBanned
         };
     }
 

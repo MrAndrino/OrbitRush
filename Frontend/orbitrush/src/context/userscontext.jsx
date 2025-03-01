@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { FRIENDLIST_URL, USERLIST_URL, SEARCH_URL, GET_REQUEST_URL, DELETE_REQUEST_URL, SELF_PROFILE_URL, USER_PROFILE_URL, EDIT_PROFILE_URL } from "@/config";
-import { getFriendList, getUserList, searchUsers, getSelfProfile, getUserProfile, updateUserProfile } from "@/lib/users";
+import { FRIENDLIST_URL, USERLIST_URL, SEARCH_URL, GET_REQUEST_URL, DELETE_REQUEST_URL, SELF_PROFILE_URL, USER_PROFILE_URL, EDIT_PROFILE_URL, ALLLIST_URL, ROLE_URL, BANN_URL } from "@/config";
+import { getFriendList, getUserList, searchUsers, getSelfProfile, getUserProfile, updateUserProfile, getAllUsers, updateUserRole, toggleBanUser } from "@/lib/users";
 import { getFriendRequests, rejectFriendRequest } from "@/lib/request";
 import { useAuth } from "@/context/authcontext";
 
@@ -20,6 +20,7 @@ export const UsersProvider = ({ children }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [includeFriends, setIncludeFriends] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
 
   // ========== Estados de Solicitudes de Amistad y Perfiles ==========
   const [friendRequests, setFriendRequests] = useState([]);
@@ -70,6 +71,38 @@ export const UsersProvider = ({ children }) => {
       setUserList(response.map(user => ({ ...user, state: mapState(user.state) })));
     } catch (error) {
       console.error("Error al obtener la lista de usuarios:", error);
+    }
+  };
+
+  // ----- Obtener lista de TODOS los usuarios menos el usuario autenticado -----
+  const getAllUsersList = async () => {
+    try {
+      const response = await getAllUsers(ALLLIST_URL, token);
+      setAllUsers(response.map(user => ({ ...user, state: mapState(user.state) })));
+    } catch (error) {
+      console.error("Error al obtener la lista de todos los usuarios:", error);
+    }
+  };
+
+  // ----- Cambiar el rol de un usuario -----
+  const changeUserRole = async (userId, newRole) => {
+    try {
+      console.log("URL para actualizar rol:", ROLE_URL(userId));
+
+      await updateUserRole(ROLE_URL(userId), token, newRole);
+      await getAllUsersList();
+    } catch (error) {
+      console.error("Error al actualizar el rol del usuario:", error);
+    }
+  };
+
+  // ----- Banear o desbanear un usuario -----
+  const banUnbanUser = async (userId) => {
+    try {
+      await toggleBanUser(BANN_URL(userId), token);
+      await getAllUsersList();
+    } catch (error) {
+      console.error("Error al cambiar el estado de baneo del usuario:", error);
     }
   };
 
@@ -219,6 +252,8 @@ export const UsersProvider = ({ children }) => {
   const contextValue = {
     friendList,
     userList,
+    allUsers,
+    getAllUsersList,
     searchResults,
     searchTerm,
     includeFriends,
@@ -233,6 +268,8 @@ export const UsersProvider = ({ children }) => {
     getSelfProfileData,
     getUserProfileData,
     updateUserProfileData,
+    changeUserRole,
+    banUnbanUser,
     selfProfile,
     userProfile
   };
