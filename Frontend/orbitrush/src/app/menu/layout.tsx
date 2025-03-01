@@ -1,5 +1,9 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/authcontext';
+import { toast } from 'react-hot-toast';
 import Footer from '@/components/mainlayout/footer/footer';
 import Header from '@/components/mainlayout/header/header';
 import Friendbox from '@/components/mainlayout/userbox/boxfriend/friendbox';
@@ -10,6 +14,17 @@ export default function MenuLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { token } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!token) {
+      console.log("Debes loguear antes");
+      router.push('/login');
+    }
+  }, [token, router]);
+
+  if (!token) return null;
 
   return (
     <section className="min-h-[100vh] flex flex-col">
