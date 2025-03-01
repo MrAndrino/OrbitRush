@@ -4,6 +4,7 @@ import { createContext, useState, useEffect, useContext, useRef } from "react";
 import { toast } from 'react-hot-toast';
 import { useRouter } from "next/navigation";
 import MatchFoundModal from "@/components/miscelaneus/modal/matchfound/matchfound";
+import { CellState } from "@/types/game";
 
 const WebSocketContext = createContext();
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -19,7 +20,7 @@ export const WebSocketProvider = ({ children }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
 
-  const [board, setBoard] = useState(Array.from({ length: 4 }, () => Array(4).fill("Empty")));
+  const [board, setBoard] = useState(Array(16).fill("Empty"));
   const [currentPlayer, setCurrentPlayer] = useState(() => {
     return sessionStorage.getItem("currentPlayer") || null;
   });
@@ -47,161 +48,169 @@ export const WebSocketProvider = ({ children }) => {
     };
 
     socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("data: ", data)
-      switch (data.Action) {
+      socket.onmessage = (event) => {
+        try {
+          console.log("📩 Mensaje crudo recibido:", event.data);
+          const data = JSON.parse(event.data);
 
-        case "chatMessage":
-          setChatMessages((prev) => {
-            return [...prev, {
-              senderId: data.SenderId,
-              senderName: data.SenderName,
-              message: data.Message,
-              timestamp: data.Timestamp,
-              sessionId: data.SessionId
-            }];
-          });
-
-          break;
-
-        case "chatHistory":
-          if (data.SessionId === sessionId) {
-            setChatMessages(data.Messages || []);
+          if (typeof data !== "object" || !data.Action) {
+            console.error("❌ Estructura de mensaje inválida:", data);
+            return;
           }
-          break;
 
-        case "gameStarted":
-          console.log("🎮 Partida iniciada: ", data);
+          console.log("✅ Mensaje validado:", data);
+          switch (data.Action) {
 
-          setSessionId(data.SessionId);
-          setPlayer1Id(data.Player1Id);
-          setPlayer2Id(data.Player2Id);
+            case "chatMessage":
+              setChatMessages((prev) => {
+                return [...prev, {
+                  senderId: data.SenderId,
+                  senderName: data.SenderName,
+                  message: data.Message,
+                  timestamp: data.Timestamp,
+                  sessionId: data.SessionId
+                }];
+              });
 
-          localStorage.setItem("sessionId", data.SessionId); // 🔥 Guardamos en localStorage
-          console.log("✅ sessionId guardado en contexto y localStorage:", data.SessionId);
+              break;
 
-          router.push("/prueba");
-          break;
+            case "chatHistory":
+              if (data.SessionId === sessionId) {
+                setChatMessages(data.Messages || []);
+              }
+              break;
 
-        case "lobbyCreated":
-          console.log("✅ Lobby creado, redirigiendo...");
-          localStorage.setItem("lobbyId", data.LobbyId);
-          setMatchData(null);
-          router.push("/menu/lobby");
-          break;
+            case "gameStarted":
+              console.log("🎮 Partida iniciada: ", data);
+              localStorage.setItem("sessionId", data.SessionId);
+              console.log("✅ sessionId guardado en contexto y localStorage:", data.SessionId);
 
-        case "lobbyUpdated":
-          console.log("✅ Lobby actualizado:", data);
-          break;
+              router.push("/prueba");
+              break;
 
-        case "playerLeftLobby":
-          console.log("Un jugador ha abandonado el lobby");
-          break;
+            case "lobbyCreated":
+              console.log("✅ Lobby creado, redirigiendo...");
+              localStorage.setItem("lobbyId", data.LobbyId);
+              setMatchData(null);
+              router.push("/menu/lobby");
+              break;
 
-        case "leftLobby":
-          console.log("✅ Has salido del lobby. Redirigiendo...");
-          localStorage.removeItem("lobbyId");
-          router.push("/menu");
-          toast.success(data.Message);
-          break;
+            case "lobbyUpdated":
+              console.log("✅ Lobby actualizado:", data);
+              break;
 
-        case "playerLeftLobby":
-          console.log("❌ Tu oponente ha abandonado el lobby.");
-          toast.error("Tu oponente ha salido del lobby.");
-          break;
+            case "playerLeftLobby":
+              console.log("Un jugador ha abandonado el lobby");
+              break;
 
-        case "randomMatchFound":
-          setMatchData({ matchId: data.MatchId, opponentId: data.Opponent });
-          break;
+            case "leftLobby":
+              console.log("✅ Has salido del lobby. Redirigiendo...");
+              localStorage.removeItem("lobbyId");
+              router.push("/menu");
+              toast.success(data.Message);
+              break;
 
-        case "randomMatchAccepted":
-          toast.success(data.Message);
+            case "playerLeftLobby":
+              console.log("❌ Tu oponente ha abandonado el lobby.");
+              toast.error("Tu oponente ha salido del lobby.");
+              break;
 
-          setMatchData((prev) => {
-            if (prev) {
-              return { ...prev, acceptedByMe: true };
-            }
-            return prev;
-          });
-          break;
+            case "randomMatchFound":
+              setMatchData({ matchId: data.MatchId, opponentId: data.Opponent });
+              break;
 
-        case "randomMatchRejected":
-        case "matchmakingCancelled":
-          toast.error(data.Message);
-          setMatchData(null);
-          setIsSearching(false);
-          break;
+            case "randomMatchAccepted":
+              toast.success(data.Message);
 
-        case "invitationReceived":
-          setGameInvites((prev) => [...prev, { id: Date.now(), sender: data.FromUserName, senderId: data.FromUserId }]);
-          toast.custom(
-            <div style={{
-              backgroundColor: 'var(--backgroundtoast)',
-              color: 'var(--foreground)',
-              fontSize: '16px',
-              borderRadius: '8px',
-              padding: '10px 20px',
-              border: '2px solid rgba(255, 140, 0)',
-              boxShadow: '0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6)',
-            }}>
-              {data.Message}
-            </div>
-          );
-          break;
+              setMatchData((prev) => {
+                if (prev) {
+                  return { ...prev, acceptedByMe: true };
+                }
+                return prev;
+              });
+              break;
 
-        case "answerGameRequest":
-          setGameInvites((prev) => {
-            const updatedInvites = prev.filter(inv => inv.senderId !== data.TargetId);
-            return updatedInvites;
-          });
-          break;
+            case "randomMatchRejected":
+            case "matchmakingCancelled":
+              toast.error(data.Message);
+              setMatchData(null);
+              setIsSearching(false);
+              break;
 
-        case "friendRequestReceived":
-          handleFriendRequest(data);
-          const friendRequestEvent = new CustomEvent("friendRequestReceived", {
-            detail: data,
-          });
-          window.dispatchEvent(friendRequestEvent);
-          break;
+            case "invitationReceived":
+              setGameInvites((prev) => [...prev, { id: Date.now(), sender: data.FromUserName, senderId: data.FromUserId }]);
+              toast.custom(
+                <div style={{
+                  backgroundColor: 'var(--backgroundtoast)',
+                  color: 'var(--foreground)',
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  border: '2px solid rgba(255, 140, 0)',
+                  boxShadow: '0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6)',
+                }}>
+                  {data.Message}
+                </div>
+              );
+              break;
 
-        case "acceptFriendRequest":
-          toast.success(data.Message)
-          const acceptFriendEvent = new CustomEvent("acceptFriendRequest", {
-            detail: data,
-          });
-          window.dispatchEvent(acceptFriendEvent);
-          break;
+            case "answerGameRequest":
+              setGameInvites((prev) => {
+                const updatedInvites = prev.filter(inv => inv.senderId !== data.TargetId);
+                return updatedInvites;
+              });
+              break;
 
-        case "userStateChanged":
-          const friendStateEvent = new CustomEvent("friendStateUpdate", {
-            detail: { userId: data.userId, newState: data.State }
-          });
-          window.dispatchEvent(friendStateEvent);
-          break;
+            case "friendRequestReceived":
+              handleFriendRequest(data);
+              const friendRequestEvent = new CustomEvent("friendRequestReceived", {
+                detail: data,
+              });
+              window.dispatchEvent(friendRequestEvent);
+              break;
 
-        case "onlineCountUpdate":
-          console.log('Nuevo conteo de usuarios conectados:', data.OnlineCount);
-          setOnlineCount(data.OnlineCount);
-          break;
+            case "acceptFriendRequest":
+              toast.success(data.Message)
+              const acceptFriendEvent = new CustomEvent("acceptFriendRequest", {
+                detail: data,
+              });
+              window.dispatchEvent(acceptFriendEvent);
+              break;
 
-        case "updateFriendList":
-          const updateFriendEvent = new CustomEvent("updateFriendList", {
-            detail: { friends: data.Friends }
-          });
-          window.dispatchEvent(updateFriendEvent);
-          break;
+            case "userStateChanged":
+              const friendStateEvent = new CustomEvent("friendStateUpdate", {
+                detail: { userId: data.userId, newState: data.State }
+              });
+              window.dispatchEvent(friendStateEvent);
+              break;
 
-        case "deleteFriend":
-          const deleteFriendEvent = new CustomEvent("deleteFriend", {
-            detail: { friends: data.Friends }
-          });
-          window.dispatchEvent(deleteFriendEvent);
-          break;
+            case "onlineCountUpdate":
+              console.log('Nuevo conteo de usuarios conectados:', data.OnlineCount);
+              setOnlineCount(data.OnlineCount);
+              break;
 
-        default:
-          console.error("No se ha leído el mensaje");
-      }
-    };
+            case "updateFriendList":
+              const updateFriendEvent = new CustomEvent("updateFriendList", {
+                detail: { friends: data.Friends }
+              });
+              window.dispatchEvent(updateFriendEvent);
+              break;
+
+            case "deleteFriend":
+              const deleteFriendEvent = new CustomEvent("deleteFriend", {
+                detail: { friends: data.Friends }
+              });
+              window.dispatchEvent(deleteFriendEvent);
+              break;
+
+            default:
+              console.warn("⚠️ Mensaje no reconocido:", data);
+          }
+        } catch (error) {
+          console.error("❌ Error al procesar mensaje WebSocket:", event.data, error);
+        }
+      };
+    }
 
     socket.onerror = (error) => {
       console.error("❌ Error al conectar el WebSocket", error);
@@ -503,21 +512,17 @@ export const WebSocketProvider = ({ children }) => {
 
       if (data.action === "gameState") {
         console.log("📩 Actualización del juego recibida:", data);
-        console.log("🔎 Estado previo del tablero:", board);
 
-        // Transformar el array plano en una matriz 4x4
+        // Convertimos el array de 16 celdas en una matriz de 4x4
         const formattedBoard = [];
         for (let i = 0; i < 4; i++) {
           formattedBoard.push(data.board.slice(i * 4, i * 4 + 4));
         }
 
-        console.log("✅ Tablero formateado correctamente antes de setBoard:", formattedBoard);
+        console.log("✅ Tablero formateado correctamente:", formattedBoard);
+
         setBoard(formattedBoard);
-
-        console.log("🔄 Actualizando currentPlayer a:", data.currentPlayer);
         setCurrentPlayer(data.currentPlayer);
-
-        console.log("📢 Actualizando gameState a:", data.state);
         setGameState(data.state);
       }
     };
@@ -527,6 +532,9 @@ export const WebSocketProvider = ({ children }) => {
       ws.removeEventListener("message", handleGameUpdate);
     };
   }, [ws]);
+
+
+
 
   // Guarda currentPlayer en sessionStorage cada vez que cambia
   useEffect(() => {

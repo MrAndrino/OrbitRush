@@ -23,15 +23,15 @@ const GameBoard = () => {
     useEffect(() => {
         console.log("📊 Tablero en GameBoard actualizado:", board);
     }, [board]);
-    
+
     useEffect(() => {
         console.log("🎯 Jugador actual en GameBoard:", currentPlayer);
     }, [currentPlayer]);
-    
+
     useEffect(() => {
         console.log("📢 Estado del juego en GameBoard:", gameState);
     }, [gameState]);
-    
+
     useEffect(() => {
         console.log("🔄 currentPlayer actualizado en GameBoard.tsx:", currentPlayer);
     }, [currentPlayer]);
@@ -85,7 +85,7 @@ const GameBoard = () => {
             console.log("⏳ Esperando re-render... currentPlayer:", currentPlayer);
         }, 500);
     }, [currentPlayer]);
-    
+
     return (
         <div className="flex flex-col items-center gap-4 p-4">
             <h1 className="text-2xl font-bold">🚀 Orbit Rush</h1>
@@ -93,18 +93,15 @@ const GameBoard = () => {
                 <>
                     <p className="text-lg">{gameState === "GameOver" ? "🛑 Juego terminado" : `Turno de: ${currentPlayer}`}</p>
                     <div className="grid grid-cols-4 gap-2">
-                        {board.map((row: CellState[], rowIndex: number) =>
-                            row.map((cell: CellState, colIndex: number) => (
-                                <div
-                                    key={`${rowIndex}-${colIndex}`}
-                                    onClick={() => handleCellClick(rowIndex, colIndex)}
-                                    className={`w-16 h-16 flex items-center justify-center border border-gray-500 text-2xl cursor-pointer ${cell === "Black" ? "bg-black text-white" : cell === "White" ? "bg-white text-black" : "bg-gray-800"
-                                        }`}
-                                >
-                                    {cell === "Black" ? "⚫" : cell === "White" ? "⚪" : ""}
-                                </div>
-                            ))
-                        )}
+                        {board.map((cell: CellState, index: number) => (
+                            <div
+                                key={index}
+                                onClick={() => handleCellClick(Math.floor(index / 4), index % 4)}
+                                className={`w-16 h-16 flex items-center justify-center border border-gray-500 text-2xl cursor-pointer ${cell === CellState.Black ? "bg-black text-white" : cell === CellState.White ? "bg-white text-black" : "bg-gray-800"}`}
+                            >
+                                {cell === CellState.Black ? "⚫" : cell === CellState.White ? "⚪" : ""}
+                            </div>
+                        ))}
                     </div>
                 </>
             ) : (
