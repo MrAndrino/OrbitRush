@@ -20,9 +20,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
     const storedPlayer1 = sessionStorage.getItem("player1Id");
     const storedPlayer2 = sessionStorage.getItem("player2Id");
     const isPlayer1 = String(userId) === String(storedPlayer1);
-    const isPlayer2 = String(userId) === String(storedPlayer2);
-    const hoverClass = isPlayer1 ? styles["hover-blue"] : (isPlayer2 ? styles["hover-orange"] : "");
-
+    const isCurrentPlayer = currentPlayer === (isPlayer1 ? "Black" : "White");
+    const canHover = isCurrentPlayer && gameState !== "WaitingForOrbit";
+    const hoverClass = canHover ? (isPlayer1 ? styles["hover-blue"] : styles["hover-orange"]) : "";
 
     useEffect(() => {
         if (!ws) {
