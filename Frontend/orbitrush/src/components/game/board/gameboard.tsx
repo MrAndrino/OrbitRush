@@ -17,6 +17,12 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
     const { ws, sessionId, board, currentPlayer, gameState, connectWebSocket } =
         useWebSocket();
     const [localSessionId, setLocalSessionId] = useState<string | null>(null);
+    const storedPlayer1 = sessionStorage.getItem("player1Id");
+    const storedPlayer2 = sessionStorage.getItem("player2Id");
+    const isPlayer1 = String(userId) === String(storedPlayer1);
+    const isPlayer2 = String(userId) === String(storedPlayer2);
+    const hoverClass = isPlayer1 ? styles["hover-blue"] : (isPlayer2 ? styles["hover-orange"] : "");
+
 
     useEffect(() => {
         if (!ws) {
@@ -151,7 +157,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
 
     return (
         <div className={styles.container}>
-            <h1 className={styles.title}>🚀 Orbit Rush</h1>
             {localSessionId ? (
                 <>
                     <p className={styles.currentTurn}>
@@ -169,10 +174,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
                                             ? styles.black
                                             : cell === CellState.White
                                                 ? styles.white
-                                                : styles.empty
+                                                : `${styles.empty} ${hoverClass}`
                                             }`}
                                     >
-                                        {cell === CellState.Black ? "⚫" : cell === CellState.White ? "⚪" : ""}
+                                        {cell === CellState.Black ? "🔵" : cell === CellState.White ? "🟠" : ""}
                                     </div>
                                 ))
                             )
@@ -181,11 +186,19 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
                         )}
                         <button
                             onClick={handleOrbit}
-                            className={`${styles.orbitButton} ${gameState === "WaitingForOrbit" && sessionStorage.getItem("currentPlayer") === currentPlayer
+                            className={`${styles.orbitButton} ${gameState === "WaitingForOrbit" &&
+                                ((currentPlayer === "Black" && userId === storedPlayer1) ||
+                                    (currentPlayer === "White" && userId === storedPlayer2))
                                 ? styles.orbitActive
                                 : styles.orbitDisabled
                                 }`}
-                            disabled={gameState !== "WaitingForOrbit" || sessionStorage.getItem("currentPlayer") !== currentPlayer}
+                            disabled={
+                                gameState !== "WaitingForOrbit" ||
+                                !(
+                                    (currentPlayer === "Black" && userId === storedPlayer1) ||
+                                    (currentPlayer === "White" && userId === storedPlayer2)
+                                )
+                            }
                         >
                             <img src="/icons/icon-512x512.png" alt="" />
                         </button>

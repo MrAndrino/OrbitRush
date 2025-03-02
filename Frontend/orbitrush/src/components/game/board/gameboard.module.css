@@ -6,12 +6,6 @@
     padding: 16px;
 }
 
-.title {
-    font-size: 24px;
-    font-weight: bold;
-    color: white;
-}
-
 .currentTurn {
     font-size: 18px;
     color: white;
@@ -20,57 +14,50 @@
 .board {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+    gap: 1.7rem;
     position: relative;
 }
 
 .cell {
-    width: 64px;
-    height: 64px;
+    width: 4.5rem;
+    height: 4.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid gray;
-    font-size: 24px;
+    font-size: 3.5rem;
     cursor: pointer;
 }
 
 .black {
-    background-color: black;
     color: white;
 }
 
 .white {
-    background-color: white;
     color: black;
-}
-
-.empty {
-    background-color: #2d2d2d;
 }
 
 .orbitButton {
     border-radius: 50%;
-    transition: background-color 0.3s ease;
-    font-size: 16px;
+    transition: background 0.3s ease;
 }
 
 .orbitButton {
     position: absolute;
-    left: 39%;
-    top: 39%;
+    left: 40%;
+    top: 40%;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 4rem;
-    height: 4rem;
+    width: 4.5rem;
+    height: 4.5rem;
     border-radius: 50%;
     cursor: pointer;
     overflow: hidden;
-    border: 2px solid rgba(255, 140, 0);
-    background: linear-gradient(135deg, rgba(255, 140, 0, 0.4), rgba(255, 140, 0, 0.7)),
-        linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
-    box-shadow: 0 0 25px rgba(255, 140, 0, 1), 0 0 40px rgba(255, 140, 0, 0.9);
+    border: 2px solid rgb(255, 255, 255);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.7)),
+        linear-gradient(45deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.9));
+    box-shadow: 0 0 10 rgb(255, 255, 255), 0 0 15 rgba(255, 255, 255, 0.9);
 }
 
 .orbitButton img {
@@ -80,19 +67,46 @@
 }
 
 .orbitActive:hover {
-    background: linear-gradient(135deg, rgba(255, 140, 0, 0.6), rgba(255, 140, 0, 1)),
-        linear-gradient(45deg, rgba(10, 10, 10, 0.8), rgba(40, 40, 40, 0.9));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgb(255, 255, 255)),
+        linear-gradient(45deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.9));
+    box-shadow: 0 0 25px rgb(255, 255, 255), 0 0 40px rgba(255, 255, 255, 0.9);
 }
 
 .orbitActive:active {
-    background: linear-gradient(135deg, rgba(255, 140, 0, 0.2), rgba(255, 140, 0, 0.3)),
-        linear-gradient(45deg, rgba(10, 10, 10, 0.8), rgba(20, 20, 20, 1));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.3)),
+        linear-gradient(45deg, rgba(255, 255, 255, 0.8), rgb(255, 255, 255));
+    box-shadow: 0 0 17px rgb(255, 255, 255), 0 0 27px rgba(255, 255, 255, 0.9);
 }
 
 .orbitDisabled {
-    border: 2px solid rgb(0, 153, 255);
-    background: linear-gradient(135deg, rgba(0, 153, 255, 0.2), rgba(0, 153, 255, 0.3)),
-        linear-gradient(45deg, rgba(10, 10, 10, 0.8), rgba(20, 20, 20, 1));
-    box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+    background: #202020;
+    border: 2px solid #202020;
     cursor: not-allowed;
+    box-shadow: none;
+}
+
+.cell.empty {
+    position: relative;
+}
+
+.cell.empty::after {
+    content: "";
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    opacity: 0;
+}
+
+
+.cell.empty.hover-blue::after {
+    background-color: rgba(0, 102, 255, 0.5); 
+}
+
+.cell.empty.hover-orange::after {
+    background-color: rgba(255, 102, 0, 0.5);
+}
+
+.cell.empty:hover::after {
+    opacity: 1;
 }

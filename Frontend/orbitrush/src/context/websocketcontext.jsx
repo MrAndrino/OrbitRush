@@ -523,10 +523,14 @@ export const WebSocketProvider = ({ children }) => {
   // ⏳ Esperar a que los PlayerIds sean asignados antes de redirigir
   useEffect(() => {
     if (player1Id && player2Id) {
-      console.log("✅ Jugadores asignados correctamente:", {
+      console.log("✅ Guardando jugadores en sessionStorage:", {
         player1Id,
         player2Id,
       });
+
+      sessionStorage.setItem("player1Id", player1Id);
+      sessionStorage.setItem("player2Id", player2Id);
+
       router.push("/prueba");
     }
   }, [player1Id, player2Id]);
