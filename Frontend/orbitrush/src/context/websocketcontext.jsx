@@ -500,6 +500,21 @@ export const WebSocketProvider = ({ children }) => {
     ws.send(mensaje);
   };
 
+  // ----- Salir del partida -----
+  const leaveGame = () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.error("❌ WebSocket no conectado");
+      return;
+    }
+
+    const mensaje = JSON.stringify({
+      Action: "leaveGame",
+    });
+
+    console.log("📤 Enviando mensaje para salir del lobby: ", mensaje);
+    ws.send(mensaje);
+  };
+
   // ----- useEffect para redirección al crear lobby -----
   useEffect(() => {
     if (!ws) return;
@@ -639,6 +654,7 @@ export const WebSocketProvider = ({ children }) => {
     playWithBot,
     sendMatchResponse,
     leaveLobby,
+    leaveGame,
     startGame,
     board,
     currentPlayer,

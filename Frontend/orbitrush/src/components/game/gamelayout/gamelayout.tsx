@@ -12,6 +12,8 @@ import { BookOpen, LogOut } from "lucide-react";
 import Modal from "@/components/miscelaneus/modal/modal";
 import Instructions from "@/components/miscelaneus/instructions/instructions";
 import { useWebSocket } from "@/context/websocketcontext";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 interface UserProfile {
     id: number;
@@ -19,10 +21,15 @@ interface UserProfile {
     image?: string;
 }
 
-const GameLayout = () => {
-    const { decodedToken } = useAuth();
+interface GameLayoutProps {
+    userId: string;
+}
+
+const GameLayout: React.FC<GameLayoutProps> = ({ userId }) => {
+    const { logout } = useAuth();
     const { getUserProfileData } = useUsers();
-    const { currentPlayer } = useWebSocket();
+    const { currentPlayer, leaveGame } = useWebSocket();
+    const router = useRouter();
 
     const [player1, setPlayer1] = useState<UserProfile | null>(null);
     const [player2, setPlayer2] = useState<UserProfile | null>(null);
@@ -32,11 +39,14 @@ const GameLayout = () => {
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState<boolean>(false);
+    const openLogoutModal = () => setIsLogoutModalOpen(true);
+    const closeLogoutModal = () => setIsLogoutModalOpen(false);
+    const player1Id = sessionStorage.getItem("player1Id");
+    const player2Id = sessionStorage.getItem("player2Id");
+
     useEffect(() => {
         const fetchPlayers = async () => {
-            const player1Id = sessionStorage.getItem("player1Id");
-            const player2Id = sessionStorage.getItem("player2Id");
-
             console.log("Player1 ID:", player1Id);
             console.log("Player2 ID:", player2Id);
 
@@ -55,14 +65,29 @@ const GameLayout = () => {
         fetchPlayers();
     }, []);
 
+
     useEffect(() => {
-        setTimer(60); // Reinicia el temporizador a 60 cada vez que cambia el turno
+        setTimer(5);
 
         const interval = setInterval(() => {
             setTimer((prev) => {
                 if (prev <= 1) {
                     clearInterval(interval);
-                    console.log("⏳ Tiempo agotado. Aquí va la función."); // Aquí va la función
+                    leaveGame();
+
+                    console.log("⏳ Tiempo agotado. Evaluando qué hacer...");
+
+                    if (userId === player1Id && currentPlayer === "Black") {
+                        console.log("🚪 El jugador Black (usuario actual) se fue. Haciendo logout...");
+                        logout();
+                    } else if (userId === player2Id && currentPlayer === "White") {
+                        console.log("🚪 El jugador White (usuario actual) se fue. Haciendo logout...");
+                        logout();
+                    } else {
+                        console.log("🏠 Otro jugador se fue. Redirigiendo al menú...");
+                        router.push("/menu");
+                    }
+
                     return 60;
                 }
                 return prev - 1;
@@ -70,13 +95,36 @@ const GameLayout = () => {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [currentPlayer]);
+    }, [currentPlayer, userId, player1Id, player2Id]);
+
+
+    const handleSurrender = () => {
+        leaveGame();
+        closeLogoutModal();
+        router.push("/menu");
+        toast.custom(
+            <div
+                style={{
+                    backgroundColor: "var(--backgroundtoast)",
+                    color: "var(--foreground)",
+                    fontSize: "16px",
+                    borderRadius: "8px",
+                    padding: "10px 20px",
+                    border: "2px solid rgba(255, 140, 0)",
+                    boxShadow:
+                        "0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6)",
+                }}
+            >
+                Has abandonado partida
+            </div>
+        );
+    };
 
     return (
         <div className={styles.container}>
             <div className={styles.leftSide}>
                 <div className={styles.buttons}>
-                    <Button color="red" className="h-12 w-16 text-xl flex items-center justify-center">
+                    <Button onClick={openLogoutModal} color="red" className="h-12 w-16 text-xl flex items-center justify-center">
                         <LogOut />
                     </Button>
                     <Button onClick={openModal} color="blue" className="h-12 w-16 text-xl flex items-center justify-center">
@@ -97,8 +145,10 @@ const GameLayout = () => {
                     </div>
                 )}
             </div>
+
             {/* Juego */}
-            <GameBoard userId={decodedToken.id.toString()} />
+            <GameBoard userId={userId} />
+
             <div className={styles.rightSide}>
                 {player2 && (
                     <div className={styles.userInfo2}>
@@ -119,6 +169,22 @@ const GameLayout = () => {
 
             <Modal isOpen={isModalOpen} closeModal={closeModal} color="blue" className="w-[55%]">
                 <Instructions />
+            </Modal>
+
+            <Modal isOpen={isLogoutModalOpen} closeModal={closeLogoutModal} color="red" className="w-[40%] text-center">
+
+                <div className="flex flex-col gap-12">
+                    <p className="text-3xl">¿Seguro que quieres salir del juego?</p>
+                    <p className="text-lg">Esto le dará la victoria al rival.</p>
+                    <div className="flex justify-center gap-4">
+                        <Button onClick={handleSurrender} color="red" className="w-[10rem] h-[4rem] text-2xl">
+                            Rendirse
+                        </Button>
+                        <Button onClick={closeLogoutModal} color="blue" className="w-[10rem] h-[4rem] text-2xl">
+                            Cancelar
+                        </Button>
+                    </div>
+                </div>
             </Modal>
         </div>
     );

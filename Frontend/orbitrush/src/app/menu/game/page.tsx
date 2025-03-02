@@ -1,12 +1,14 @@
 "use client";
 
 import GameLayout from "@/components/game/gamelayout/gamelayout";
+import { useAuth } from "@/context/authcontext";
 
 const GamePage = () => {
+  const {decodedToken} = useAuth();
 
   return (
     <>
-      <GameLayout />
+      <GameLayout userId={decodedToken.id.toString()}  />
     </>
   );
 };
