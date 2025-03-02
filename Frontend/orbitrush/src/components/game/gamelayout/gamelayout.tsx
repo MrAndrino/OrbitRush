@@ -67,7 +67,7 @@ const GameLayout: React.FC<GameLayoutProps> = ({ userId }) => {
 
 
     useEffect(() => {
-        setTimer(5);
+        setTimer(60);
 
         const interval = setInterval(() => {
             setTimer((prev) => {
@@ -77,18 +77,7 @@ const GameLayout: React.FC<GameLayoutProps> = ({ userId }) => {
 
                     console.log("⏳ Tiempo agotado. Evaluando qué hacer...");
 
-                    if (userId === player1Id && currentPlayer === "Black") {
-                        console.log("🚪 El jugador Black (usuario actual) se fue. Haciendo logout...");
-                        logout();
-                    } else if (userId === player2Id && currentPlayer === "White") {
-                        console.log("🚪 El jugador White (usuario actual) se fue. Haciendo logout...");
-                        logout();
-                    } else {
-                        console.log("🏠 Otro jugador se fue. Redirigiendo al menú...");
-                        router.push("/menu");
-                    }
-
-                    return 60;
+                    return 0;
                 }
                 return prev - 1;
             });
@@ -97,6 +86,23 @@ const GameLayout: React.FC<GameLayoutProps> = ({ userId }) => {
         return () => clearInterval(interval);
     }, [currentPlayer, userId, player1Id, player2Id]);
 
+    useEffect(() => {
+        if (timer === 0) {
+            router.push("/menu");
+        }
+    }, [timer]);
+
+    useEffect(() => {
+        if (timer === 0) {
+            if (userId === player1Id && currentPlayer === "Black") {
+                console.log("🚪 El jugador Black (usuario actual) se fue. Haciendo logout...");
+                logout();
+            } else if (userId === player2Id && currentPlayer === "White") {
+                console.log("🚪 El jugador White (usuario actual) se fue. Haciendo logout...");
+                logout();
+            }
+        }
+    }, [timer]);
 
     const handleSurrender = () => {
         leaveGame();

@@ -5,10 +5,6 @@ import { CellState } from "@/types/game";
 import { useEffect, useState } from "react";
 import styles from "./gameboard.module.css";
 
-interface Window {
-    ws: WebSocket;
-}
-
 interface GameBoardProps {
     userId: string;
 }
@@ -23,6 +19,34 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
     const isCurrentPlayer = currentPlayer === (isPlayer1 ? "Black" : "White");
     const canHover = isCurrentPlayer && gameState !== "WaitingForOrbit";
     const hoverClass = canHover ? (isPlayer1 ? styles["hover-blue"] : styles["hover-orange"]) : "";
+    const isBotGame = storedPlayer2?.startsWith("BOT_");
+
+    /** LOGS DE DEBUG PARA DETECTAR PROBLEMAS **/
+    useEffect(() => {
+        console.log("📊 Tablero en GameBoard actualizado:", board);
+    }, [board]);
+
+    useEffect(() => {
+        console.log("🎯 Jugador actual en GameBoard:", currentPlayer);
+    }, [currentPlayer]);
+
+    useEffect(() => {
+        console.log("📢 Estado del juego en GameBoard:", gameState);
+    }, [gameState]);
+
+    useEffect(() => {
+        console.log("📡 Datos actualizados:");
+        console.log("🆔 Session ID:", sessionId ?? "⏳ Aún no disponible");
+        console.log("🛠️ Board:", board.length > 0 ? board : "⏳ Aún no disponible");
+        console.log("🎯 Current Player:", currentPlayer ?? "⏳ Aún no disponible");
+        console.log("📢 Game State:", gameState ?? "⏳ Aún no disponible");
+    }, [sessionId, board, currentPlayer, gameState]);
+
+    useEffect(() => {
+        if (isBotGame && currentPlayer === "White") {
+            console.log("🤖 Esperando jugada del bot...");
+        }
+    }, [currentPlayer, isBotGame]);
 
     useEffect(() => {
         if (!ws) {
@@ -83,43 +107,37 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
         console.log("📢 Game State:", gameState ?? "⏳ Aún no disponible");
     }, [sessionId, board, currentPlayer, gameState]);
 
-    // 🔥 Manejo de clic en celda
+    /** 🔥 MANEJO DE CLIC EN CELDA **/
     const handleCellClick = (rowIndex: number, colIndex: number) => {
         console.log("📊 Board antes del clic:", board);
 
-        if (
-            !board ||
-            !Array.isArray(board) ||
-            board.length !== 4 ||
-            !Array.isArray(board[0])
-        ) {
+        if (!board || !Array.isArray(board) || board.length !== 4 || !Array.isArray(board[0])) {
             console.error("❌ El tablero no está correctamente inicializado:", board);
             return;
         }
 
         const cellValue = board[rowIndex][colIndex];
 
-        console.log(
-            "📌 Valor en la celda seleccionada:",
-            rowIndex,
-            colIndex,
-            "->",
-            cellValue ?? "⛔ Error: Valor indefinido"
-        );
-
         if (!localSessionId) {
             console.error("❌ No hay una sesión activa.");
             return;
         }
 
-        if (gameState !== "Laying" || cellValue !== 0) {
-            console.warn(
-                "⚠️ Movimiento inválido. No es tu turno o la casilla está ocupada."
-            );
+        if (isBotGame && (currentPlayer !== "Black" || gameState !== "Laying")) {
+            console.warn("⚠️ No es tu turno en partida contra el bot.");
             return;
         }
 
-        // 📡 Enviar el mensaje de movimiento al backend
+        if (!isBotGame && gameState !== "Laying") {
+            console.warn("⚠️ Movimiento inválido en partida normal.");
+            return;
+        }
+
+        if (cellValue !== 0) {
+            console.warn("⚠️ Casilla ocupada.");
+            return;
+        }
+
         const message = JSON.stringify({
             Action: "playMove",
             Row: rowIndex,
@@ -131,6 +149,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
         ws.send(message);
     };
 
+    /** 🔄 MANEJO DE ORBIT **/
     const handleOrbit = () => {
         if (!ws || ws.readyState !== WebSocket.OPEN) {
             console.error("❌ WebSocket no disponible.");
@@ -150,6 +169,11 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
         console.log("📤 Enviando solicitud de Orbit:", orbitMessage);
         ws.send(orbitMessage);
     };
+
+    /** 🔍 VERIFICACIÓN DE SINCRONIZACIÓN DE TURNOS **/
+    useEffect(() => {
+        console.log(`🔄 Turno actualizado: ${currentPlayer} | Estado: ${gameState}`);
+    }, [currentPlayer, gameState]);
 
     if (!currentPlayer) {
         return <p className="text-white text-lg">Cargando datos del juego...</p>;

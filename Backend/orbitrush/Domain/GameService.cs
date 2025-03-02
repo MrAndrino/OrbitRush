@@ -165,6 +165,13 @@ public class GameService
 
     public async Task SaveMatchData(CellState winner)
     {
+
+        if (Player2Id.StartsWith("BOT_"))
+        {
+            Console.WriteLine("🤖 [INFO] Partida contra un bot no se guardará en la base de datos.");
+            return;
+        }
+
         _stopwatch.Stop();
         using var scope = _serviceProvider.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();

@@ -26,13 +26,13 @@ public class WSPlayHandler
     {
         try
         {
-            Console.WriteLine("📩 Mensaje recibido en ProcessPlayMessageAsync:");
-            Console.WriteLine($"🔹 userId: {userId}");
-            Console.WriteLine($"🔹 Mensaje crudo: {message}");
+            Console.WriteLine("馃摡 Mensaje recibido en ProcessPlayMessageAsync:");
+            Console.WriteLine($"馃敼 userId: {userId}");
+            Console.WriteLine($"馃敼 Mensaje crudo: {message}");
 
             var playMessage = JsonSerializer.Deserialize<PlayMessage>(message);
             if (playMessage == null || string.IsNullOrEmpty(playMessage.SessionId))
-                throw new InvalidOperationException("Mensaje inválido o falta SessionId");
+                throw new InvalidOperationException("Mensaje inv谩lido o falta SessionId");
 
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -45,27 +45,35 @@ public class WSPlayHandler
                     case "playMove":
                         responseMessage = gameService.PlayMove(userId, playMessage.Row, playMessage.Col);
                         await BroadcastGameStateAsync(playMessage.SessionId);
+
                         break;
 
                     case "orbit":
                         await gameService.PerformOrbit();
-                        if (gameService.State == GameState.GameOver)
+                        await BroadcastGameStateAsync(playMessage.SessionId);
+
+                        await Task.Delay(500);
+
+                        if (gameService.Board.CurrentPlayer == CellState.White && gameService.Player2Id.StartsWith("BOT_"))
                         {
-                            string winnerId = gameService.Board.CheckWinner().ToString();
-                            await NotifyGameOverAsync(playMessage.SessionId, winnerId);
+                            Console.WriteLine("馃 Turno del bot despu茅s de 贸rbita. Ejecutando su jugada...");
+                            var bot = new BotOrbito(gameService.Player2Id, _connectionManager, _serviceProvider);
+                            await bot.PlayTurnAsync(playMessage.SessionId);
                         }
+
                         break;
+
 
                     case "leaveGame":
                         await LeaveGame(userId);
                         break;
 
                     default:
-                        responseMessage = "Error: Acción no válida.";
+                        responseMessage = "Error: Acci贸n no v谩lida.";
                         break;
                 }
 
-                // 🔹 Enviar la respuesta al jugador sin cerrar la conexión
+                // 馃敼 Enviar la respuesta al jugador sin cerrar la conexi贸n
                 if (!string.IsNullOrEmpty(responseMessage))
                 {
                     await SendMessageToPlayerAsync(userId, responseMessage);
@@ -74,21 +82,36 @@ public class WSPlayHandler
         }
         catch (JsonException)
         {
-            await SendMessageToPlayerAsync(userId, "Error: Formato de mensaje inválido.");
+            var errorMessage = new
+            {
+                Action = "error",
+                Message = "Formato de mensaje inv谩lido."
+            };
+            await SendMessageToPlayerAsync(userId, JsonSerializer.Serialize(errorMessage));
         }
         catch (InvalidOperationException ex)
         {
-            await SendMessageToPlayerAsync(userId, $"Error: {ex.Message}");
+            var errorMessage = new
+            {
+                Action = "error",
+                Message = ex.Message
+            };
+            await SendMessageToPlayerAsync(userId, JsonSerializer.Serialize(errorMessage));
         }
         catch (Exception ex)
         {
-            await SendMessageToPlayerAsync(userId, $"Error inesperado: {ex.Message}");
+            var errorMessage = new
+            {
+                Action = "error",
+                Message = "Error inesperado: " + ex.Message
+            };
+            await SendMessageToPlayerAsync(userId, JsonSerializer.Serialize(errorMessage));
         }
     }
 
     public async Task BroadcastGameStateAsync(string sessionId)
     {
-        Console.WriteLine($"📡 Enviando estado del juego para SessionId: {sessionId}");
+        Console.WriteLine($"馃摗 Enviando estado del juego para SessionId: {sessionId}");
 
         using (var scope = _serviceProvider.CreateScope())
         {
@@ -104,6 +127,12 @@ public class WSPlayHandler
                     boardState[i * 4 + j] = gameService.Board.Grid[i, j];
                 }
             }
+            Console.WriteLine($"馃攧 [SERVER] Turno actual: {gameService.Board.CurrentPlayer}");
+            Console.WriteLine($"馃搳 [SERVER] Tablero actualizado despu茅s del bot:");
+            for (int i = 0; i < 4; i++)
+            {
+                Console.WriteLine($"{gameService.Board.Grid[i, 0]}, {gameService.Board.Grid[i, 1]}, {gameService.Board.Grid[i, 2]}, {gameService.Board.Grid[i, 3]}");
+            }
 
             var gameState = new
             {
@@ -115,6 +144,8 @@ public class WSPlayHandler
             };
 
             var jsonMessage = JsonSerializer.Serialize(gameState);
+            Console.WriteLine($"馃摗 [SERVER] Estado enviado al frontend: {jsonMessage}");
+
             var buffer = Encoding.UTF8.GetBytes(jsonMessage);
 
             string player1Id = gameService.Player1Id;
@@ -158,7 +189,7 @@ public class WSPlayHandler
 
             if (string.IsNullOrEmpty(gameEntry.Key))
             {
-                Console.WriteLine($"No se encontró partida activa para el jugador {playerId}");
+                Console.WriteLine($"No se encontr贸 partida activa para el jugador {playerId}");
                 return;
             }
 
@@ -197,7 +228,7 @@ public class WSPlayHandler
                         {
                             Action = "opponentLeft",
                             Message = isDisconnection
-                                ? "Tu oponente se ha desconectado. Ganaste la partida automáticamente."
+                                ? "Tu oponente se ha desconectado. Ganaste la partida autom谩ticamente."
                                 : "Tu oponente ha abandonado. Ganaste la partida.",
                             SessionId = sessionId
                         };
@@ -222,8 +253,8 @@ public class WSPlayHandler
                     {
                         Action = "opponentLeft",
                         Message = isDisconnection
-                            ? "Tu oponente se ha desconectado de la partida. Ganaste automáticamente."
-                            : "Tu oponente ha salido de la partida. Ganaste automáticamente.",
+                            ? "Tu oponente se ha desconectado de la partida. Ganaste autom谩ticamente."
+                            : "Tu oponente ha salido de la partida. Ganaste autom谩ticamente.",
                         SessionId = sessionId
                     };
                     await SendAsync(hostSocket, JsonSerializer.Serialize(playerLeftMessage));
