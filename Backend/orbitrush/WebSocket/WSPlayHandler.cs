@@ -26,6 +26,10 @@ public class WSPlayHandler
     {
         try
         {
+            Console.WriteLine("📩 Mensaje recibido en ProcessPlayMessageAsync:");
+            Console.WriteLine($"🔹 userId: {userId}");
+            Console.WriteLine($"🔹 Mensaje crudo: {message}");
+
             var playMessage = JsonSerializer.Deserialize<PlayMessage>(message);
             if (playMessage == null || string.IsNullOrEmpty(playMessage.SessionId))
                 throw new InvalidOperationException("Mensaje inválido o falta SessionId");
@@ -45,7 +49,6 @@ public class WSPlayHandler
 
                     case "orbit":
                         await gameService.PerformOrbit();
-                        await BroadcastGameStateAsync(playMessage.SessionId);
                         if (gameService.State == GameState.GameOver)
                         {
                             string winnerId = gameService.Board.CheckWinner().ToString();
@@ -129,16 +132,17 @@ public class WSPlayHandler
         }
     }
 
-    private async Task SendMessageToPlayerAsync(string userId, string message)
+    private async Task SendMessageToPlayerAsync(string userId, string response)
     {
         var socket = _connectionManager.GetConnectionById(userId);
         if (socket != null && socket.State == WebSocketState.Open)
         {
-            var jsonMessage = JsonSerializer.Serialize(new { message });
-            var buffer = Encoding.UTF8.GetBytes(jsonMessage);
+            var buffer = Encoding.UTF8.GetBytes(response);
             await socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
         }
     }
+
+
 
     private async Task HandlePlayerExitFromGame(string playerId, bool isDisconnection)
     {

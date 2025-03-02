@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useWebSocket } from "@/context/websocketcontext";
 import styles from "./chatbox.module.css";
 import { useRef } from "react";
+import { Send } from 'lucide-react';
 
-// 🟢 Definimos la interfaz del mensaje
 interface ChatMessage {
     senderId: string;
     senderName: string;
@@ -17,13 +17,13 @@ interface User {
 }
 
 const ChatBox = () => {
-    const { sendChatMessage, requestChatHistory, chatMessages, sessionId } = useWebSocket();
+    const { sendChatMessage, ws, requestChatHistory, chatMessages, sessionId } = useWebSocket();
     const [message, setMessage] = useState("");
     const chatEndRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         if (sessionId) {
-            requestChatHistory(); // 📜 Cargar historial al entrar
+            requestChatHistory();
         }
     }, [sessionId]);
 
@@ -31,18 +31,34 @@ const ChatBox = () => {
         console.log("📥 Mensajes recibidos en chatMessages:", chatMessages);
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chatMessages]);
-    
+
 
     const handleSendMessage = () => {
+        const currentSessionId = sessionId || localStorage.getItem("sessionId");
+
+        if (!currentSessionId) {
+            console.error("❌ No hay una sesión activa para enviar mensajes.");
+            return;
+        }
+
         if (message.trim()) {
-            sendChatMessage(message);
-            setMessage(""); // Limpiar input
+            const payload = JSON.stringify({
+                Action: "chatMessage",
+                SessionId: currentSessionId,
+                Message: message
+            });
+
+            console.log("📤 Enviando mensaje:", payload);
+            ws.send(payload);
+            setMessage("");
         }
     };
 
+
+
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === "Enter") {
-            event.preventDefault(); // Evitar salto de línea en el input
+            event.preventDefault();
             handleSendMessage();
         }
     };
@@ -53,7 +69,7 @@ const ChatBox = () => {
                 {chatMessages.map((msg: ChatMessage, index: number) => (
                     <div key={index} className={styles.chatMessage}>
                         <span className={styles.timestamp}>{msg.timestamp}</span>
-                        <strong>{msg.senderName}:</strong> {msg.message}
+                        <strong className="font-primary">{msg.senderName}:</strong> {msg.message}
                     </div>
                 ))}
                 <div ref={chatEndRef} />
@@ -68,7 +84,7 @@ const ChatBox = () => {
                     className={styles.inputField}
                 />
                 <button onClick={handleSendMessage} className={styles.sendButton}>
-                    Enviar
+                    <Send />
                 </button>
             </div>
         </div>

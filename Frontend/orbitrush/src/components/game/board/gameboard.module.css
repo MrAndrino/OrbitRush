@@ -1,0 +1,98 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+}
+
+.currentTurn {
+    font-size: 18px;
+    color: white;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    position: relative;
+}
+
+.cell {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid gray;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.black {
+    background-color: black;
+    color: white;
+}
+
+.white {
+    background-color: white;
+    color: black;
+}
+
+.empty {
+    background-color: #2d2d2d;
+}
+
+.orbitButton {
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+}
+
+.orbitButton {
+    position: absolute;
+    left: 39%;
+    top: 39%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    cursor: pointer;
+    overflow: hidden;
+    border: 2px solid rgba(255, 140, 0);
+    background: linear-gradient(135deg, rgba(255, 140, 0, 0.4), rgba(255, 140, 0, 0.7)),
+        linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+    box-shadow: 0 0 25px rgba(255, 140, 0, 1), 0 0 40px rgba(255, 140, 0, 0.9);
+}
+
+.orbitButton img {
+    max-width: 85%;
+    max-height: 85%;
+    object-fit: contain;
+}
+
+.orbitActive:hover {
+    background: linear-gradient(135deg, rgba(255, 140, 0, 0.6), rgba(255, 140, 0, 1)),
+        linear-gradient(45deg, rgba(10, 10, 10, 0.8), rgba(40, 40, 40, 0.9));
+}
+
+.orbitActive:active {
+    background: linear-gradient(135deg, rgba(255, 140, 0, 0.2), rgba(255, 140, 0, 0.3)),
+        linear-gradient(45deg, rgba(10, 10, 10, 0.8), rgba(20, 20, 20, 1));
+}
+
+.orbitDisabled {
+    border: 2px solid rgb(0, 153, 255);
+    background: linear-gradient(135deg, rgba(0, 153, 255, 0.2), rgba(0, 153, 255, 0.3)),
+        linear-gradient(45deg, rgba(10, 10, 10, 0.8), rgba(20, 20, 20, 1));
+    box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+    cursor: not-allowed;
+}

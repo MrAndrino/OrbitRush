@@ -48,16 +48,15 @@ public class Board
     {
         var newGrid = (CellState[,])Grid.Clone();
 
-        // Rotación de la cadena externa
         for (int i = 1; i < outerChain.Length; i++)
         {
             var (row, col) = outerChain[i];
             var (prevRow, prevCol) = outerChain[i - 1];
-            newGrid[row, col] = Grid[prevRow, prevCol];
+            newGrid[prevRow, prevCol] = Grid[row, col];
         }
 
-        // Rotación de la cadena interna
-        for (int i = 1; i < innerChain.Length; i++)
+
+        for (int i = innerChain.Length - 1; i > 0; i--)
         {
             var (row, col) = innerChain[i];
             var (prevRow, prevCol) = innerChain[i - 1];

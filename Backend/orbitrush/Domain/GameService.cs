@@ -2,6 +2,7 @@
 using orbitrush.Database.Entities.Enums;
 using orbitrush.Database.Repositories;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace orbitrush.Domain;
 public class GameService
@@ -43,27 +44,51 @@ public class GameService
         try
         {
             if (State != GameState.Laying)
-                return "No es el momento de jugar una ficha.";
+                return JsonSerializer.Serialize(new
+                {
+                    Action = "error",
+                    Message = "No es el momento de jugar una ficha."
+                });
 
             if (row < 0 || row >= 4 || col < 0 || col >= 4)
-                return "Movimiento fuera de los límites del tablero.";
+                return JsonSerializer.Serialize(new
+                {
+                    Action = "error",
+                    Message = "Movimiento fuera de los límites del tablero."
+                });
 
             if (Board.Grid[row, col] != CellState.Empty)
-                return "Casilla ocupada.";
+                return JsonSerializer.Serialize(new
+                {
+                    Action = "error",
+                    Message = "Casilla ocupada."
+                });
 
             var currentPlayerPiece = (playerId == Player1Id) ? Player1Piece : Player2Piece;
 
             if (Board.CurrentPlayer != currentPlayerPiece)
-                return "No es tu turno.";
+                return JsonSerializer.Serialize(new
+                {
+                    Action = "error",
+                    Message = "No es tu turno."
+                });
 
             Board.Grid[row, col] = currentPlayerPiece;
             State = GameState.WaitingForOrbit;
 
-            return "Movimiento realizado con éxito.";
+            return JsonSerializer.Serialize(new
+            {
+                Action = "moveConfirmed",
+                Message = "Movimiento realizado con éxito."
+            });
         }
         catch (Exception ex)
         {
-            return $"Error inesperado: {ex.Message}";
+            return JsonSerializer.Serialize(new
+            {
+                Action = "error",
+                Message = $"Error inesperado: {ex.Message}"
+            });
         }
     }
 
@@ -72,45 +97,58 @@ public class GameService
         if (State != GameState.WaitingForOrbit)
             throw new InvalidOperationException("No es el momento de girar el tablero.");
 
-        Board.Orbit();
-        var winner = Board.CheckWinner();
+        using var scope = _serviceProvider.CreateScope();
+        var wsPlayHandler = scope.ServiceProvider.GetRequiredService<WSPlayHandler>();
 
+        Board.Orbit();
+        await wsPlayHandler.BroadcastGameStateAsync(CurrentSessionId);
+
+        var winner = Board.CheckWinner();
         if (winner != CellState.Empty)
         {
             State = GameState.GameOver;
             await SaveMatchData(winner);
+            await wsPlayHandler.BroadcastGameStateAsync(CurrentSessionId);
             return;
         }
 
-        if (IsBoardFull())
+        // 🔹 Si el tablero NO está lleno, simplemente cambia el turno
+        if (!IsBoardFull())
         {
-            int maxRotations = 5;
-            int rotationCount = 0;
+            Board.SwitchPlayer();
+            State = GameState.Laying;
+            await wsPlayHandler.BroadcastGameStateAsync(CurrentSessionId);
+            return;
+        }
 
-            while (rotationCount < maxRotations)
+        // 🔹 Si el tablero ESTÁ lleno, hace los 5 giros
+        int maxRotations = 5;
+        int rotationCount = 0;
+
+        while (rotationCount < maxRotations)
+        {
+            await Task.Delay(1000);
+            Board.Orbit();
+            await wsPlayHandler.BroadcastGameStateAsync(CurrentSessionId);
+
+            winner = Board.CheckWinner();
+            if (winner != CellState.Empty)
             {
-                System.Threading.Tasks.Task.Delay(2500).Wait();
-                Board.Orbit();
-                winner = Board.CheckWinner();
-
-                if (winner != CellState.Empty)
-                {
-                    State = GameState.GameOver;
-                    await SaveMatchData(winner);
-                    return;
-                }
-
-                rotationCount++;
+                State = GameState.GameOver;
+                await SaveMatchData(winner);
+                await wsPlayHandler.BroadcastGameStateAsync(CurrentSessionId);
+                return;
             }
 
-            State = GameState.GameOver;
-            await SaveMatchData(CellState.Empty);
-            return;
+            rotationCount++;
         }
 
-        Board.SwitchPlayer();
-        State = GameState.Laying;
+        // 🔹 Si después de los giros sigue sin haber ganador, se declara empate
+        State = GameState.GameOver;
+        await SaveMatchData(CellState.Empty);
+        await wsPlayHandler.BroadcastGameStateAsync(CurrentSessionId);
     }
+
 
     private bool IsBoardFull()
     {

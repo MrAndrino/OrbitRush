@@ -1,52 +1,59 @@
 .chatContainer {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 400px;
-    margin: auto;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  
-  .chatMessages {
-    flex-grow: 1;
-    padding: 10px;
-    overflow-y: auto;
-    max-height: 300px;
-    background: #f9f9f9;
-  }
-  
-  .chatMessage {
-    padding: 5px;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .timestamp {
-    font-size: 12px;
-    color: gray;
-    margin-left: 8px;
-  }
-  
-  .chatInput {
-    display: flex;
-    padding: 10px;
-    background: #fff;
-  }
-  
-  .inputField {
-    flex-grow: 1;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .sendButton {
-    margin-left: 10px;
-    padding: 5px 10px;
-    background: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  width: 25%;
+  border: 2px solid rgba(255, 140, 0, 0.7);
+  background: rgba(20, 20, 20, 0.295);
+  border-radius: 5px;
+  overflow: hidden;
+  scrollbar-color: rgba(255, 140, 0, 0.7) #1e1e1e;
+}
+
+.chatMessages {
+  padding: 0.5rem;
+  overflow-y: auto;
+  max-height: 12rem;
+  min-height: 12rem;
+}
+
+.chatMessage {
+  font-family: var(--font-secondary);
+  padding: 0.2rem;
+}
+
+.timestamp {
+  margin-right: 0.5rem;
+  font-size: 0.8rem;
+  color: gray;
+}
+
+.chatInput {
+  display: flex;
+}
+
+.inputField {
+  width: 100%;
+  font-family: var(--font-secondary);
+  font-size: 0.9rem;
+  color: var(--foreground);
+  padding: 0.2rem;
+  border-top: 2px solid rgba(255, 140, 0, 0.7);
+  background-color: rgba(255, 140, 0, 0.2);
+}
+
+.inputField:hover {
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.4), rgba(255, 140, 0, 0.7)),
+    linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+}
+
+.sendButton {
+  padding: 0.5rem;
+  background: rgba(255, 140, 0, 0.2);
+  border-top: 2px solid rgba(255, 140, 0, 0.7);
+  color: white;
+  cursor: pointer;
+}
+
+.sendButton:hover {
+  background: rgba(255, 140, 0, 0.7);
+}

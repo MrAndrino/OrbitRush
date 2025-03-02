@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
 import { createContext, useState, useEffect, useContext, useRef } from "react";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import MatchFoundModal from "@/components/miscelaneus/modal/matchfound/matchfound";
+import { CellState } from "@/types/game";
 
 const WebSocketContext = createContext();
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -19,7 +20,11 @@ export const WebSocketProvider = ({ children }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
 
-  const [board, setBoard] = useState(Array(16).fill(0));
+  const [board, setBoard] = useState(
+    Array(4)
+      .fill(null)
+      .map(() => Array(4).fill(0))
+  );
   const [currentPlayer, setCurrentPlayer] = useState(() => {
     return sessionStorage.getItem("currentPlayer") || null;
   });
@@ -33,15 +38,28 @@ export const WebSocketProvider = ({ children }) => {
 
   // ----- Conexión del WebSocket -----
   const connectWebSocket = (userId) => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      console.log("✅ WebSocket ya conectado");
+    if (!userId) {
+      console.error("❌ userId no válido. No se puede conectar WebSocket.");
       return;
     }
 
-    const socket = new WebSocket(`wss://localhost:7203/socket?userId=${userId}`);
+    if (
+      ws &&
+      ws.readyState === WebSocket.OPEN &&
+      ws.url.includes(`userId=${userId}`)
+    ) {
+      console.log(`✅ WebSocket ya está conectado para el usuario ${userId}`);
+      return;
+    }
+
+    const socket = new WebSocket(
+      `wss://localhost:7203/socket?userId=${userId}`
+    );
+
+    console.log("🔌 Conectando nuevo WebSocket para:", userId);
 
     socket.onopen = () => {
-      console.log("✅ WebSocket conectado");
+      console.log("✅ WebSocket conectado correctamente para:", userId);
       toast.success("Conectad@")
       setWs(socket);
       setConnected(true);
@@ -58,22 +76,27 @@ export const WebSocketProvider = ({ children }) => {
             return;
           }
 
-          console.log("✅ Mensaje validado:", data);
-          switch (data.Action) {
+          if (data.Action === "gameState") {
+            console.log("🟢 Tablero recibido en WebSocket:", data.Board);
+          }
 
+          switch (data.Action) {
             case "gameState":
-              handleGameUpdate(data)
+              handleGameUpdate(data);
               break;
 
             case "chatMessage":
               setChatMessages((prev) => {
-                return [...prev, {
-                  senderId: data.SenderId,
-                  senderName: data.SenderName,
-                  message: data.Message,
-                  timestamp: data.Timestamp,
-                  sessionId: data.SessionId
-                }];
+                return [
+                  ...prev,
+                  {
+                    senderId: data.SenderId,
+                    senderName: data.SenderName,
+                    message: data.Message,
+                    timestamp: data.Timestamp,
+                    sessionId: data.SessionId,
+                  },
+                ];
               });
 
               break;
@@ -86,10 +109,12 @@ export const WebSocketProvider = ({ children }) => {
 
             case "gameStarted":
               console.log("🎮 Partida iniciada: ", data);
-              localStorage.setItem("sessionId", data.SessionId);
-              console.log("✅ sessionId guardado en contexto y localStorage:", data.SessionId);
 
-              router.push("/prueba");
+              setPlayer1Id(data.Player1Id);
+              setPlayer2Id(data.Player2Id);
+              localStorage.setItem("sessionId", data.SessionId);
+
+              console.log("⌛ Esperando que los estados se actualicen...");
               break;
 
             case "lobbyCreated":
@@ -120,7 +145,10 @@ export const WebSocketProvider = ({ children }) => {
               break;
 
             case "randomMatchFound":
-              setMatchData({ matchId: data.MatchId, opponentId: data.Opponent });
+              setMatchData({
+                matchId: data.MatchId,
+                opponentId: data.Opponent,
+              });
               break;
 
             case "randomMatchAccepted":
@@ -142,17 +170,27 @@ export const WebSocketProvider = ({ children }) => {
               break;
 
             case "invitationReceived":
-              setGameInvites((prev) => [...prev, { id: Date.now(), sender: data.FromUserName, senderId: data.FromUserId }]);
+              setGameInvites((prev) => [
+                ...prev,
+                {
+                  id: Date.now(),
+                  sender: data.FromUserName,
+                  senderId: data.FromUserId,
+                },
+              ]);
               toast.custom(
-                <div style={{
-                  backgroundColor: 'var(--backgroundtoast)',
-                  color: 'var(--foreground)',
-                  fontSize: '16px',
-                  borderRadius: '8px',
-                  padding: '10px 20px',
-                  border: '2px solid rgba(255, 140, 0)',
-                  boxShadow: '0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6)',
-                }}>
+                <div
+                  style={{
+                    backgroundColor: "var(--backgroundtoast)",
+                    color: "var(--foreground)",
+                    fontSize: "16px",
+                    borderRadius: "8px",
+                    padding: "10px 20px",
+                    border: "2px solid rgba(255, 140, 0)",
+                    boxShadow:
+                      "0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6)",
+                  }}
+                >
                   {data.Message}
                 </div>
               );
@@ -160,21 +198,26 @@ export const WebSocketProvider = ({ children }) => {
 
             case "answerGameRequest":
               setGameInvites((prev) => {
-                const updatedInvites = prev.filter(inv => inv.senderId !== data.TargetId);
+                const updatedInvites = prev.filter(
+                  (inv) => inv.senderId !== data.TargetId
+                );
                 return updatedInvites;
               });
               break;
 
             case "friendRequestReceived":
               handleFriendRequest(data);
-              const friendRequestEvent = new CustomEvent("friendRequestReceived", {
-                detail: data,
-              });
+              const friendRequestEvent = new CustomEvent(
+                "friendRequestReceived",
+                {
+                  detail: data,
+                }
+              );
               window.dispatchEvent(friendRequestEvent);
               break;
 
             case "acceptFriendRequest":
-              toast.success(data.Message)
+              toast.success(data.Message);
               const acceptFriendEvent = new CustomEvent("acceptFriendRequest", {
                 detail: data,
               });
@@ -183,38 +226,51 @@ export const WebSocketProvider = ({ children }) => {
 
             case "userStateChanged":
               const friendStateEvent = new CustomEvent("friendStateUpdate", {
-                detail: { userId: data.userId, newState: data.State }
+                detail: { userId: data.userId, newState: data.State },
               });
               window.dispatchEvent(friendStateEvent);
               break;
 
             case "onlineCountUpdate":
-              console.log('Nuevo conteo de usuarios conectados:', data.OnlineCount);
+              console.log(
+                "Nuevo conteo de usuarios conectados:",
+                data.OnlineCount
+              );
               setOnlineCount(data.OnlineCount);
               break;
 
             case "updateFriendList":
               const updateFriendEvent = new CustomEvent("updateFriendList", {
-                detail: { friends: data.Friends }
+                detail: { friends: data.Friends },
               });
               window.dispatchEvent(updateFriendEvent);
               break;
 
             case "deleteFriend":
               const deleteFriendEvent = new CustomEvent("deleteFriend", {
-                detail: { friends: data.Friends }
+                detail: { friends: data.Friends },
               });
               window.dispatchEvent(deleteFriendEvent);
+              break;
+
+            case "moveConfirmed":
+            case "error":
+            case "orbit":
+              console.log(data.Message);
               break;
 
             default:
               console.warn("⚠️ Mensaje no reconocido:", data);
           }
         } catch (error) {
-          console.error("❌ Error al procesar mensaje WebSocket:", event.data, error);
+          console.error(
+            "❌ Error al procesar mensaje WebSocket:",
+            event.data,
+            error
+          );
         }
       };
-    }
+    };
 
     socket.onerror = (error) => {
       console.error("❌ Error al conectar el WebSocket", error);
@@ -242,18 +298,21 @@ export const WebSocketProvider = ({ children }) => {
   const handleFriendRequest = (data) => {
     setRequest((prevRequest) => [
       ...prevRequest,
-      { fromUserId: data.FromUserId, message: data.Message }
+      { fromUserId: data.FromUserId, message: data.Message },
     ]);
     toast.custom(
-      <div style={{
-        backgroundColor: 'var(--backgroundtoast)',
-        color: 'var(--foreground)',
-        fontSize: '16px',
-        borderRadius: '8px',
-        padding: '10px 20px',
-        border: '2px solid rgba(255, 140, 0)',
-        boxShadow: '0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6)',
-      }}>
+      <div
+        style={{
+          backgroundColor: "var(--backgroundtoast)",
+          color: "var(--foreground)",
+          fontSize: "16px",
+          borderRadius: "8px",
+          padding: "10px 20px",
+          border: "2px solid rgba(255, 140, 0)",
+          boxShadow:
+            "0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6)",
+        }}
+      >
         {data.Message}
       </div>
     );
@@ -267,7 +326,7 @@ export const WebSocketProvider = ({ children }) => {
     }
     const mensaje = JSON.stringify({
       Action: "sendFriendRequest",
-      TargetId: `${targetId}`
+      TargetId: `${targetId}`,
     });
     console.log("mensaje: ", mensaje);
     ws.send(mensaje);
@@ -281,7 +340,7 @@ export const WebSocketProvider = ({ children }) => {
     }
     const mensaje = JSON.stringify({
       Action: "sendGameRequest",
-      TargetId: `${targetId}`
+      TargetId: `${targetId}`,
     });
     console.log("mensaje: ", mensaje);
     ws.send(mensaje);
@@ -296,7 +355,7 @@ export const WebSocketProvider = ({ children }) => {
     const mensaje = JSON.stringify({
       Action: "answerGameRequest",
       TargetId: `${targetId}`,
-      Response: response
+      Response: response,
     });
     console.log("mensaje: ", mensaje);
     ws.send(mensaje);
@@ -307,7 +366,7 @@ export const WebSocketProvider = ({ children }) => {
       toast.error("Has rechazado la invitación");
     }
 
-    setGameInvites((prev) => prev.filter(inv => inv.senderId !== targetId));
+    setGameInvites((prev) => prev.filter((inv) => inv.senderId !== targetId));
   };
 
   // ----- Aceptar solicitud de amistad -----
@@ -318,7 +377,7 @@ export const WebSocketProvider = ({ children }) => {
     }
     const mensaje = JSON.stringify({
       Action: "acceptFriendRequest",
-      TargetId: `${targetId}`
+      TargetId: `${targetId}`,
     });
     console.log("mensaje: ", mensaje);
     ws.send(mensaje);
@@ -332,7 +391,7 @@ export const WebSocketProvider = ({ children }) => {
     }
     const mensaje = JSON.stringify({
       Action: "deleteFriend",
-      TargetId: `${targetId}`
+      TargetId: `${targetId}`,
     });
     console.log("mensaje: ", mensaje);
     ws.send(mensaje);
@@ -353,7 +412,6 @@ export const WebSocketProvider = ({ children }) => {
     console.log("setIsSearching(true) llamado");
     setIsSearching(true);
   };
-
 
   // ----- Cancelar matchmaking -----
   const cancelMatchmaking = () => {
@@ -378,7 +436,7 @@ export const WebSocketProvider = ({ children }) => {
     const message = JSON.stringify({
       Action: "randomMatchResponse",
       MatchId: matchId,
-      Response: response
+      Response: response,
     });
 
     console.log("📤 Enviando respuesta: ", message);
@@ -442,7 +500,6 @@ export const WebSocketProvider = ({ children }) => {
     ws.send(mensaje);
   };
 
-
   // ----- useEffect para redirección al crear lobby -----
   useEffect(() => {
     if (!ws) return;
@@ -462,6 +519,17 @@ export const WebSocketProvider = ({ children }) => {
       ws.removeEventListener("message", handleMessage);
     };
   }, [ws]);
+
+  // ⏳ Esperar a que los PlayerIds sean asignados antes de redirigir
+  useEffect(() => {
+    if (player1Id && player2Id) {
+      console.log("✅ Jugadores asignados correctamente:", {
+        player1Id,
+        player2Id,
+      });
+      router.push("/prueba");
+    }
+  }, [player1Id, player2Id]);
 
   // ----- FUNCIÓN PARA ENVIAR MENSAJE -----
   const sendChatMessage = (message) => {
@@ -508,10 +576,17 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [ws]);
 
+  // ----- useEffect para manejo del juego -----
   // ----- Función para manejo del juego -----
   const handleGameUpdate = (data) => {
     console.log("📩 Actualización del juego recibida:", data);
 
+    if (!data.Board || !Array.isArray(data.Board) || data.Board.length !== 16) {
+      console.error("❌ Tablero recibido no es válido:", data.Board);
+      return;
+    }
+
+    // 🔄 Convertimos el array plano en una matriz `4x4`
     const formattedBoard = [];
     for (let i = 0; i < 4; i++) {
       formattedBoard.push(data.Board.slice(i * 4, i * 4 + 4));
@@ -519,12 +594,11 @@ export const WebSocketProvider = ({ children }) => {
 
     console.log("✅ Tablero formateado correctamente:", formattedBoard);
 
-    setBoard(formattedBoard);
+    setBoard(formattedBoard); // Guardamos como matriz 4x4 en el frontend
     setCurrentPlayer(data.CurrentPlayer);
     setGameState(data.State);
   };
-  
- 
+
   // Guarda currentPlayer en sessionStorage cada vez que cambia
   useEffect(() => {
     if (currentPlayer !== null) {
@@ -569,7 +643,9 @@ export const WebSocketProvider = ({ children }) => {
     sessionId,
     sendChatMessage,
     requestChatHistory,
-    chatMessages
+    chatMessages,
+    player1Id,
+    player2Id
   };
 
   return (
