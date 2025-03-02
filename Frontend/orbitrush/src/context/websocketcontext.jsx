@@ -4,7 +4,6 @@ import { createContext, useState, useEffect, useContext, useRef } from "react";
 import { toast } from 'react-hot-toast';
 import { useRouter } from "next/navigation";
 import MatchFoundModal from "@/components/miscelaneus/modal/matchfound/matchfound";
-import { CellState } from "@/types/game";
 
 const WebSocketContext = createContext();
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -43,6 +42,7 @@ export const WebSocketProvider = ({ children }) => {
 
     socket.onopen = () => {
       console.log("✅ WebSocket conectado");
+      toast.success("Conectad@")
       setWs(socket);
       setConnected(true);
     };
@@ -222,6 +222,7 @@ export const WebSocketProvider = ({ children }) => {
 
     socket.onclose = () => {
       console.log("❌ WebSocket cerrado");
+      toast.error("Has sido desconectad@")
       setWs(null);
       setConnected(false);
     };

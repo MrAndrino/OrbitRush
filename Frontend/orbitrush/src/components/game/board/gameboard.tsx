@@ -12,7 +12,7 @@ const GameBoard = () => {
     useEffect(() => {
         if (!ws) {
           console.log("⏳ WebSocket aún no está disponible en GameBoard...");
-          connectWebSocket(2); 
+          connectWebSocket(); 
         } else {
           console.log("✅ WebSocket finalmente disponible en GameBoard:", ws);
           setIsReady(true);
