@@ -35,7 +35,7 @@ const MatchFoundModal = ({
 
     setCountdown(7);
     const timer = setInterval(() => {
-      setCountdown(prev => {
+      setCountdown((prev) => {
         if (prev > 1) return prev - 1;
         clearInterval(timer);
         return 0;
@@ -44,7 +44,7 @@ const MatchFoundModal = ({
 
     if (matchData?.gameStarted) {
       onClose();
-      router.push("/menu/lobby");
+      cancelMatchmaking();
     }
 
     autoCloseTimeoutRef.current = setTimeout(() => {
@@ -61,7 +61,9 @@ const MatchFoundModal = ({
         autoCloseTimeoutRef.current = null;
       }
     };
-  }, [isOpen, matchData]);
+  }, [isOpen, matchData?.gameStarted]);
+
+
 
   const handleAccept = () => {
     setStatusMessage("Partida Aceptada");

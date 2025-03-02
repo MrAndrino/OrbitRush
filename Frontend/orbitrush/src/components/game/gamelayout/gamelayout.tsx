@@ -130,11 +130,11 @@ const GameLayout: React.FC<GameLayoutProps> = ({ userId }) => {
         <div className={styles.container}>
             <div className={styles.leftSide}>
                 <div className={styles.buttons}>
-                    <Button onClick={openLogoutModal} color="red" className="h-12 w-16 text-xl flex items-center justify-center">
-                        <LogOut />
-                    </Button>
                     <Button onClick={openModal} color="blue" className="h-12 w-16 text-xl flex items-center justify-center">
                         <BookOpen />
+                    </Button>
+                    <Button onClick={openLogoutModal} color="red" className="h-12 w-16 text-xl flex items-center justify-center">
+                        <LogOut />
                     </Button>
                 </div>
                 {player1 && (
