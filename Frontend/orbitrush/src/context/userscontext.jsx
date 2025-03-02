@@ -169,6 +169,7 @@ export const UsersProvider = ({ children }) => {
     try {
       const profile = await getUserProfile(USER_PROFILE_URL, token, userId);
       setUserProfile(profile);
+      return profile;
     } catch (error) {
       console.error("No se pudo cargar el perfil del usuario.");
     }

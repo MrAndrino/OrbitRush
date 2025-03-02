@@ -7,13 +7,14 @@
   border-radius: 5px;
   overflow: hidden;
   scrollbar-color: rgba(255, 140, 0, 0.7) #1e1e1e;
+  width: 100%;
 }
 
 .chatMessages {
   padding: 0.5rem;
   overflow-y: auto;
-  max-height: 12rem;
-  min-height: 12rem;
+  max-height: 10rem;
+  min-height: 10rem;
 }
 
 .chatMessage {

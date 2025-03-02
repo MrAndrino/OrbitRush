@@ -531,7 +531,7 @@ export const WebSocketProvider = ({ children }) => {
       sessionStorage.setItem("player1Id", player1Id);
       sessionStorage.setItem("player2Id", player2Id);
 
-      router.push("/prueba");
+      router.push("/menu/game");
     }
   }, [player1Id, player2Id]);
 
@@ -580,7 +580,6 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [ws]);
 
-  // ----- useEffect para manejo del juego -----
   // ----- Función para manejo del juego -----
   const handleGameUpdate = (data) => {
     console.log("📩 Actualización del juego recibida:", data);

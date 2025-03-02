@@ -38,7 +38,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
 
         if (ws) {
             console.log("✅ WebSocket disponible:", ws.url);
-            (window as any).ws = ws; // Forzar la asignación sin errores de TypeScript
+            (window as any).ws = ws;
             console.log("🌍 WebSocket almacenado en window:", (window as any).ws);
         } else {
             console.warn("⚠ WebSocket no está disponible todavía.");

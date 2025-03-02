@@ -7,7 +7,6 @@
   gap: 1.2rem;
   background: linear-gradient(135deg, #1c2028, #151515);
   padding: 3rem;
-  transition: border 0.3s, box-shadow 0.3s;
   max-height: 60%;
   width: 15rem;
 }
