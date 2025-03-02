@@ -11,6 +11,7 @@ import Button from "@/components/miscelaneus/button/button";
 import { BookOpen, LogOut } from "lucide-react";
 import Modal from "@/components/miscelaneus/modal/modal";
 import Instructions from "@/components/miscelaneus/instructions/instructions";
+import { useWebSocket } from "@/context/websocketcontext";
 
 interface UserProfile {
     id: number;
@@ -21,10 +22,12 @@ interface UserProfile {
 const GameLayout = () => {
     const { decodedToken } = useAuth();
     const { getUserProfileData } = useUsers();
+    const { currentPlayer } = useWebSocket();
 
     const [player1, setPlayer1] = useState<UserProfile | null>(null);
     const [player2, setPlayer2] = useState<UserProfile | null>(null);
 
+    const [timer, setTimer] = useState<number>(60);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
@@ -52,6 +55,23 @@ const GameLayout = () => {
         fetchPlayers();
     }, []);
 
+    useEffect(() => {
+        setTimer(60); // Reinicia el temporizador a 60 cada vez que cambia el turno
+
+        const interval = setInterval(() => {
+            setTimer((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    console.log("⏳ Tiempo agotado. Aquí va la función."); // Aquí va la función
+                    return 60;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [currentPlayer]);
+
     return (
         <div className={styles.container}>
             <div className={styles.leftSide}>
@@ -71,6 +91,9 @@ const GameLayout = () => {
                             className={styles.avatar1}
                         />
                         <h2 className={styles.playerName}>{player1.name}</h2>
+                        {currentPlayer === "Black" && <p className={`${styles.timer} ${timer < 10 ? styles.timerRed : ""}`}>
+                            {timer}s
+                        </p>}
                     </div>
                 )}
             </div>
@@ -85,6 +108,9 @@ const GameLayout = () => {
                             className={styles.avatar2}
                         />
                         <h2 className={styles.playerName}>{player2.name}</h2>
+                        {currentPlayer === "White" && <p className={`${styles.timer} ${timer < 10 ? styles.timerRed : ""}`}>
+                            {timer}s
+                        </p>}
                     </div>
                 )}
                 {/* Chat */}
