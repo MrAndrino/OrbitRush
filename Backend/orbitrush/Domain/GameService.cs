@@ -91,7 +91,6 @@ public class GameService
             });
         }
     }
-
     public async Task PerformOrbit()
     {
         if (State != GameState.WaitingForOrbit)
@@ -103,16 +102,32 @@ public class GameService
         Board.Orbit();
         await wsPlayHandler.BroadcastGameStateAsync(CurrentSessionId);
 
+
         var winner = Board.CheckWinner();
+        string winnerId;
+
+        if (winner == CellState.Empty)
+        {
+            winnerId = "-1";
+        }
+        else if ((winner == Player1Piece && Player1Id.StartsWith("BOT_")) ||
+                 (winner == Player2Piece && Player2Id.StartsWith("BOT_")))
+        {
+            winnerId = "0";
+        }
+        else
+        {
+            winnerId = (winner == Player1Piece) ? Player1Id : Player2Id;
+        }
+
         if (winner != CellState.Empty)
         {
             State = GameState.GameOver;
             await SaveMatchData(winner);
-            await wsPlayHandler.BroadcastGameStateAsync(CurrentSessionId);
+            await wsPlayHandler.NotifyGameOverAsync(CurrentSessionId, winnerId);
             return;
         }
 
-        // 🔹 Si el tablero NO está lleno, simplemente cambia el turno
         if (!IsBoardFull())
         {
             Board.SwitchPlayer();
@@ -121,7 +136,6 @@ public class GameService
             return;
         }
 
-        // 🔹 Si el tablero ESTÁ lleno, hace los 5 giros
         int maxRotations = 5;
         int rotationCount = 0;
 
@@ -132,21 +146,27 @@ public class GameService
             await wsPlayHandler.BroadcastGameStateAsync(CurrentSessionId);
 
             winner = Board.CheckWinner();
+
             if (winner != CellState.Empty)
             {
+                winnerId = (winner == CellState.Empty) ? "-1" :
+                           ((winner == Player1Piece && Player1Id.StartsWith("BOT_")) ||
+                            (winner == Player2Piece && Player2Id.StartsWith("BOT_"))) ? "0" :
+                            (winner == Player1Piece) ? Player1Id : Player2Id;
+
                 State = GameState.GameOver;
                 await SaveMatchData(winner);
-                await wsPlayHandler.BroadcastGameStateAsync(CurrentSessionId);
+                await wsPlayHandler.NotifyGameOverAsync(CurrentSessionId, winnerId);
                 return;
             }
 
             rotationCount++;
         }
 
-        // 🔹 Si después de los giros sigue sin haber ganador, se declara empate
         State = GameState.GameOver;
         await SaveMatchData(CellState.Empty);
-        await wsPlayHandler.BroadcastGameStateAsync(CurrentSessionId);
+        await wsPlayHandler.NotifyGameOverAsync(CurrentSessionId, "-1");
+        return;
     }
 
 

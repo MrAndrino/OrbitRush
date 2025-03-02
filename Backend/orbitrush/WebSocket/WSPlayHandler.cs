@@ -127,8 +127,7 @@ public class WSPlayHandler
                     boardState[i * 4 + j] = gameService.Board.Grid[i, j];
                 }
             }
-            Console.WriteLine($"馃攧 [SERVER] Turno actual: {gameService.Board.CurrentPlayer}");
-            Console.WriteLine($"馃搳 [SERVER] Tablero actualizado despu茅s del bot:");
+
             for (int i = 0; i < 4; i++)
             {
                 Console.WriteLine($"{gameService.Board.Grid[i, 0]}, {gameService.Board.Grid[i, 1]}, {gameService.Board.Grid[i, 2]}, {gameService.Board.Grid[i, 3]}");
@@ -265,7 +264,7 @@ public class WSPlayHandler
         }
     }
 
-    private async Task NotifyGameOverAsync(string sessionId, string winnerId)
+    public async Task NotifyGameOverAsync(string sessionId, string winnerId)
     {
         using (var scope = _serviceProvider.CreateScope())
         {
@@ -289,8 +288,6 @@ public class WSPlayHandler
                     await socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
                 }
             }
-
-            gameManager.RemoveGame(sessionId);
         }
     }
 
