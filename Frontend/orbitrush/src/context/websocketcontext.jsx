@@ -108,10 +108,6 @@ export const WebSocketProvider = ({ children }) => {
             });
             break;
 
-          case "leftGame":
-            toast.success("Has salido de la partida.");
-            break;
-
           case "opponentLeft":
             toast.success("Tu oponente ha abandonado partida.");
             break;
@@ -147,7 +143,6 @@ export const WebSocketProvider = ({ children }) => {
             sessionStorage.removeItem("player2Id");
             setPlayer2Id(null);
             router.push("/menu");
-
             break;
 
           case "lobbyCreated":
@@ -223,6 +218,10 @@ export const WebSocketProvider = ({ children }) => {
             );
             break;
 
+          case "clearGameInvites":
+            setGameInvites([]);
+            break;
+
           case "answerGameRequest":
             setGameInvites((prev) => {
               const updatedInvites = prev.filter(
@@ -290,6 +289,8 @@ export const WebSocketProvider = ({ children }) => {
             window.dispatchEvent(deleteFriendEvent);
             break;
 
+          case "leftGame":
+          case "invitationError":
           case "moveConfirmed":
           case "error":
           case "orbit":
@@ -370,16 +371,23 @@ export const WebSocketProvider = ({ children }) => {
 
   // ----- Envío de solicitud de partida -----
   const sendGameRequest = (targetId) => {
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      console.error("WebSocket no conectado");
-      return;
-    }
-    const mensaje = JSON.stringify({
-      Action: "sendGameRequest",
-      TargetId: `${targetId}`,
+    return new Promise((resolve) => {
+      const mensaje = JSON.stringify({
+        Action: "sendGameRequest",
+        TargetId: `${targetId}`,
+      });
+
+      const handleMessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.Action === "invitationError" || data.Action === "invitationReceived") {
+          resolve(data);
+        }
+      };
+
+      ws.addEventListener("message", handleMessage, { once: true });
+      ws.send(mensaje);
     });
-    console.log("mensaje: ", mensaje);
-    ws.send(mensaje);
   };
 
   // ----- Responder solicitud de partida -----

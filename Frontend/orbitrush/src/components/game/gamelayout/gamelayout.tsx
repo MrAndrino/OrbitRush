@@ -59,7 +59,7 @@ const GameLayout: React.FC<GameLayoutProps> = ({ userId }) => {
                 console.log("Player1 Profile:", profile1);
                 if (profile1) setPlayer1(profile1);
             }
-            if (player2Id) {
+            if (player2Id && !player2Id.startsWith("BOT_")) {
                 const profile2 = await getUserProfileData(player2Id);
                 console.log("Player2 Profile:", profile2);
                 if (profile2) {
@@ -68,6 +68,7 @@ const GameLayout: React.FC<GameLayoutProps> = ({ userId }) => {
                     setPlayer2({ id: 0, name: BOT_NAME, image: BOT_IMAGE });
                 }
             } else {
+                console.log("Asignando bot por defecto en lugar de hacer una solicitud");
                 setPlayer2({ id: 0, name: BOT_NAME, image: BOT_IMAGE });
             }
         };

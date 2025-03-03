@@ -42,9 +42,18 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
     toast.success(`Enviaste solicitud de amistad a ${user.name}.`);
   };
 
-  const handleGameRequest = () => {
-    sendGameRequest(user.id);
-    toast.success(`Invitaste a ${user.name} a jugar.`);
+  const handleGameRequest = async () => {
+    try {
+      const response = await sendGameRequest(user.id);
+
+      if (response?.Success === false) {
+        toast.error(response.ResponseMessage);
+      } else {
+        toast.success(`Invitaste a ${user.name} a jugar.`);
+      }
+    } catch (error) {
+      toast.error("Error al enviar la invitación.");
+    }
   };
 
   const handleRemoveFriend = () => {

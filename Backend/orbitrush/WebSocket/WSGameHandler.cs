@@ -141,6 +141,30 @@ public class WSGameHandler
         {
             var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
 
+            var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
+
+            bool isTargetInGame = gameManager.GetAllActiveGames()
+                .Any(g => g.Value.Player1Id == request.TargetId || g.Value.Player2Id == request.TargetId);
+
+            if (isTargetInGame)
+            {
+                Console.WriteLine($":no_entry: No se puede invitar a {request.TargetId}, está en partida.");
+
+                if (_connectionManager.TryGetConnection(senderId, out WebSocket senderSocket))
+                {
+                    string errorMessage = JsonSerializer.Serialize(new
+                    {
+                        Action = "invitationError",
+                        Success = false,
+                        ResponseMessage = "El usuario está en partida y no puede recibir invitaciones."
+                    });
+
+                    await SendAsync(senderSocket, errorMessage);
+                }
+
+                return;
+            }
+
             if (pendingInvitations.ContainsKey(senderId) && pendingInvitations[senderId] == request.TargetId)
             {
                 string errorMessage = JsonSerializer.Serialize(new
@@ -302,6 +326,9 @@ public class WSGameHandler
 
             var gameService = gameManager.GetOrCreateGame(sessionId);
             gameService.InitializeGame(lobby.Player1Id, lobby.Player2Id, sessionId);
+
+            RemovePendingInvitations(lobby.Player1Id);
+            RemovePendingInvitations(lobby.Player2Id);
 
             var friendHandler = scope.ServiceProvider.GetRequiredService<WSFriendHandler>();
 
@@ -658,6 +685,31 @@ public class WSGameHandler
     public bool IsPlayerInLobby(string userId)
     {
         return activeLobbies.Values.Any(lobby => lobby.Player1Id.Contains(userId) || lobby.Player2Id.Contains(userId));
+    }
+
+    private async Task RemovePendingInvitations(string userId)
+    {
+        bool removed = pendingInvitations.TryRemove(userId, out _);
+
+        foreach (var key in pendingInvitations.Keys.ToList())
+        {
+            if (pendingInvitations[key] == userId)
+            {
+                pendingInvitations.TryRemove(key, out _);
+                removed = true;
+            }
+        }
+
+        if (removed && _connectionManager.TryGetConnection(userId, out WebSocket userSocket))
+        {
+            var notification = JsonSerializer.Serialize(new
+            {
+                Action = "clearGameInvites",
+                Message = "Se han eliminado tus invitaciones pendientes."
+            });
+
+            await userSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(notification)), WebSocketMessageType.Text, true, CancellationToken.None);
+        }
     }
 
     private async Task SendAsync(WebSocket webSocket, string message)
