@@ -21,11 +21,10 @@ const electrolize = Electrolize({
 });
 
 export const metadata = {
-  title: "Orbit Rush",
+  title: "Orbit Rush!",
   description: "Juego multijugador en tiempo real",
   icons: {
-    icon: "/favicon.ico",
-    apple: "/favicon.png",
+    icon: "/favicon.ico"
   },
 };
 
