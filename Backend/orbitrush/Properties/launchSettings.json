@@ -16,7 +16,8 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "JWT_KEY": "dT2^kF7@vJ3#mP9!xB4&oL6*zY8%qC1!zW5&"
+        "JWT_KEY": "dT2^kF7@vJ3#mP9!xB4&oL6*zY8%qC1!zW5&",
+        "OR_DATABASE_CONFIG": "Server=db14860.databaseasp.net; Database=db14860; Uid=db14860; Pwd=x+5NEs-4r7Y?; "
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7203;http://localhost:5249"

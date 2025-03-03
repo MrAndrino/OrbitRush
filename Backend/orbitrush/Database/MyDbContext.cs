@@ -23,8 +23,13 @@ public class MyDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+#if DEBUG
 
         options.UseSqlite($"DataSource={baseDir}{DATABASE_PATH}");
+
+#elif RELEASE
+        options.UseMySql(Environment.GetEnvironmentVariable("OR_DATABASE_CONFIG"), ServerVersion.AutoDetect(Environment.GetEnvironmentVariable("OR_DATABASE_CONFIG")));
+#endif
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

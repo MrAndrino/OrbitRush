@@ -371,8 +371,8 @@ public class WSGameHandler
             var gameService = gameManager.GetOrCreateGame(sessionId);
             gameService.InitializeGame(lobby.Player1Id, lobby.Player2Id, sessionId);
 
-            RemovePendingInvitations(lobby.Player1Id);
-            RemovePendingInvitations(lobby.Player2Id);
+            await RemovePendingInvitations(lobby.Player1Id);
+            await RemovePendingInvitations(lobby.Player2Id);
 
             var friendHandler = scope.ServiceProvider.GetRequiredService<WSFriendHandler>();
 
