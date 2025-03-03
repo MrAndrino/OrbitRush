@@ -156,6 +156,12 @@ export const WebSocketProvider = ({ children }) => {
             console.log("✅ Lobby actualizado:", data);
             break;
 
+          case "returnToLobby":
+            toast.success(
+              "Tu oponente ha salido, puedes invitar a otro jugador."
+            );
+            break;
+
           case "leftLobby":
             console.log("✅ Has salido del lobby. Redirigiendo...");
             localStorage.removeItem("lobbyId");

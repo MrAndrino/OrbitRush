@@ -239,56 +239,100 @@ public class WSGameHandler
 
                 if (response == "accept")
                 {
-                    var existingLobby = activeLobbies.FirstOrDefault(l => l.Value.Player1Id == targetPlayer);
+                    // Verificar si el jugador que acepta (userId) ya está en un lobby
+                    var existingLobbyUser = activeLobbies.FirstOrDefault(l => l.Value.Player1Id == userId || l.Value.Player2Id == userId);
 
-                    if (!string.IsNullOrEmpty(existingLobby.Key))
+                    if (!string.IsNullOrEmpty(existingLobbyUser.Key))
                     {
-                        var lobby = existingLobby.Value;
+                        var oldLobby = existingLobbyUser.Value;
+                        string oldOpponentId = oldLobby.Player1Id == userId ? oldLobby.Player2Id : oldLobby.Player1Id;
 
-                        if (string.IsNullOrEmpty(lobby.Player2Id))
+                        if (!string.IsNullOrEmpty(oldOpponentId))
                         {
-                            lobby.Player2Id = userId;
-                            lobby.Player2Ready = true;
-                            Console.WriteLine($"Jugador {userId} agregado al lobby existente {existingLobby.Key}");
+                            Console.WriteLine($"{userId} sale del lobby con {oldOpponentId}, ahora {oldOpponentId} pasa a ser Player1.");
 
-                            await SendLobbyInfo(targetPlayer, existingLobby.Key);
-                            await SendLobbyInfo(userId, existingLobby.Key);
-                        }
-                        else
-                        {
-                            Console.WriteLine($"El lobby {existingLobby.Key} ya tiene 2 jugadores. No se puede agregar otro.");
+                            oldLobby.Player1Id = oldOpponentId;
+                            oldLobby.Player2Id = null;
+                            oldLobby.Player2Ready = false;
+
+                            if (_connectionManager.TryGetConnection(oldOpponentId, out WebSocket oldOpponentSocket))
+                            {
+                                var returnMessage = new
+                                {
+                                    Action = "returnToLobby",
+                                    Message = "Tu oponente ha salido, ahora eres el anfitrión y puedes invitar a otro jugador."
+                                };
+                                await SendAsync(oldOpponentSocket, JsonSerializer.Serialize(returnMessage));
+                            }
+
+                            await SendLobbyInfo(oldOpponentId, existingLobbyUser.Key);
                         }
                     }
-                    else
+
+                    // Verificar si el jugador que invita (targetPlayer) ya está en un lobby
+                    var existingLobbyTarget = activeLobbies.FirstOrDefault(l => l.Value.Player1Id == targetPlayer || l.Value.Player2Id == targetPlayer);
+
+                    if (!string.IsNullOrEmpty(existingLobbyTarget.Key))
                     {
-                        var lobbyId = Guid.NewGuid().ToString();
-                        Lobby newLobby = new Lobby(lobbyId, targetPlayer, userId, false)
-                        {
-                            Player1Ready = true,
-                            Player2Ready = true,
-                        };
-                        activeLobbies.TryAdd(lobbyId, newLobby);
-                        Console.WriteLine($"Nuevo lobby creado: {lobbyId} entre {targetPlayer} y {userId}");
+                        var oldLobby = existingLobbyTarget.Value;
+                        string oldOpponentId = oldLobby.Player1Id == targetPlayer ? oldLobby.Player2Id : oldLobby.Player1Id;
 
-                        await SendLobbyInfo(userId, lobbyId);
-                        await SendLobbyInfo(targetPlayer, lobbyId);
-
-                        var lobbyCreatedMessage = JsonSerializer.Serialize(new
+                        if (!string.IsNullOrEmpty(oldOpponentId))
                         {
-                            Action = "lobbyCreated",
-                            LobbyId = lobbyId,
-                            Message = "Se ha creado un nuevo lobby. Redirigiendo..."
-                        });
+                            Console.WriteLine($"{targetPlayer} sale del lobby con {oldOpponentId}, ahora {oldOpponentId} pasa a ser Player1.");
 
-                        if (_connectionManager.TryGetConnection(targetPlayer, out WebSocket targetSocketLobby))
-                        {
-                            await SendAsync(targetSocketLobby, lobbyCreatedMessage);
+                            oldLobby.Player1Id = oldOpponentId;
+                            oldLobby.Player2Id = null;
+                            oldLobby.Player2Ready = false;
+
+                            if (_connectionManager.TryGetConnection(oldOpponentId, out WebSocket oldOpponentSocket))
+                            {
+                                var returnMessage = new
+                                {
+                                    Action = "returnToLobby",
+                                    Message = "Tu oponente ha salido, ahora eres el anfitrión y puedes invitar a otro jugador."
+                                };
+                                await SendAsync(oldOpponentSocket, JsonSerializer.Serialize(returnMessage));
+                            }
+
+                            await SendLobbyInfo(oldOpponentId, existingLobbyTarget.Key);
                         }
+                    }
 
-                        if (_connectionManager.TryGetConnection(userId, out WebSocket senderSocketLobby))
-                        {
-                            await SendAsync(senderSocketLobby, lobbyCreatedMessage);
-                        }
+                    string finalPlayer1 = targetPlayer;
+                    string finalPlayer2 = userId;
+
+                    Console.WriteLine($"Nuevo lobby: {finalPlayer1} será Player1 y {finalPlayer2} será Player2.");
+
+                    // Crear un nuevo lobby 
+                    var newLobbyId = Guid.NewGuid().ToString();
+                    Lobby newLobby = new Lobby(newLobbyId, finalPlayer1, finalPlayer2, false)
+                    {
+                        Player1Ready = true,
+                        Player2Ready = true
+                    };
+                    activeLobbies.TryAdd(newLobbyId, newLobby);
+
+                    Console.WriteLine($"Nuevo lobby creado: {newLobbyId} entre {finalPlayer1} y {finalPlayer2}");
+
+                    await SendLobbyInfo(finalPlayer1, newLobbyId);
+                    await SendLobbyInfo(finalPlayer2, newLobbyId);
+
+                    var lobbyCreatedMessage = JsonSerializer.Serialize(new
+                    {
+                        Action = "lobbyCreated",
+                        LobbyId = newLobbyId,
+                        Message = "Se ha creado un nuevo lobby. Redirigiendo..."
+                    });
+
+                    if (_connectionManager.TryGetConnection(finalPlayer2, out WebSocket targetSocketLobby))
+                    {
+                        await SendAsync(targetSocketLobby, lobbyCreatedMessage);
+                    }
+
+                    if (_connectionManager.TryGetConnection(finalPlayer1, out WebSocket senderSocketLobby))
+                    {
+                        await SendAsync(senderSocketLobby, lobbyCreatedMessage);
                     }
                 }
                 else if (response == "reject")

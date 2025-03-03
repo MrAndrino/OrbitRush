@@ -42,13 +42,19 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
   }, [player1Id, player2Id]);
 
   useEffect(() => {
+    if (player1Id && !player1Id.startsWith("BOT_"))
+      getUserProfileData(player1Id);
+    if (player2Id && !player2Id.startsWith("BOT_"))
+      getUserProfileData(player2Id);
+  }, [player1Id, player2Id]);
+  useEffect(() => {
     if (!ws) return;
 
     const handleLobbyUpdate = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
 
       if (data.Action === "lobbyUpdated" && data.LobbyId === lobbyId) {
-        console.log("📢 Lobby actualizado:", data);
+        console.log(":loudspeaker: Lobby actualizado:", data);
 
         setPlayers([
           {
@@ -64,10 +70,22 @@ const LobbyBox = ({ lobbyId, player1Id, player2Id }: LobbyBoxProps) => {
       }
 
       if (data.Action === "opponentDisconnected") {
-        console.log("🔄 Oponente desconectado. Ahora el usuario actual es el anfitrión.");
+        console.log(
+          ":arrows_counterclockwise: Oponente desconectado. Ahora el usuario actual es el anfitrión."
+        );
+
         setPlayers((prev) => [
-          prev[1],
-          { name: "Esperando...", image: "/images/OrbitRush-TrashCan.jpg" }
+          prev[0],
+          { name: "Esperando...", image: "/images/OrbitRush-TrashCan.jpg" },
+        ]);
+      }
+
+      if (data.Action === "returnToLobby") {
+        console.log(":arrows_counterclockwise: Oponente ha salido. Actualizando lobby...");
+
+        setPlayers((prev) => [
+          prev[0],
+          { name: "Esperando...", image: "/images/OrbitRush-TrashCan.jpg" },
         ]);
       }
     };
