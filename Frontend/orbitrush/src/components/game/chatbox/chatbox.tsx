@@ -34,7 +34,7 @@ const ChatBox = () => {
 
 
     const handleSendMessage = () => {
-        const currentSessionId = sessionId || localStorage.getItem("sessionId");
+        const currentSessionId = sessionId || sessionStorage.getItem("sessionId");
 
         if (!currentSessionId) {
             console.error("❌ No hay una sesión activa para enviar mensajes.");

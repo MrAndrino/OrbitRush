@@ -73,7 +73,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
         const storedSessionId = sessionStorage.getItem("sessionId");
         if (!sessionId && storedSessionId) {
             console.log(
-                "🔄 Restaurando sessionId desde localStorage:",
                 storedSessionId
             );
             setLocalSessionId(storedSessionId);
@@ -183,10 +182,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
         <div className={styles.container}>
             {localSessionId ? (
                 <>
-                    <p className={styles.currentTurn}>
-                        {gameState === "GameOver" ? "🛑 Juego terminado" : `Turno de: ${currentPlayer}`}
-                    </p>
-
                     <div className={styles.board}>
                         {Array.isArray(board) && board.length === 4 ? (
                             board.map((row, rowIndex) =>

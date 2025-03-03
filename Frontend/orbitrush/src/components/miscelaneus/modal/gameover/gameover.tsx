@@ -1,6 +1,6 @@
 import Modal from "@/components/miscelaneus/modal/modal";
-import { useRouter } from "next/navigation";
 import Button from "../../button/button";
+import { useWebSocket } from "@/context/websocketcontext";
 
 interface GameOverModalProps {
   isOpen: boolean;
@@ -11,15 +11,15 @@ interface GameOverModalProps {
 }
 
 const GameOverModal = ({ isOpen, onClose, winner, sessionId, userId }: GameOverModalProps) => {
-  const router = useRouter()
   const isWinner = winner?.toString() === userId?.toString();
+  const { queueForMatch } = useWebSocket();
 
   const handlePlayAgain = () => {
+    queueForMatch();
     onClose();
   };
 
   const handleGoToMenu = () => {
-    router.push("/menu");
     onClose();
   };
 
@@ -29,7 +29,7 @@ const GameOverModal = ({ isOpen, onClose, winner, sessionId, userId }: GameOverM
         <p className={`text-5xl font-semibold ${isWinner ? "text-green-400" : "text-red-400"}`}>
           {winner && userId ? (isWinner ? "¡Ganaste!" : "Has perdido") : "❌ Error: Datos de la partida no disponibles."}
         </p>
-        <p className="text-lg">¿Deseas volver a jugar contra este usuario?</p>
+        <p className="text-lg">¿Deseas jugar otra partida?</p>
 
         <div className="flex justify-center gap-[2rem] select-none">
           <Button color="blue" onClick={handlePlayAgain} className="w-36 h-12 text-xl" >Jugar otra vez</Button>
