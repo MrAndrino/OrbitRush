@@ -13,7 +13,7 @@ interface GameCardProps {
   color?: "blue" | "orange";
 }
 
-const BOT_NAME = "Mr. Orbit";
+const BOT_NAME = "Mr. Botorbito";
 const BOT_IMAGE = "/images/MatchBot.jpeg";
 
 const GameCard = ({ user, className = "", color = "blue" }: GameCardProps) => {

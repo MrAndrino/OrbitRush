@@ -60,9 +60,7 @@ public class WSPlayHandler
                             var bot = new BotOrbito(gameService.Player2Id, _connectionManager, _serviceProvider);
                             await bot.PlayTurnAsync(playMessage.SessionId);
                         }
-
                         break;
-
 
                     case "leaveGame":
                         await LeaveGame(userId);
@@ -264,7 +262,7 @@ public class WSPlayHandler
         using (var scope = _serviceProvider.CreateScope())
         {
             var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
-            var gameService = gameManager.GetOrCreateGame(sessionId);
+            var gameService = gameManager.GetAllActiveGames().GetValueOrDefault(sessionId);
 
             if (gameService == null)
             {

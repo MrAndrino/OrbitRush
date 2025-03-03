@@ -65,6 +65,7 @@ public class GameManager
 
             var connectionManager = scope.ServiceProvider.GetRequiredService<WSConnectionManager>();
             await connectionManager.NotifyPlayingPlayersCountAsync();
+            await connectionManager.NotifyActiveGameCountAsync();
         }
     }
 

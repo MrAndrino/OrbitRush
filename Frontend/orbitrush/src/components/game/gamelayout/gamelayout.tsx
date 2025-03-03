@@ -25,6 +25,9 @@ interface GameLayoutProps {
     userId: string;
 }
 
+const BOT_NAME = "Botorbito";
+const BOT_IMAGE = "/images/MatchBot.jpeg";
+
 const GameLayout: React.FC<GameLayoutProps> = ({ userId }) => {
     const { logout } = useAuth();
     const { getUserProfileData } = useUsers();
@@ -42,6 +45,7 @@ const GameLayout: React.FC<GameLayoutProps> = ({ userId }) => {
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState<boolean>(false);
     const openLogoutModal = () => setIsLogoutModalOpen(true);
     const closeLogoutModal = () => setIsLogoutModalOpen(false);
+
     const player1Id = sessionStorage.getItem("player1Id");
     const player2Id = sessionStorage.getItem("player2Id");
 
@@ -58,7 +62,13 @@ const GameLayout: React.FC<GameLayoutProps> = ({ userId }) => {
             if (player2Id) {
                 const profile2 = await getUserProfileData(player2Id);
                 console.log("Player2 Profile:", profile2);
-                if (profile2) setPlayer2(profile2);
+                if (profile2) {
+                    setPlayer2(profile2);
+                } else {
+                    setPlayer2({ id: 0, name: BOT_NAME, image: BOT_IMAGE });
+                }
+            } else {
+                setPlayer2({ id: 0, name: BOT_NAME, image: BOT_IMAGE });
             }
         };
 

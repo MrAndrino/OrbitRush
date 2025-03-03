@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import FriendCard, { User } from "../friendcard/friendcard"; 
+import FriendCard, { User } from "../friendcard/friendcard";
 import styles from "./userlist.module.css";
 
 interface UserListProps {
   users: User[];
-  type: "user" | "friend"; 
+  type: "user" | "friend";
 }
 
 const UserList = ({ users, type }: UserListProps) => {
@@ -30,15 +30,19 @@ const UserList = ({ users, type }: UserListProps) => {
 
   return (
     <div className={styles.userList} ref={userListRef}>
-      {users.map((user) => (
-        <FriendCard
-          key={user.id}
-          user={user}
-          type={type}
-          isExpanded={expandedCardId === user.id}
-          handleExpand={() => handleExpand(user.id)}
-        />
-      ))}
+      {users.length === 0 ? (
+        <p className="text-center pt-4">No hay usuarios disponibles</p>
+      ) : (
+        users.map((user) => (
+          <FriendCard
+            key={user.id}
+            user={user}
+            type={type}
+            isExpanded={expandedCardId === user.id}
+            handleExpand={() => handleExpand(user.id)}
+          />
+        ))
+      )}
     </div>
   );
 };

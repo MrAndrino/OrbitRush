@@ -54,6 +54,16 @@ const UserProfile = ({ id }: UserProfileProps) => {
     setIsConfirmModalOpen(false);
   };
 
+  function formatDuration(duration: string) {
+    if (!duration) return "00:00";
+
+    const parts = duration.split(":");
+    const minutes = parts.length > 1 ? parts[1] : "00";
+    const seconds = parts.length > 2 ? parts[2] : "00";
+    
+    return `${minutes.padStart(2, "0")}:${seconds.padStart(2, "0")}`;
+  }
+
   const getResultInfo = (result: number) => {
     switch (result) {
       case 0:
@@ -107,7 +117,7 @@ const UserProfile = ({ id }: UserProfileProps) => {
                   </div>
                   <div className={styles.matchItemPart}>
                     <p>Fecha: {new Date(match.matchDate.split(".")[0]).toLocaleDateString()}</p>
-                    <p>Duración: {match.duration}</p>
+                    <p>Duración: {formatDuration(match.duration)}</p>
                   </div>
                 </li>
               );

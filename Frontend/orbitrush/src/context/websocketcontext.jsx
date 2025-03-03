@@ -109,11 +109,11 @@ export const WebSocketProvider = ({ children }) => {
             break;
 
           case "leftGame":
-            toast.success(data.Message || "Has salido de la partida.");
+            toast.success("Has salido de la partida.");
             break;
 
           case "opponentLeft":
-            toast.success(data.Message || "Tu oponente ha abandonado partida.");
+            toast.success("Tu oponente ha abandonado partida.");
             break;
 
           case "chatHistory":
@@ -192,7 +192,6 @@ export const WebSocketProvider = ({ children }) => {
 
           case "randomMatchRejected":
           case "matchmakingCancelled":
-            toast.error(data.Message);
             setMatchData(null);
             setIsSearching(false);
             break;

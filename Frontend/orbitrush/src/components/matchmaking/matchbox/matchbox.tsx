@@ -4,6 +4,7 @@ import React from "react";
 import styles from "./matchbox.module.css";
 import Button from "@/components/miscelaneus/button/button";
 import { useWebSocket } from "@/context/websocketcontext";
+import toast from "react-hot-toast";
 
 interface MatchBoxProps {
   variant: "bot" | "random" | "friend";
@@ -27,6 +28,7 @@ const MatchBox = ({ variant, isSearching }: MatchBoxProps) => {
     if (variant === "random") {
       if (isSearching) {
         cancelMatchmaking();
+        toast.error("Has salido del Matchmaking")
       } else {
         queueForMatch();
       }

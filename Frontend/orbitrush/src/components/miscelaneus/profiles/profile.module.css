@@ -5,6 +5,7 @@
   gap: 5rem;
   align-items: center;
   height: 60vh;
+  justify-content: space-evenly;
 }
 
 .profileContainer input {

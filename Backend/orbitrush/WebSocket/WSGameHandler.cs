@@ -100,7 +100,7 @@ public class WSGameHandler
 
                 if (!string.IsNullOrEmpty(lobby.Player2Id) && lobby.Player2Id.StartsWith("BOT_"))
                 {
-                    player2Name = "Mr. Botorbito";
+                    player2Name = "Botorbito";
                     player2Image = "/images/profiles/MatchBot.jpeg";
                 }
                 else if (!string.IsNullOrEmpty(lobby.Player2Id))

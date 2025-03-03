@@ -26,9 +26,6 @@ export async function getUserList(url, token) {
   });
 
   if (!response.ok) {
-    if (response.status === 404) {
-      throw new Error("No hay usuarios");
-    }
     throw new Error("Error al obtener la lista de usuarios");
   }
 
@@ -147,7 +144,7 @@ export async function updateUserRole(url, token, newRole) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify(newRole) 
+    body: JSON.stringify(newRole)
   });
 
   if (!response.ok) {

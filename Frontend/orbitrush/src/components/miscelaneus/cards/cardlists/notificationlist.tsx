@@ -10,20 +10,25 @@ interface NotificationListProps {
 
 const NotificationList = ({ notifications, type }: NotificationListProps) => {
 
-
   return (
     <div className={styles.notificationList}>
-      {notifications.map((notification) =>
-        type === "friend" ? (
-          <FriendNotificationCard
-            key={notification.id}
-            notification={notification as FriendNotification}
-          />
-        ) : (
-          <GameNotificationCard
-            key={notification.id}
-            notification={notification as GameNotification}
-          />
+      {notifications.length === 0 ? (
+        <p className="text-center pt-4">
+          {type === "friend" ? "No hay solicitudes de amistad" : "No hay solicitudes a partida"}
+        </p>
+      ) : (
+        notifications.map((notification) =>
+          type === "friend" ? (
+            <FriendNotificationCard
+              key={notification.id}
+              notification={notification as FriendNotification}
+            />
+          ) : (
+            <GameNotificationCard
+              key={notification.id}
+              notification={notification as GameNotification}
+            />
+          )
         )
       )}
     </div>

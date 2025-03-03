@@ -32,7 +32,11 @@ export default function FriendBox() {
           placeholder="Buscar amigos..."
         />
       </div>
-      <UserList users={displayedFriends} type='friend' />
+      {displayedFriends.length === 0 ? (
+        <p className="text-center pt-4">No tienes amigos 😢</p>
+      ) : (
+        <UserList users={displayedFriends} type="friend" />
+      )}
     </section>
   );
 }

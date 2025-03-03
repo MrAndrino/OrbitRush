@@ -26,6 +26,9 @@ public class FriendSeeder
             new UserFriend{ UserId = 1, FriendId = 5 },
             new UserFriend{ UserId = 5, FriendId = 1 },
 
+            new UserFriend{ UserId = 1, FriendId = 6 },
+            new UserFriend{ UserId = 6, FriendId = 1 },
+
             new UserFriend{ UserId = 2, FriendId = 4 },
             new UserFriend{ UserId = 4, FriendId = 2 },
 
