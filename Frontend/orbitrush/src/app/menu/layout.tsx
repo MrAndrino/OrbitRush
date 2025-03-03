@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/authcontext';
-import { toast } from 'react-hot-toast';
 import Footer from '@/components/mainlayout/footer/footer';
 import Header from '@/components/mainlayout/header/header';
 import Friendbox from '@/components/mainlayout/userbox/boxfriend/friendbox';

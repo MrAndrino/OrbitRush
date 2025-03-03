@@ -10,7 +10,7 @@ interface GameOverModalProps {
   userId: string | null;
 }
 
-const GameOverModal = ({ isOpen, onClose, winner, sessionId, userId }: GameOverModalProps) => {
+const GameOverModal = ({ isOpen, onClose, winner, userId }: GameOverModalProps) => {
   const isWinner = winner?.toString() === userId?.toString();
   const { queueForMatch } = useWebSocket();
 

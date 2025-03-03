@@ -58,18 +58,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
     }, [ws]);
 
     useEffect(() => {
-        console.log("🔍 Valor de ws antes de asignar a window:", ws);
-
-        if (ws) {
-            console.log("✅ WebSocket disponible:", ws.url);
-            (window as any).ws = ws;
-            console.log("🌍 WebSocket almacenado en window:", (window as any).ws);
-        } else {
-            console.warn("⚠ WebSocket no está disponible todavía.");
-        }
-    }, [ws]);
-
-    useEffect(() => {
         const storedSessionId = sessionStorage.getItem("sessionId");
         if (!sessionId && storedSessionId) {
             console.log(
