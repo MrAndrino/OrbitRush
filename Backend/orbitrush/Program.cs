@@ -88,6 +88,7 @@ public class Program
                 });
             });
 
+            Console.WriteLine($"JWT_KEY en producción: {Environment.GetEnvironmentVariable("JWT_KEY")}");
 
             static void SeedDatabase(IServiceProvider serviceProvider)
             {

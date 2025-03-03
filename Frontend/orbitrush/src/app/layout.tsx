@@ -1,12 +1,8 @@
-"use client";
-
-import { useEffect } from "react";
 import { Roboto, Electrolize } from "next/font/google";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
 import { Toaster } from 'react-hot-toast';
 import { ToastContainer } from "react-toastify";
-
 import { WebSocketProvider } from "../context/websocketcontext";
 import { AuthProvider } from "../context/authcontext";
 import { UsersProvider } from "../context/userscontext";
@@ -24,18 +20,21 @@ const electrolize = Electrolize({
   weight: ["400"],
 });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js")
-        .then(() => console.log("✅ Service Worker registrado correctamente."))
-        .catch((error) => console.error("❌ Error registrando el Service Worker:", error));
-    }
-  }, []);
+export const metadata = {
+  title: "Orbit Rush",
+  description: "Juego multijugador en tiempo real",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/favicon.png",
+  },
+};
 
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
       <head>
+
+        {/* 👇 Este head es para la PWA */}
         <link rel="manifest" href="/manifest.json" />
         <script
           dangerouslySetInnerHTML={{
