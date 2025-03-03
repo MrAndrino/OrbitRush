@@ -60,7 +60,7 @@ public class UserController : BaseController
 
             if (users == null || !users.Any())
             {
-                return NotFound("No hay usuarios");
+                return NotFound("No hay usuarios.");
             }
 
             return Ok(users);
@@ -181,5 +181,4 @@ public class UserController : BaseController
 
         return Ok(new { message = "Estado de baneo cambiado correctamente." });
     }
-
 }

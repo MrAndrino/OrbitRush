@@ -7,7 +7,7 @@ public class MyDbContext : DbContext
 {
     private const string DATABASE_PATH = "orbitrush.db";
 
-    
+
     public MyDbContext() { }
     public MyDbContext(DbContextOptions<MyDbContext> options) : base(options) { }
 

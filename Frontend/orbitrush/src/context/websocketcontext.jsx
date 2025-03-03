@@ -16,7 +16,11 @@ export const WebSocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
   const [request, setRequest] = useState([]);
   const [gameInvites, setGameInvites] = useState([]);
+
   const [onlineCount, setOnlineCount] = useState(0);
+  const [playingCount, setPlayingCount] = useState(0);
+  const [gameCount, setGameCount] = useState(0);
+
   const [matchData, setMatchData] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
@@ -27,7 +31,10 @@ export const WebSocketProvider = ({ children }) => {
       .map(() => Array(4).fill(0))
   );
   const [currentPlayer, setCurrentPlayer] = useState(() => {
-    return sessionStorage.getItem("currentPlayer") || null;
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("currentPlayer") || null;
+    }
+    return null;
   });
 
   const [gameState, setGameState] = useState("Laying");
@@ -103,20 +110,11 @@ export const WebSocketProvider = ({ children }) => {
 
           case "leftGame":
             toast.success(data.Message || "Has salido de la partida.");
-            sessionStorage.removeItem("sessionId");
-            sessionStorage.removeItem("currentPlayer");
-            sessionStorage.removeItem("player1Id");
-            sessionStorage.removeItem("player2Id");
-            router.push("/menu");
             break;
 
           case "opponentLeft":
             toast.success(data.Message || "Tu oponente ha abandonado partida.");
-            sessionStorage.removeItem("sessionId");
-            sessionStorage.removeItem("currentPlayer");
-            sessionStorage.removeItem("player1Id");
-            sessionStorage.removeItem("player2Id");
-            router.push("/menu");
+            break;
 
           case "chatHistory":
             if (data.SessionId === sessionId) {
@@ -140,6 +138,15 @@ export const WebSocketProvider = ({ children }) => {
               winner: data.Winner,
               sessionId: data.SessionId,
             });
+
+            sessionStorage.removeItem("sessionId");
+            setSessionId(null);
+            sessionStorage.removeItem("currentPlayer");
+            sessionStorage.removeItem("player1Id");
+            setPlayer1Id(null);
+            sessionStorage.removeItem("player2Id");
+            setPlayer2Id(null);
+            router.push("/menu");
 
             break;
 
@@ -258,6 +265,16 @@ export const WebSocketProvider = ({ children }) => {
               data.OnlineCount
             );
             setOnlineCount(data.OnlineCount);
+            break;
+
+          case "playingCountUpdate":
+            console.log("Jugadores en partida:", data.PlayingCount);
+            setPlayingCount(data.PlayingCount);
+            break;
+
+          case "activeGameCountUpdate":
+            console.log("Partidas en curso:", data.GameCount);
+            setGameCount(data.GameCount);
             break;
 
           case "updateFriendList":
@@ -654,6 +671,7 @@ export const WebSocketProvider = ({ children }) => {
     }
   }, [currentPlayer]);
 
+  // ----- Función para coger Id desde token -----
   const getUserIdFromToken = () => {
     const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
     try {
@@ -683,6 +701,8 @@ export const WebSocketProvider = ({ children }) => {
     isSearching,
     setIsSearching,
     onlineCount,
+    playingCount,
+    gameCount,
     gameInvites,
     playWithBot,
     sendMatchResponse,

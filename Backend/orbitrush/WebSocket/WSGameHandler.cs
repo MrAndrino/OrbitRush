@@ -1,9 +1,9 @@
 ﻿using orbitrush.Database.Entities;
+using orbitrush.Database.Entities.Enums;
 using orbitrush.Database.Repositories;
 using orbitrush.Domain;
 using orbitrush.Services;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -86,9 +86,6 @@ public class WSGameHandler
         }
     }
 
-    private const string BotName = "Mr. Orbit";
-    private const string BotImage = "/images/profiles/MatchBot.jpeg";
-
     private async Task SendLobbyInfo(string userId, string lobbyId)
     {
         using (var scope = _serviceProvider.CreateScope())
@@ -103,13 +100,11 @@ public class WSGameHandler
 
                 if (!string.IsNullOrEmpty(lobby.Player2Id) && lobby.Player2Id.StartsWith("BOT_"))
                 {
-                    // Si el Player2 es un bot, asignamos valores manualmente
-                    player2Name = "Mr. Orbit";
+                    player2Name = "Mr. Botorbito";
                     player2Image = "/images/profiles/MatchBot.jpeg";
                 }
                 else if (!string.IsNullOrEmpty(lobby.Player2Id))
                 {
-                    // Solo convertir a número si Player2 no es un bot
                     var player2Profile = await userService.GetUserProfile(int.Parse(lobby.Player2Id));
                     player2Name = player2Profile?.Name ?? "Esperando...";
                     player2Image = player2Profile?.Image ?? "/images/OrbitRush-TrashCan.jpg";
@@ -139,9 +134,6 @@ public class WSGameHandler
             }
         }
     }
-
-
-
 
     private async Task HandleInvitation(string senderId, GameRequestMessage request)
     {
@@ -211,7 +203,6 @@ public class WSGameHandler
                 return;
             }
 
-            // 🔹 Procesar la respuesta a la invitación
             if (_connectionManager.TryGetConnection(targetPlayer, out var targetSocket))
             {
                 var responseMessage = new
@@ -224,7 +215,6 @@ public class WSGameHandler
 
                 if (response == "accept")
                 {
-                    // 🔹 Buscar si el Player1 ya tiene un lobby existente
                     var existingLobby = activeLobbies.FirstOrDefault(l => l.Value.Player1Id == targetPlayer);
 
                     if (!string.IsNullOrEmpty(existingLobby.Key))
@@ -235,19 +225,18 @@ public class WSGameHandler
                         {
                             lobby.Player2Id = userId;
                             lobby.Player2Ready = true;
-                            Console.WriteLine($"✅ Jugador {userId} agregado al lobby existente {existingLobby.Key}");
+                            Console.WriteLine($"Jugador {userId} agregado al lobby existente {existingLobby.Key}");
 
                             await SendLobbyInfo(targetPlayer, existingLobby.Key);
                             await SendLobbyInfo(userId, existingLobby.Key);
                         }
                         else
                         {
-                            Console.WriteLine($"⚠ El lobby {existingLobby.Key} ya tiene 2 jugadores. No se puede agregar otro.");
+                            Console.WriteLine($"El lobby {existingLobby.Key} ya tiene 2 jugadores. No se puede agregar otro.");
                         }
                     }
                     else
                     {
-                        // 🔹 Si no había un lobby válido, crear uno nuevo
                         var lobbyId = Guid.NewGuid().ToString();
                         Lobby newLobby = new Lobby(lobbyId, targetPlayer, userId, false)
                         {
@@ -255,7 +244,7 @@ public class WSGameHandler
                             Player2Ready = true,
                         };
                         activeLobbies.TryAdd(lobbyId, newLobby);
-                        Console.WriteLine($"🎮 Nuevo lobby creado: {lobbyId} entre {targetPlayer} y {userId}");
+                        Console.WriteLine($"Nuevo lobby creado: {lobbyId} entre {targetPlayer} y {userId}");
 
                         await SendLobbyInfo(userId, lobbyId);
                         await SendLobbyInfo(targetPlayer, lobbyId);
@@ -289,13 +278,11 @@ public class WSGameHandler
                     await SendAsync(targetSocket, JsonSerializer.Serialize(rejectMessage));
                 }
 
-                // 🔹 Eliminar la invitación pendiente
                 pendingInvitations.TryRemove(userId, out _);
                 pendingInvitations.TryRemove(targetPlayer, out _);
             }
         }
     }
-
 
     private async Task HandleStartGame(string userId)
     {
@@ -313,11 +300,16 @@ public class WSGameHandler
         {
             var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
 
-            // 🔹 Crear una instancia única de GameService por sesión
             var gameService = gameManager.GetOrCreateGame(sessionId);
             gameService.InitializeGame(lobby.Player1Id, lobby.Player2Id, sessionId);
 
-            Console.WriteLine($"✅ Partida iniciada con SessionId: {sessionId}");
+            var friendHandler = scope.ServiceProvider.GetRequiredService<WSFriendHandler>();
+
+            await friendHandler.HandleUpdateUserStateAsync(lobby.Player1Id, StateEnum.Playing);
+            if (!string.IsNullOrEmpty(lobby.Player2Id) && !lobby.Player2Id.StartsWith("BOT_"))
+            {
+                await friendHandler.HandleUpdateUserStateAsync(lobby.Player2Id, StateEnum.Playing);
+            }
 
             await StartGame(lobby.Player1Id, lobby.Player2Id, sessionId);
 
@@ -325,9 +317,9 @@ public class WSGameHandler
             await playHandler.BroadcastGameStateAsync(sessionId);
         }
 
+        await _connectionManager.NotifyPlayingPlayersCountAsync();
         activeLobbies.TryRemove(lobbyId, out _);
     }
-
 
     private async Task StartGame(string player1Id, string player2Id, string sessionId)
     {
@@ -335,8 +327,8 @@ public class WSGameHandler
         {
             Action = "gameStarted",
             SessionId = sessionId,
-            Player1Id = player1Id, 
-            Player2Id = player2Id 
+            Player1Id = player1Id,
+            Player2Id = player2Id
         };
 
         var startMessagePlayer2 = new
@@ -387,7 +379,6 @@ public class WSGameHandler
                     await SendAsync(opponentSocket, acceptMessage);
                 }
 
-                // Verificar si ambos jugadores han aceptado antes de iniciar la partida
                 lobby.Player1Ready = (lobby.Player1Id == playerId) ? true : lobby.Player1Ready;
                 lobby.Player2Ready = (lobby.Player2Id == playerId) ? true : lobby.Player2Ready;
 
@@ -411,11 +402,9 @@ public class WSGameHandler
                     await SendAsync(opponentSocket, rejectMessage);
                 }
 
-                // 🔹 Eliminar al jugador que rechazó de la cola
                 Console.WriteLine($"Jugador {playerId} ha rechazado y será eliminado de la cola.");
                 RemovePlayerFromQueue(playerId);
 
-                // 🔹 Volver a agregar al oponente a la cola de emparejamiento
                 Console.WriteLine($"Jugador {opponentId} vuelve a la cola de emparejamiento.");
                 await AddPlayerToQueue(opponentId);
             }
@@ -425,7 +414,6 @@ public class WSGameHandler
             Console.WriteLine(" No se encontró un lobby activo para este jugador.");
         }
     }
-
 
     public async Task AddPlayerToQueue(string playerId)
     {
@@ -564,20 +552,29 @@ public class WSGameHandler
     private async Task HandlePlayerExit(string playerId, bool isDisconnection)
     {
         Console.WriteLine(isDisconnection
-            ? $"⚠ Jugador {playerId} se ha desconectado."
-            : $"🚪 Jugador {playerId} ha salido del lobby.");
+            ? $"Jugador {playerId} se ha desconectado."
+            : $"Jugador {playerId} ha salido del lobby.");
 
         var lobbyEntry = activeLobbies.FirstOrDefault(l => l.Value.Player1Id == playerId || l.Value.Player2Id == playerId);
 
         if (string.IsNullOrEmpty(lobbyEntry.Key))
         {
-            Console.WriteLine($"⛔ No se encontró lobby para el jugador {playerId}");
+            Console.WriteLine($"No se encontró lobby para el jugador {playerId}");
             return;
         }
 
         var lobbyId = lobbyEntry.Key;
         var lobby = lobbyEntry.Value;
         string opponentId = lobby.Player1Id == playerId ? lobby.Player2Id : lobby.Player1Id;
+
+        using (var scope = _serviceProvider.CreateScope())
+        {
+            var friendHandler = scope.ServiceProvider.GetRequiredService<WSFriendHandler>();
+            if (!playerId.StartsWith("BOT_"))
+            {
+                await friendHandler.HandleUpdateUserStateAsync(playerId, StateEnum.Connected);
+            }
+        }
 
         WebSocket userSocket;
         if (_connectionManager.TryGetConnection(playerId, out userSocket))
@@ -590,23 +587,20 @@ public class WSGameHandler
             await SendAsync(userSocket, JsonSerializer.Serialize(leaveMessage));
         }
 
-        // 🔹 Si el oponente es un bot, eliminar el lobby y salir
         if (!string.IsNullOrEmpty(lobby.Player2Id) && lobby.Player2Id.StartsWith("BOT_"))
         {
             activeLobbies.TryRemove(lobbyId, out _);
-            Console.WriteLine($"🗑 Lobby {lobbyId} eliminado porque el jugador humano salió y el oponente era un bot.");
+            Console.WriteLine($"Lobby {lobbyId} eliminado porque el jugador humano salió y el oponente era un bot.");
             return;
         }
 
-        // 🔹 Si el jugador que sale es el Player1
         if (lobby.Player1Id == playerId)
         {
             if (!string.IsNullOrEmpty(opponentId))
             {
-                // 🔄 Transferir la propiedad del lobby al Player2
                 lobby.Player1Id = opponentId;
                 lobby.Player2Id = null;
-                Console.WriteLine($"🔄 {opponentId} ahora es el nuevo anfitrión del lobby {lobbyId}");
+                Console.WriteLine($"{opponentId} ahora es el nuevo anfitrión del lobby {lobbyId}");
 
                 if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket))
                 {
@@ -625,16 +619,14 @@ public class WSGameHandler
             }
             else
             {
-                // 🗑 Si no hay oponente, eliminar el lobby
                 activeLobbies.TryRemove(lobbyId, out _);
-                Console.WriteLine($"🗑 Lobby {lobbyId} eliminado porque no hay más jugadores.");
+                Console.WriteLine($"Lobby {lobbyId} eliminado porque no hay más jugadores.");
             }
         }
         else
         {
-            // 🚪 Si el Player2 se va, simplemente lo eliminamos del lobby
             lobby.Player2Id = null;
-            Console.WriteLine($"🚪 Jugador {playerId} ha salido del lobby {lobbyId}.");
+            Console.WriteLine($"Jugador {playerId} ha salido del lobby {lobbyId}.");
 
             if (_connectionManager.TryGetConnection(lobby.Player1Id, out var hostSocket))
             {

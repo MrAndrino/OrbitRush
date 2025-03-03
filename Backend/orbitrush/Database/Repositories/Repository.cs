@@ -55,7 +55,7 @@ public abstract class Repository<TEntity, TId> : IRepository<TEntity, TId> where
 
     public async Task<bool> ExistAsync(TId id)
     {
-        return await GetByIdAsync(id) !=null;
+        return await GetByIdAsync(id) != null;
     }
 
     public async Task<string> GetNameByIdAsync(int id)

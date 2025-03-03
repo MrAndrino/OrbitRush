@@ -27,7 +27,5 @@ public class FriendRequestConfiguration : IEntityTypeConfiguration<FriendRequest
 
         entity.HasIndex(e => new { e.SenderId, e.TargetId })
               .IsUnique();
-
-        // RELACIONES
     }
 }

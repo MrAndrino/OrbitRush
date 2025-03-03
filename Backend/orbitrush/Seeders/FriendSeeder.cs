@@ -1,7 +1,5 @@
-﻿using orbitrush.Database.Entities.Enums;
+﻿using orbitrush.Database;
 using orbitrush.Database.Entities;
-using orbitrush.Database;
-using orbitrush.Utils;
 
 namespace orbitrush.Seeders;
 

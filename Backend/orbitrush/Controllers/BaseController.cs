@@ -11,7 +11,7 @@ public abstract class BaseController : ControllerBase
         var userIdClaim = User.FindFirst("id");
         if (userIdClaim == null)
         {
-            throw new UnauthorizedAccessException("Usuario no autenticado");
+            throw new UnauthorizedAccessException("Usuario no autenticado.");
         }
         return int.Parse(userIdClaim.Value);
     }

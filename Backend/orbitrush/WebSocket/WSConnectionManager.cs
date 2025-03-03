@@ -1,10 +1,15 @@
-﻿using orbitrush.Domain;
+﻿using orbitrush.Database.Entities.Enums;
+using orbitrush.Domain;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
 
 public class WSConnectionManager
 {
     private readonly ConcurrentDictionary<string, WebSocket> _connections = new();
+    private readonly ConcurrentDictionary<string, StateEnum> _playerStates = new();
+
     private readonly IServiceProvider _serviceProvider;
 
 
@@ -17,13 +22,16 @@ public class WSConnectionManager
     public void AddConnection(string userId, WebSocket webSocket)
     {
         _connections[userId] = webSocket;
+        _ = NotifyConnectionCountAsync();
     }
 
     public async Task RemoveConnection(string userId)
     {
         if (_connections.TryRemove(userId, out _))
         {
-            Console.WriteLine($"🔴 Jugador {userId} desconectado.");
+            Console.WriteLine($"Jugador {userId} desconectado.");
+            _ = NotifyConnectionCountAsync();
+
             DisconnectionType type = DetermineDisconnectionType(userId);
 
             await HandleDisconnection(userId, type);
@@ -47,15 +55,15 @@ public class WSConnectionManager
 
     public async Task HandleDisconnection(string userId, DisconnectionType type)
     {
-        Console.WriteLine($"🔴 Jugador {userId} se ha desconectado. Determinando el contexto...");
-        if(type == DisconnectionType.Game)
+        Console.WriteLine($"Jugador {userId} se ha desconectado. Determinando el contexto...");
+        if (type == DisconnectionType.Game)
         {
-            await Task.Delay(3000); 
+            await Task.Delay(3000);
         }
 
         if (TryGetConnection(userId, out _))
         {
-            Console.WriteLine($"✅ Jugador {userId} se ha reconectado. No se eliminará.");
+            Console.WriteLine($"Jugador {userId} se ha reconectado. No se eliminará.");
             return;
         }
 
@@ -66,19 +74,16 @@ public class WSConnectionManager
         switch (type)
         {
             case DisconnectionType.Game:
-                Console.WriteLine($"🎮 {userId} estaba en una partida. Llamando a HandlePlayerGameDisconnection.");
                 await playHandler.HandlePlayerGameDisconnection(userId);
                 break;
             case DisconnectionType.Lobby:
-                Console.WriteLine($"🏠 {userId} estaba en el lobby. Llamando a HandlePlayerDisconnection.");
                 await gameHandler.HandlePlayerDisconnection(userId);
                 break;
             default:
-                Console.WriteLine($"⚠ Tipo de desconexión desconocido para {userId}");
+                Console.WriteLine($"Tipo de desconexión desconocido para {userId}");
                 break;
         }
     }
-
 
     public bool TryGetConnection(string userId, out WebSocket webSocket)
     {
@@ -94,8 +99,69 @@ public class WSConnectionManager
     {
         return _connections.TryGetValue(userId, out var socket) ? socket : null;
     }
+
     public IEnumerable<WebSocket> GetAllConnections()
     {
         return _connections.Values;
+    }
+
+    public async Task NotifyConnectionCountAsync()
+    {
+        var payload = new
+        {
+            Action = "onlineCountUpdate",
+            OnlineCount = _connections.Count
+        };
+
+        var json = JsonSerializer.Serialize(payload);
+        var message = Encoding.UTF8.GetBytes(json);
+
+        var tasks = _connections.Values
+            .Where(ws => ws.State == WebSocketState.Open)
+            .Select(ws => ws.SendAsync(new ArraySegment<byte>(message), WebSocketMessageType.Text, true, CancellationToken.None));
+
+        await Task.WhenAll(tasks);
+    }
+
+    public async Task NotifyPlayingPlayersCountAsync()
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
+
+        var payload = new
+        {
+            Action = "playingCountUpdate",
+            PlayingCount = gameManager.GetPlayingPlayersCount()
+        };
+
+        var json = JsonSerializer.Serialize(payload);
+        var message = Encoding.UTF8.GetBytes(json);
+
+        var tasks = _connections.Values
+            .Where(ws => ws.State == WebSocketState.Open)
+            .Select(ws => ws.SendAsync(new ArraySegment<byte>(message), WebSocketMessageType.Text, true, CancellationToken.None));
+
+        await Task.WhenAll(tasks);
+    }
+
+    public async Task NotifyActiveGameCountAsync()
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
+
+        var payload = new
+        {
+            Action = "activeGameCountUpdate",
+            GameCount = gameManager.GetActiveGameCount()
+        };
+
+        var json = JsonSerializer.Serialize(payload);
+        var message = Encoding.UTF8.GetBytes(json);
+
+        var tasks = _connections.Values
+            .Where(ws => ws.State == WebSocketState.Open)
+            .Select(ws => ws.SendAsync(new ArraySegment<byte>(message), WebSocketMessageType.Text, true, CancellationToken.None));
+
+        await Task.WhenAll(tasks);
     }
 }

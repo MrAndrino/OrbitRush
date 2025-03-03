@@ -26,13 +26,13 @@ public class WSPlayHandler
     {
         try
         {
-            Console.WriteLine("馃摡 Mensaje recibido en ProcessPlayMessageAsync:");
-            Console.WriteLine($"馃敼 userId: {userId}");
-            Console.WriteLine($"馃敼 Mensaje crudo: {message}");
+            Console.WriteLine("Mensaje recibido en ProcessPlayMessageAsync:");
+            Console.WriteLine($"userId: {userId}");
+            Console.WriteLine($"Mensaje crudo: {message}");
 
             var playMessage = JsonSerializer.Deserialize<PlayMessage>(message);
             if (playMessage == null || string.IsNullOrEmpty(playMessage.SessionId))
-                throw new InvalidOperationException("Mensaje inv谩lido o falta SessionId");
+                throw new InvalidOperationException("Mensaje inválido o falta SessionId");
 
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -56,7 +56,7 @@ public class WSPlayHandler
 
                         if (gameService.Board.CurrentPlayer == CellState.White && gameService.Player2Id.StartsWith("BOT_"))
                         {
-                            Console.WriteLine("馃 Turno del bot despu茅s de 贸rbita. Ejecutando su jugada...");
+                            Console.WriteLine("Turno del bot después de órbita. Ejecutando su jugada...");
                             var bot = new BotOrbito(gameService.Player2Id, _connectionManager, _serviceProvider);
                             await bot.PlayTurnAsync(playMessage.SessionId);
                         }
@@ -69,11 +69,10 @@ public class WSPlayHandler
                         break;
 
                     default:
-                        responseMessage = "Error: Acci贸n no v谩lida.";
+                        responseMessage = "Error: Acción no válida.";
                         break;
                 }
 
-                // 馃敼 Enviar la respuesta al jugador sin cerrar la conexi贸n
                 if (!string.IsNullOrEmpty(responseMessage))
                 {
                     await SendMessageToPlayerAsync(userId, responseMessage);
@@ -85,7 +84,7 @@ public class WSPlayHandler
             var errorMessage = new
             {
                 Action = "error",
-                Message = "Formato de mensaje inv谩lido."
+                Message = "Formato de mensaje inválido."
             };
             await SendMessageToPlayerAsync(userId, JsonSerializer.Serialize(errorMessage));
         }
@@ -111,7 +110,7 @@ public class WSPlayHandler
 
     public async Task BroadcastGameStateAsync(string sessionId)
     {
-        Console.WriteLine($"馃摗 Enviando estado del juego para SessionId: {sessionId}");
+        Console.WriteLine($"Enviando estado del juego para SessionId: {sessionId}");
 
         using (var scope = _serviceProvider.CreateScope())
         {
@@ -143,7 +142,7 @@ public class WSPlayHandler
             };
 
             var jsonMessage = JsonSerializer.Serialize(gameState);
-            Console.WriteLine($"馃摗 [SERVER] Estado enviado al frontend: {jsonMessage}");
+            Console.WriteLine($"Estado enviado al frontend: {jsonMessage}");
 
             var buffer = Encoding.UTF8.GetBytes(jsonMessage);
 
@@ -173,7 +172,6 @@ public class WSPlayHandler
     }
 
 
-
     private async Task HandlePlayerExitFromGame(string playerId, bool isDisconnection)
     {
         Console.WriteLine(isDisconnection
@@ -188,7 +186,7 @@ public class WSPlayHandler
 
             if (string.IsNullOrEmpty(gameEntry.Key))
             {
-                Console.WriteLine($"No se encontr贸 partida activa para el jugador {playerId}");
+                Console.WriteLine($"No se encontró partida activa para el jugador {playerId}");
                 return;
             }
 
@@ -209,17 +207,17 @@ public class WSPlayHandler
 
             if (!string.IsNullOrEmpty(gameService.Player2Id) && gameService.Player2Id.StartsWith("BOT_"))
             {
-                gameManager.RemoveGame(sessionId);
+                await gameManager.RemoveGame(sessionId);
                 return;
             }
+
+            gameService.State = GameState.GameOver;
 
             if (gameService.Player1Id == playerId)
             {
                 if (!string.IsNullOrEmpty(opponentId))
                 {
-                    gameService.State = GameState.GameOver;
-
-                    await gameService.SaveMatchData(gameService.Player1Id == playerId ? gameService.Player2Piece : gameService.Player1Piece);
+                    await gameService.SaveMatchData(gameService.Player2Piece);
 
                     if (_connectionManager.TryGetConnection(opponentId, out var opponentSocket))
                     {
@@ -227,7 +225,7 @@ public class WSPlayHandler
                         {
                             Action = "opponentLeft",
                             Message = isDisconnection
-                                ? "Tu oponente se ha desconectado. Ganaste la partida autom谩ticamente."
+                                ? "Tu oponente se ha desconectado. Ganaste la partida automáticamente."
                                 : "Tu oponente ha abandonado. Ganaste la partida.",
                             SessionId = sessionId
                         };
@@ -236,14 +234,9 @@ public class WSPlayHandler
 
                     await NotifyGameOverAsync(sessionId, opponentId);
                 }
-                else
-                {
-                    gameManager.RemoveGame(sessionId);
-                }
             }
             else
             {
-                gameService.State = GameState.GameOver;
                 await gameService.SaveMatchData(gameService.Player1Piece);
 
                 if (_connectionManager.TryGetConnection(gameService.Player1Id, out var hostSocket))
@@ -252,8 +245,8 @@ public class WSPlayHandler
                     {
                         Action = "opponentLeft",
                         Message = isDisconnection
-                            ? "Tu oponente se ha desconectado de la partida. Ganaste autom谩ticamente."
-                            : "Tu oponente ha salido de la partida. Ganaste autom谩ticamente.",
+                            ? "Tu oponente se ha desconectado de la partida. Ganaste automáticamente."
+                            : "Tu oponente ha salido de la partida. Ganaste automáticamente.",
                         SessionId = sessionId
                     };
                     await SendAsync(hostSocket, JsonSerializer.Serialize(playerLeftMessage));
@@ -261,6 +254,8 @@ public class WSPlayHandler
 
                 await NotifyGameOverAsync(sessionId, gameService.Player1Id);
             }
+
+            await gameManager.RemoveGame(sessionId);
         }
     }
 
@@ -271,6 +266,12 @@ public class WSPlayHandler
             var gameManager = scope.ServiceProvider.GetRequiredService<GameManager>();
             var gameService = gameManager.GetOrCreateGame(sessionId);
 
+            if (gameService == null)
+            {
+                Console.WriteLine($"No se encontró una partida activa con SessionId: {sessionId}");
+                return;
+            }
+
             var gameOverMessage = new
             {
                 Action = "gameOver",
@@ -278,17 +279,20 @@ public class WSPlayHandler
                 Winner = winnerId
             };
 
-            Console.WriteLine($"🏆 Enviando mensaje de gameOver: Winner={winnerId}, SessionId={sessionId}");
-
             var jsonMessage = JsonSerializer.Serialize(gameOverMessage);
             var buffer = Encoding.UTF8.GetBytes(jsonMessage);
 
-            foreach (var socket in _connectionManager.GetAllConnections())
+            string player1Id = gameService.Player1Id;
+            string player2Id = gameService.Player2Id;
+
+            if (_connectionManager.TryGetConnection(player1Id, out WebSocket player1Socket) && player1Socket.State == WebSocketState.Open)
             {
-                if (socket.State == WebSocketState.Open)
-                {
-                    await socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
-                }
+                await player1Socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+            }
+
+            if (!string.IsNullOrEmpty(player2Id) && _connectionManager.TryGetConnection(player2Id, out WebSocket player2Socket) && player2Socket.State == WebSocketState.Open)
+            {
+                await player2Socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
             }
         }
     }

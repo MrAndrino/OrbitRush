@@ -1,6 +1,4 @@
 ﻿using orbitrush.Database.Entities.Enums;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace orbitrush.Database.Entities;
 

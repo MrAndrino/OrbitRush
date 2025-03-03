@@ -60,6 +60,15 @@ public class UserSeeder
                 Image = "images/profiles/Fernando.jpg",
                 Role = "user",
                 State = StateEnum.Disconnected
+            },
+            new User{
+                Id = 6,
+                Name = "OrbitAdmin",
+                Email = "admin@gmail.com",
+                HashPassword = PasswordHelper.Hash("Admin1"),
+                Image = "images/MatchBot.jpeg",
+                Role = "admin",
+                State = StateEnum.Disconnected
             }
         ];
 

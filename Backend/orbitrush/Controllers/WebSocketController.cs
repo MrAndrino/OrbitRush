@@ -27,7 +27,7 @@ public class WebSocketController : ControllerBase
             else
             {
                 HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-                await HttpContext.Response.WriteAsync("Se necesita un UserId");
+                await HttpContext.Response.WriteAsync("Se necesita un UserId.");
             }
         }
         else

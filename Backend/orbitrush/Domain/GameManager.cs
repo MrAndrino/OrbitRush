@@ -1,4 +1,4 @@
-﻿using orbitrush.Database.Repositories;
+﻿using orbitrush.Database.Entities.Enums;
 using System.Collections.Concurrent;
 
 namespace orbitrush.Domain;
@@ -6,16 +6,23 @@ namespace orbitrush.Domain;
 public class GameManager
 {
     private readonly ConcurrentDictionary<string, GameService> _activeGames = new();
+    private readonly WSConnectionManager _connectionManager;
     private readonly IServiceProvider _serviceProvider;
 
-    public GameManager(IServiceProvider serviceProvider)
+    public GameManager(WSConnectionManager connectionManager, IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
+        _connectionManager = connectionManager;
     }
 
     public GameService GetOrCreateGame(string sessionId)
     {
-        return _activeGames.GetOrAdd(sessionId, _ => new GameService(_serviceProvider));
+        var game = _activeGames.GetOrAdd(sessionId, _ => new GameService(_serviceProvider));
+
+        var connectionManager = _serviceProvider.GetRequiredService<WSConnectionManager>();
+        Task.Run(() => connectionManager.NotifyActiveGameCountAsync());
+
+        return game;
     }
 
     public ConcurrentDictionary<string, GameService> GetAllActiveGames()
@@ -36,23 +43,41 @@ public class GameManager
         return null;
     }
 
-    public void RemoveGame(string sessionId)
+    public async Task RemoveGame(string sessionId)
     {
-        if (_activeGames.TryRemove(sessionId, out _))
+        if (_activeGames.TryRemove(sessionId, out var gameService))
         {
-            Console.WriteLine($":wastebasket: Partida {sessionId} eliminada.");
-
             using var scope = _serviceProvider.CreateScope();
             var chatHandler = scope.ServiceProvider.GetRequiredService<WSChatHandler>();
+            var friendHandler = scope.ServiceProvider.GetRequiredService<WSFriendHandler>();
 
             chatHandler.ClearChatForSession(sessionId);
-            Console.WriteLine($":wastebasket: Historial de chat de la partida {sessionId} eliminado.");
+
+            if (!string.IsNullOrEmpty(gameService.Player1Id))
+            {
+                await friendHandler.HandleUpdateUserStateAsync(gameService.Player1Id, StateEnum.Connected);
+            }
+
+            if (!string.IsNullOrEmpty(gameService.Player2Id) && !gameService.Player2Id.StartsWith("BOT_"))
+            {
+                await friendHandler.HandleUpdateUserStateAsync(gameService.Player2Id, StateEnum.Connected);
+            }
+
+            var connectionManager = scope.ServiceProvider.GetRequiredService<WSConnectionManager>();
+            await connectionManager.NotifyPlayingPlayersCountAsync();
         }
     }
-
 
     public int GetActiveGameCount()
     {
         return _activeGames.Count;
+    }
+
+    public int GetPlayingPlayersCount()
+    {
+        return _activeGames.Values.Sum(game =>
+            (game.Player1Id != null ? 1 : 0) +
+            (game.Player2Id != null && !game.Player2Id.StartsWith("BOT_") ? 1 : 0)
+        );
     }
 }

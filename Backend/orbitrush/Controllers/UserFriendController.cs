@@ -24,7 +24,7 @@ public class UserFriendController : BaseController
 
         if (!result)
         {
-            return NotFound("No se ha encontrado");
+            return NotFound("No se ha encontrado.");
         }
         return NoContent();
     }

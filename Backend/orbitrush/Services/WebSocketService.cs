@@ -11,14 +11,12 @@ public class WebSocketService
     private readonly WSGameHandler _gameHandler;
     private readonly WSPlayHandler _playHandler;
     private readonly WSChatHandler _chatHandler;
-    private readonly WSOnlineCount _onlineCount;
 
 
-    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler friendHandler, WSOnlineCount onlineCount, WSGameHandler gameHandler, WSPlayHandler playHandler, WSChatHandler chatHandler)
+    public WebSocketService(WSConnectionManager connectionManager, WSFriendHandler friendHandler, WSGameHandler gameHandler, WSPlayHandler playHandler, WSChatHandler chatHandler)
     {
         _connectionManager = connectionManager;
         _friendHandler = friendHandler;
-        _onlineCount = onlineCount;
         _gameHandler = gameHandler;
         _playHandler = playHandler;
         _chatHandler = chatHandler;
@@ -27,8 +25,7 @@ public class WebSocketService
     public async Task HandleAsync(WebSocket webSocket, string userId)
     {
         _connectionManager.AddConnection(userId, webSocket);
-        _onlineCount.Increment();
-        await _onlineCount.NotifyAllClientsAsync(_connectionManager.GetAllConnections());
+        await _connectionManager.NotifyConnectionCountAsync();
         await _friendHandler.HandleUpdateUserStateAsync(userId, StateEnum.Connected);
 
         try
@@ -65,17 +62,13 @@ public class WebSocketService
 
                 if (!string.IsNullOrWhiteSpace(message))
                 {
-                    Console.WriteLine($"📩 Mensaje WebSocket recibido: {message}");
-
                     var messageData = JsonSerializer.Deserialize<GameRequestMessage>(message);
 
                     if (messageData == null || string.IsNullOrEmpty(messageData.Action))
                     {
-                        Console.WriteLine($"⚠ Error: El mensaje no contiene una acción válida.");
-                        continue; // Ignorar este mensaje y esperar el siguiente
+                        Console.WriteLine($"Error: El mensaje no contiene una acción válida.");
+                        continue;
                     }
-
-                    Console.WriteLine($"🔹 Acción detectada: {messageData.Action}");
 
                     if (gameActions.Contains(messageData.Action))
                     {
@@ -87,12 +80,10 @@ public class WebSocketService
                     }
                     else if (chatActions.Contains(messageData.Action))
                     {
-                        Console.WriteLine($"✅ Enviando a WSChatHandler...");
                         await _chatHandler.ProcessChatMessageAsync(userId, message);
                     }
                     else
                     {
-                        Console.WriteLine($"⚠ Acción desconocida: {messageData.Action}, enviando a WSFriendHandler.");
                         await _friendHandler.ProcessMessageAsync(userId, message);
                     }
                 }
@@ -100,10 +91,9 @@ public class WebSocketService
         }
         finally
         {
-            await _connectionManager.RemoveConnection(userId);
-            _onlineCount.Decrement();
-            await _onlineCount.NotifyAllClientsAsync(_connectionManager.GetAllConnections());
             await _friendHandler.HandleUpdateUserStateAsync(userId, StateEnum.Disconnected);
+            await _connectionManager.RemoveConnection(userId);
+            await _connectionManager.NotifyConnectionCountAsync();
 
             if (webSocket.State == WebSocketState.Open)
             {
@@ -139,5 +129,4 @@ public class WebSocketService
 
         return fullMessage;
     }
-
 }

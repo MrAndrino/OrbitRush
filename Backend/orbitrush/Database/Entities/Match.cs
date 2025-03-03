@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-
-namespace orbitrush.Database.Entities;
+﻿namespace orbitrush.Database.Entities;
 
 public class Match
 {

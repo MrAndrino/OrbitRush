@@ -188,7 +188,7 @@ public class GameService
 
         if (Player2Id.StartsWith("BOT_"))
         {
-            Console.WriteLine("🤖 [INFO] Partida contra un bot no se guardará en la base de datos.");
+            Console.WriteLine("[INFO] Partida contra un bot no se guardará en la base de datos.");
             return;
         }
 

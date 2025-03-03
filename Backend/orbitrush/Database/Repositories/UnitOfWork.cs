@@ -16,9 +16,10 @@ public class UnitOfWork
     public MatchResultRepository MatchResultRepository => _matchResultRepository ??= new MatchResultRepository(_myDbContext);
 
 
-    public UnitOfWork(MyDbContext myDbContext) { 
-    
-        _myDbContext=myDbContext;
+    public UnitOfWork(MyDbContext myDbContext)
+    {
+
+        _myDbContext = myDbContext;
 
     }
 

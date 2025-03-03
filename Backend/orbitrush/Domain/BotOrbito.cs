@@ -1,6 +1,6 @@
 ﻿using System.Net.WebSockets;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
 
 namespace orbitrush.Domain;
 
@@ -19,7 +19,7 @@ public class BotOrbito
 
     public async Task PlayTurnAsync(string sessionId)
     {
-        Console.WriteLine($"🤖 [BOT] INTENTANDO JUGAR en la sesión {sessionId}");
+        Console.WriteLine($"[BOT] INTENTANDO JUGAR en la sesión {sessionId}");
 
         using (var scope = _serviceProvider.CreateScope())
         {
@@ -29,20 +29,20 @@ public class BotOrbito
 
             if (gameService == null || gameService.State == GameState.GameOver)
             {
-                Console.WriteLine($"🚨 [BOT] No se encontró la partida o ya ha terminado.");
+                Console.WriteLine($"[BOT] No se encontró la partida o ya ha terminado.");
                 return;
             }
 
             if (gameService.Board.CurrentPlayer != CellState.White)
             {
-                Console.WriteLine($"🚨 [BOT] No es mi turno.");
+                Console.WriteLine($"[BOT] No es mi turno.");
                 return;
             }
 
             (int row, int col)? move = GetBestMove(gameService.Board);
             if (move == null)
             {
-                Console.WriteLine($"🚨 [BOT] No hay movimientos disponibles.");
+                Console.WriteLine($"[BOT] No hay movimientos disponibles.");
                 return;
             }
 
@@ -61,12 +61,8 @@ public class BotOrbito
         }
     }
 
-
-
-
     private (int row, int col)? GetBestMove(Board board)
     {
-        // Buscar una casilla vacía de forma aleatoria
         Random random = new Random();
         var emptyCells = Enumerable.Range(0, 4)
             .SelectMany(row => Enumerable.Range(0, 4)
@@ -74,20 +70,8 @@ public class BotOrbito
             .Select(col => (row, col)))
             .ToList();
 
-        if (emptyCells.Count == 0) return null; // No hay movimientos disponibles
+        if (emptyCells.Count == 0) return null;
 
         return emptyCells[random.Next(emptyCells.Count)];
-    }
-
-    private async Task SendMessageToGameAsync(object message)
-    {
-        string jsonMessage = JsonSerializer.Serialize(message);
-        byte[] buffer = Encoding.UTF8.GetBytes(jsonMessage);
-
-        var socket = _connectionManager.GetConnectionById(_botId);
-        if (socket != null && socket.State == WebSocketState.Open)
-        {
-            await socket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
-        }
     }
 }

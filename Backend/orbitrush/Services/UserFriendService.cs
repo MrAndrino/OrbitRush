@@ -1,5 +1,4 @@
-﻿using orbitrush.Database.Entities;
-using orbitrush.Database.Repositories;
+﻿using orbitrush.Database.Repositories;
 
 namespace orbitrush.Services;
 

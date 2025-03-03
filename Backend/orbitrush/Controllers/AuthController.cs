@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using orbitrush.Database.Entities;
@@ -36,19 +35,19 @@ public class AuthController : ControllerBase
         {
             if (string.IsNullOrEmpty(request?.Password))
             {
-                throw new ArgumentException("Password is required.");
+                throw new ArgumentException("La contraseña es obligatoria.");
             }
 
             if (string.IsNullOrEmpty(request.NameLabel))
             {
-                throw new ArgumentException("Either Email or Name must be provided.");
+                throw new ArgumentException("Debes introducir nombre o email.");
             }
 
             User user = await _unitOfWork.UserRepository.CheckData(request.NameLabel, request.Password);
 
             if (user == null)
             {
-                return Unauthorized("Nombre de Usuario, email o contraseña inválidos");
+                return Unauthorized("Nombre de Usuario, email o contraseña inválidos.");
             }
 
             if (user.IsBanned)
@@ -84,7 +83,7 @@ public class AuthController : ControllerBase
             }
             if (nameExist)
             {
-                return BadRequest("Este nombre de usuario ya está en uso");
+                return BadRequest("Este nombre de usuario ya está en uso.");
             }
 
             User newUser = new User

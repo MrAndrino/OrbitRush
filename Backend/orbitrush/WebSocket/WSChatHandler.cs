@@ -51,13 +51,13 @@ public class WSChatHandler
                     break;
 
                 default:
-                    Console.WriteLine($"⚠ Acción desconocida en el chat: {chatData.Action}");
+                    Console.WriteLine($"Acción desconocida en el chat: {chatData.Action}");
                     break;
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Error en ProcessChatAsync: {ex.Message}");
+            Console.WriteLine($"Error en ProcessChatAsync: {ex.Message}");
         }
     }
 
@@ -65,7 +65,7 @@ public class WSChatHandler
     {
         if (string.IsNullOrEmpty(sessionId))
         {
-            Console.WriteLine($"❌ Error: El jugador {userId} intentó enviar un mensaje sin estar en una partida.");
+            Console.WriteLine($"Error: El jugador {userId} intentó enviar un mensaje sin estar en una partida.");
             return;
         }
 
@@ -106,7 +106,7 @@ public class WSChatHandler
                     SenderId = m.SenderId,
                     SenderName = m.SenderName,
                     Message = m.Message,
-                    Timestamp = m.Timestamp.ToString("HH:mm:ss")
+                    Timestamp = m.Timestamp.ToString("HH:mm")
                 }).ToList()
             });
 
@@ -128,7 +128,7 @@ public class WSChatHandler
             var gameService = gameManager.GetOrCreateGame(sessionId);
             if (gameService == null)
             {
-                Console.WriteLine($"⚠ No se encontró una partida activa con SessionId: {sessionId}");
+                Console.WriteLine($"No se encontró una partida activa con SessionId: {sessionId}");
                 return;
             }
 
@@ -138,7 +138,7 @@ public class WSChatHandler
                 SenderId = chatMessage.SenderId,
                 SenderName = chatMessage.SenderName,
                 Message = chatMessage.Message,
-                Timestamp = chatMessage.Timestamp.ToString("HH:mm:ss")
+                Timestamp = chatMessage.Timestamp.ToString("HH:mm")
             });
 
             var buffer = Encoding.UTF8.GetBytes(formattedMessage);

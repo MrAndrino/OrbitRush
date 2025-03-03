@@ -2,7 +2,7 @@
 
 namespace orbitrush.Database.Repositories;
 
-public class MatchRepository: Repository<Match, int>
+public class MatchRepository : Repository<Match, int>
 {
     public MatchRepository(MyDbContext context) : base(context) { }
 }

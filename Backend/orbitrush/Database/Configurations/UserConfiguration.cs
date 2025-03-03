@@ -53,7 +53,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         // RELACIONES
         entity.HasMany(e => e.MatchResults)
-              .WithOne(mr => mr.User)  
+              .WithOne(mr => mr.User)
               .HasForeignKey(e => e.UserId);
     }
 }
