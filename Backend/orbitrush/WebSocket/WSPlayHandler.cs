@@ -278,6 +278,8 @@ public class WSPlayHandler
                 Winner = winnerId
             };
 
+            Console.WriteLine($"🏆 Enviando mensaje de gameOver: Winner={winnerId}, SessionId={sessionId}");
+
             var jsonMessage = JsonSerializer.Serialize(gameOverMessage);
             var buffer = Encoding.UTF8.GetBytes(jsonMessage);
 

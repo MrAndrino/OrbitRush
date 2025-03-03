@@ -20,7 +20,6 @@ export const WebSocketProvider = ({ children }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [gameOverData, setGameOverData] = useState(null);
-
   const [board, setBoard] = useState(
     Array(4)
       .fill(null)
@@ -34,6 +33,7 @@ export const WebSocketProvider = ({ children }) => {
   const [sessionId, setSessionId] = useState(null);
   const [player1Id, setPlayer1Id] = useState(null);
   const [player2Id, setPlayer2Id] = useState(null);
+
 
   const router = useRouter();
 
@@ -98,7 +98,13 @@ export const WebSocketProvider = ({ children }) => {
                 },
               ];
             });
+            break;
 
+          case "leftGame":
+            toast.success(data.Message || "Has salido de la partida.");
+            localStorage.removeItem("sessionId");
+
+            router.push("/menu");
             break;
 
           case "chatHistory":
@@ -119,16 +125,19 @@ export const WebSocketProvider = ({ children }) => {
             break;
 
           case "gameOver":
-            console.log("🏆 Partida finalizada:", data); // Verificar los datos del mensaje
+            console.log("🏆 Mensaje gameOver recibido:", data);
+
+            if (!userId) {
+              console.warn("⚠️ userId aún no está definido, esperando...");
+              return;
+            }
+
             setGameOverData({
               winner: data.Winner,
               sessionId: data.SessionId,
             });
-            console.log("🔍 Estado actualizado gameOverData:", {
-              winner: data.Winner,
-              sessionId: data.SessionId,
-            });
             break;
+
 
           case "lobbyCreated":
             console.log("✅ Lobby creado, redirigiendo...");
@@ -513,9 +522,11 @@ export const WebSocketProvider = ({ children }) => {
       console.error("❌ WebSocket no conectado");
       return;
     }
+    const storedSessionId = localStorage.getItem("sessionId");
 
     const mensaje = JSON.stringify({
       Action: "leaveGame",
+      SessionId: storedSessionId
     });
 
     console.log("📤 Enviando mensaje para salir del lobby: ", mensaje);
@@ -646,6 +657,7 @@ export const WebSocketProvider = ({ children }) => {
       console.log("📢 Se ha actualizado gameOverData:", gameOverData);
     }
   }, [gameOverData]);
+
 
   // ----- Valor del contexto y renderizado-----
   const contextValue = {

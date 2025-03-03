@@ -54,14 +54,10 @@
 .banned,
 .active {
     text-align: center;
-    /* Centra el texto dentro de su min-width */
     display: flex;
     justify-content: center;
-    /* Alinea el contenido en el centro */
     align-items: center;
-    /* Asegura que también esté centrado verticalmente */
     width: 100%;
-    /* Hace que use todo el espacio del grid */
 }
 
 .banned {

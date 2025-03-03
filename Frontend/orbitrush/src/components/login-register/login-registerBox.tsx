@@ -13,10 +13,10 @@ function LoginRegisterBox() {
   useEffect(() => {
     if (showLogin) {
       setRenderLogin(true);
-      setTimeout(() => setRenderRegister(false), 500); // Tiempo de la transición
+      setTimeout(() => setRenderRegister(false), 500); 
     } else {
       setRenderRegister(true);
-      setTimeout(() => setRenderLogin(false), 500); // Tiempo de la transición
+      setTimeout(() => setRenderLogin(false), 500);
     }
   }, [showLogin]);
 

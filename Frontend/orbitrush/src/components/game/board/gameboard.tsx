@@ -21,7 +21,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
     const hoverClass = canHover ? (isPlayer1 ? styles["hover-blue"] : styles["hover-orange"]) : "";
     const isBotGame = storedPlayer2?.startsWith("BOT_");
 
-    /** LOGS DE DEBUG PARA DETECTAR PROBLEMAS **/
+    //LOGS DE DEBUG PARA DETECTAR PROBLEMAS
     useEffect(() => {
         console.log("📊 Tablero en GameBoard actualizado:", board);
     }, [board]);
@@ -107,7 +107,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
         console.log("📢 Game State:", gameState ?? "⏳ Aún no disponible");
     }, [sessionId, board, currentPlayer, gameState]);
 
-    /** 🔥 MANEJO DE CLIC EN CELDA **/
+    //MANEJO DE CLIC EN CELDA 
     const handleCellClick = (rowIndex: number, colIndex: number) => {
         console.log("📊 Board antes del clic:", board);
 
@@ -149,7 +149,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
         ws.send(message);
     };
 
-    /** 🔄 MANEJO DE ORBIT **/
+    //🔄 MANEJO DE ORBIT
     const handleOrbit = () => {
         if (!ws || ws.readyState !== WebSocket.OPEN) {
             console.error("❌ WebSocket no disponible.");
@@ -170,7 +170,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
         ws.send(orbitMessage);
     };
 
-    /** 🔍 VERIFICACIÓN DE SINCRONIZACIÓN DE TURNOS **/
+    // VERIFICACIÓN DE SINCRONIZACIÓN DE TURNOS
     useEffect(() => {
         console.log(`🔄 Turno actualizado: ${currentPlayer} | Estado: ${gameState}`);
     }, [currentPlayer, gameState]);

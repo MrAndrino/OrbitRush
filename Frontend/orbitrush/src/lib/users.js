@@ -141,13 +141,13 @@ export async function getAllUsers(url, token) {
 }
 
 export async function updateUserRole(url, token, newRole) {
-  const response = await fetch(url, {  // ✅ URL correcta sin newRole
+  const response = await fetch(url, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify(newRole)  // ✅ Enviar el role en el body
+    body: JSON.stringify(newRole) 
   });
 
   if (!response.ok) {
@@ -159,7 +159,7 @@ export async function updateUserRole(url, token, newRole) {
 
 
 export async function toggleBanUser(url, token) {
-  const response = await fetch(url, {  // ✅ URL correcta sin "undefined"
+  const response = await fetch(url, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

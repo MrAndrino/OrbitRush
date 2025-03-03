@@ -185,8 +185,6 @@ export const UsersProvider = ({ children }) => {
     try {
       const response = await updateUserProfile(EDIT_PROFILE_URL, token, formData);
       console.log(response.message);
-
-      // Opcionalmente, recargar el perfil del usuario después de la actualización
       await getSelfProfileData();
       logout();
     } catch (error) {
