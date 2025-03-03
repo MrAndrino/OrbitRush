@@ -1,0 +1,104 @@
+.profileContainer {
+  display: flex;
+  color: var(--foreground);
+  border-radius: 5px;
+  gap: 5rem;
+  align-items: center;
+  height: 60vh;
+  justify-content: space-evenly;
+}
+
+.profileContainer input {
+  font-family: var(--font-secondary);
+  font-size: 0.9rem;
+  border-radius: 5px;
+  color: var(--foreground);
+  padding: 0.2rem;
+  border: 2px solid rgb(0, 153, 255, 0.7);
+  background-color: rgba(0, 153, 255, 0.2);
+}
+
+.profileContainer input:hover {
+  background: linear-gradient(135deg, rgba(0, 153, 255, 0.4), rgba(0, 153, 255, 0.7)),
+    linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+}
+
+.profileData {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: center;
+}
+
+.selfProfileImage{
+  border-radius: 50%;
+  width: 10.5rem;
+  height: 10.5rem;
+  border: 2px solid rgba(0, 153, 255);
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+}
+
+.editProfileImage{
+  border-radius: 50%;
+  width: 10.5rem;
+  height: 10.5rem;
+  border: 2px solid rgba(0, 153, 255);
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+.otherProfileImage{
+  border-radius: 50%;
+  width: 10.5rem;
+  height: 10.5rem;
+  border: 2px solid rgba(255, 140, 0);
+  box-shadow: 0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6);
+}
+
+.profileName {
+  font-size: 1.7rem;
+  font-weight: bold;
+}
+
+.matchesHistory {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+}
+
+.matchesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  padding-right: 1.5rem;
+}
+
+.matchItem {
+  display: flex;
+  gap: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #4a4a4a;
+}
+
+.matchItemPart {
+  display: flex;
+  flex-direction: column;
+}
+
+.resultWin {
+  color: green;
+  font-size: 1.3rem;
+}
+
+.resultLoss {
+  color: red;
+  font-size: 1.3rem;
+}
+
+.resultDraw {
+  color: orange;
+  font-size: 1.3rem;
+}

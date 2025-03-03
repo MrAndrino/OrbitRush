@@ -1,0 +1,15 @@
+.neonBorder {
+  width: 100%;
+  position: relative;
+  background: linear-gradient(to bottom, rgb(0, 153, 255), rgb(255, 140, 0));
+  padding: 2px;
+  border-radius: 5px;
+  box-shadow: 0 -2px 7px rgba(0, 153, 255, 0.8),
+    0 2px 10px rgba(255, 140, 0, 0.8);
+}
+
+.content {
+  background: white;
+  border-radius: 5px;
+  height: 1px;
+}

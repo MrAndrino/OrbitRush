@@ -10,4 +10,5 @@ public interface IRepository<TEntity, TId> where TEntity : class
     Task DeleteAsync(TEntity entity);
     Task<bool> SaveAsync();
     Task<bool> ExistAsync(TId id);
+    Task<string> GetNameByIdAsync(int id);
 }

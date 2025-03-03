@@ -1,0 +1,100 @@
+.userCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.8rem;
+  border-bottom: 3px solid black;
+  transition: all 0.3s ease-in-out;
+  gap: 1rem;
+  background: linear-gradient(135deg, #1c2028, #151515);
+  user-select: none;
+}
+
+.userCard:hover {
+  background: linear-gradient(135deg, #2a2f3a, #222222); 
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  cursor: pointer;
+}
+
+.imageContainer {
+  position: relative;
+}
+
+.userImage {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+}
+
+.stateIndicator { 
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+}
+
+.stateDisconnected { 
+  border: 2px solid rgba(70, 70, 70, 0.8); 
+  background-color: rgb(60, 60, 60);
+}
+
+.stateConnected { 
+  border: 2px solid rgb(0, 200, 0, 0.8); 
+  background-color: rgb(0, 175, 0); 
+  box-shadow: 0 0 5px rgba(0, 128, 0, 0.8), 0 0 7px rgba(0, 128, 0, 0.5); 
+}
+
+.statePlaying { 
+  border: 2px solid rgb(0, 153, 255, 0.8);
+  background-color: rgba(0, 135, 224);
+  box-shadow: 0 0 5px rgba(0, 153, 255, 1), 0 0 7px rgba(0, 153, 255, 0.6);
+}
+
+.userName {
+  font-size: 1.25em;
+}
+
+.extraButtons {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-around;
+  gap: 0.5rem;
+}
+
+.extraButton{
+  font-family: var(--font-secondary);
+  color: #ededed;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.extraButton:hover {
+  color: rgba(255, 140, 0, 0.7);
+}
+
+.extraButton:active{
+  color: rgba(131, 72, 0, 0.7);
+}
+
+.extraButtonErase {
+  font-family: var(--font-secondary);
+  color: rgb(190, 0, 0);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+.extraButtonErase:hover {
+  color: rgba(255, 0, 0);
+}
+
+.extraButtonErase:active{
+  color: rgb(160, 0, 0);
+}

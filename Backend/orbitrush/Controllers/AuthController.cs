@@ -35,22 +35,27 @@ public class AuthController : ControllerBase
         {
             if (string.IsNullOrEmpty(request?.Password))
             {
-                throw new ArgumentException("Password is required.");
+                throw new ArgumentException("La contraseña es obligatoria.");
             }
 
             if (string.IsNullOrEmpty(request.NameLabel))
             {
-                throw new ArgumentException("Either Email or Name must be provided.");
+                throw new ArgumentException("Debes introducir nombre o email.");
             }
 
             User user = await _unitOfWork.UserRepository.CheckData(request.NameLabel, request.Password);
 
             if (user == null)
             {
-                return Unauthorized("Nombre de Usuario, email o contraseña inválidos");
+                return Unauthorized("Nombre de Usuario, email o contraseña inválidos.");
             }
 
-            string accessToken = GenerateToken(user.Id.ToString(), user.Name, user.Email, user.Role);
+            if (user.IsBanned)
+            {
+                return StatusCode(403, new { message = "Este usuario está baneado y no puede iniciar sesión." });
+            }
+
+            string accessToken = GenerateToken(user.Id.ToString(), user.Name, user.Image, user.Role);
 
             return Ok(new AccessTokenJwt { AccessToken = accessToken });
         }
@@ -78,7 +83,7 @@ public class AuthController : ControllerBase
             }
             if (nameExist)
             {
-                return BadRequest("Este nombre de usuario ya está en uso");
+                return BadRequest("Este nombre de usuario ya está en uso.");
             }
 
             User newUser = new User
@@ -94,7 +99,7 @@ public class AuthController : ControllerBase
             await _unitOfWork.UserRepository.InsertAsync(newUser);
             await _unitOfWork.SaveAsync();
 
-            string accessToken = GenerateToken(newUser.Id.ToString(), newUser.Name, newUser.Email, newUser.Role);
+            string accessToken = GenerateToken(newUser.Id.ToString(), newUser.Name, newUser.Image, newUser.Role);
 
             return Ok(new AccessTokenJwt { AccessToken = accessToken });
         }
@@ -105,7 +110,7 @@ public class AuthController : ControllerBase
     }
 
 
-    private string GenerateToken(string userId, string userName, string userRole, string userEmail)
+    private string GenerateToken(string userId, string userName, string userImage, string userRole)
     {
         SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
         {
@@ -113,7 +118,7 @@ public class AuthController : ControllerBase
             {
                 { "id", userId },
                 { "name", userName },
-                { "email", userEmail },
+                { "image", userImage },
                 {ClaimTypes.Role, userRole }
             },
 

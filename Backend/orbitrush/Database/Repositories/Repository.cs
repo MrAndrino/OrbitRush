@@ -55,6 +55,20 @@ public abstract class Repository<TEntity, TId> : IRepository<TEntity, TId> where
 
     public async Task<bool> ExistAsync(TId id)
     {
-        return await GetByIdAsync(id) !=null;
+        return await GetByIdAsync(id) != null;
+    }
+
+    public async Task<string> GetNameByIdAsync(int id)
+    {
+        return await Context.Users
+            .Where(u => u.Id == id)
+            .Select(u => u.Name)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task InsertRangeAsync(IEnumerable<TEntity> entities)
+    {
+        await Context.Set<TEntity>().AddRangeAsync(entities);
+        await SaveAsync();
     }
 }

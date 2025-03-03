@@ -1,11 +1,16 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect } from "react";
 import { Roboto, Electrolize } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/context/authcontext";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Toaster } from 'react-hot-toast';
-import { WebSocketProvider } from "@/context/websocketcontext"
+import { ToastContainer } from "react-toastify";
+
+import { WebSocketProvider } from "../context/websocketcontext";
+import { AuthProvider } from "../context/authcontext";
+import { UsersProvider } from "../context/userscontext";
+import React from "react";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -19,32 +24,45 @@ const electrolize = Electrolize({
   weight: ["400"],
 });
 
-export const metadata: Metadata = {
-  title: "Orbit Rush!",
-};
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+        .then(() => console.log("✅ Service Worker registrado correctamente."))
+        .catch((error) => console.error("❌ Error registrando el Service Worker:", error));
+    }
+  }, []);
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
   return (
-
-    <html lang="en">
-      <body
-        className={`${roboto.variable} ${electrolize.variable} antialiased`}
-      >
+    <html lang="es">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                  .then(() => console.log("✅ Service Worker registrado correctamente."))
+                  .catch((error) => console.error("❌ Error registrando el Service Worker:", error));
+              }
+            `,
+          }}
+        />
+      </head>
+      <body className={`${roboto.variable} ${electrolize.variable} antialiased overflow-hidden`}>
         <WebSocketProvider>
           <AuthProvider>
-            <ToastContainer />
-            {children}
+            <UsersProvider>
+              <ToastContainer />
+              {children}
+            </UsersProvider>
           </AuthProvider>
         </WebSocketProvider>
 
         <Toaster
-          position="top-right"
+          position="bottom-right"
           reverseOrder={false}
-          gutter={8} // Espaciado entre los toasts
+          gutter={8}
           toastOptions={{
             success: {
               duration: 3000,

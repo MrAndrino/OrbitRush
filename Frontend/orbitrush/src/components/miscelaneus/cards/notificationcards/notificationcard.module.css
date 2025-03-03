@@ -1,0 +1,63 @@
+.notificationCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.8rem;
+  border-bottom: 3px solid black;
+  transition: all 0.3s ease-in-out;
+  background: linear-gradient(135deg, #1c2028, #151515);
+  user-select: none;
+  font-family: var(--font-secondary);
+  color: #ededed;
+  text-align: center;
+}
+
+.notificationCard:hover {
+  background: linear-gradient(135deg, #2a2f3a, #222222);
+}
+
+.notificationUser{
+  font-size: 1.2rem;
+  color: rgba(0, 153, 255, 1);
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-around;
+}
+
+.acceptButton,
+.rejectButton {
+  cursor: pointer;
+  border: none;
+  transition: color 0.3s ease;
+  border-radius: 5px;
+  font-size: 1rem;
+  padding-top: 0.5rem;
+}
+
+.acceptButton {
+  color: #ededed;
+}
+
+.acceptButton:hover {
+  color: rgba(0, 153, 255, 0.7);
+}
+
+.acceptButton:active {
+  color: rgba(0, 96, 160, 0.7);
+}
+
+.rejectButton {
+  color: rgb(190, 0, 0);
+}
+
+.rejectButton:hover {
+  color: rgba(255, 0, 0);
+}
+
+.rejectButton:active {
+  color: rgb(160, 0, 0);
+}

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import Button from '@/components/button/button';
-import Line from '@/components/line/line';
-import Modal from '@/components/modal/modal';
+import Button from '@/components/miscelaneus/button/button';
+import Line from '@/components/miscelaneus/line/line';
+import Modal from '@/components/miscelaneus/modal/modal';
 import { useAuth } from '@/context/authcontext';
-import Instructions from '@/components/instructions/instructions';
+import Instructions from '@/components/miscelaneus/instructions/instructions';
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -31,16 +31,16 @@ export default function HomePage() {
 
       {/* Botonera */}
       <section className="flex justify-center gap-[5rem] select-none">
-        <Button href={token ? "/menu" : "/login"} color="blue" className="w-[15rem] h-[5rem] text-3xl">
+        <Button href={token ? "/menu" : "/login"} color="orange" className="w-[15rem] h-[5rem] text-3xl">
           ¡Juega Ahora!
         </Button>
-        <Button onClick={openModal} color="orange" className="w-[15rem] h-[5rem] text-3xl">
+        <Button onClick={openModal} color="blue" className="w-[15rem] h-[5rem] text-3xl">
           Cómo Jugar
         </Button>
       </section>
 
       {/* Modal */}
-      <Modal isOpen={isModalOpen} closeModal={closeModal} color='orange' className='w-[55%]'>
+      <Modal isOpen={isModalOpen} closeModal={closeModal} color='blue' className='w-[55%]'>
         <Instructions/>
       </Modal>
     </section>

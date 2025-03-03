@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import LoginForm from "@/components/login-register/loginForm";
 import RegisterForm from "@/components/login-register/registerForm";
 import styles from "@/components/login-register/login-register.module.css";
-import Line from "../line/line";
+import Line from "../miscelaneus/line/line";
 
 function LoginRegisterBox() {
   const [showLogin, setShowLogin] = useState(true);
@@ -13,10 +13,10 @@ function LoginRegisterBox() {
   useEffect(() => {
     if (showLogin) {
       setRenderLogin(true);
-      setTimeout(() => setRenderRegister(false), 500); // Tiempo de la transición
+      setTimeout(() => setRenderRegister(false), 500); 
     } else {
       setRenderRegister(true);
-      setTimeout(() => setRenderLogin(false), 500); // Tiempo de la transición
+      setTimeout(() => setRenderLogin(false), 500);
     }
   }, [showLogin]);
 

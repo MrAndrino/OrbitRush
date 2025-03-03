@@ -1,47 +1,54 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { jwtDecode } from 'jwt-decode';
 import { Login, Register } from '@/lib/auth';
 import { LOGIN_URL, REGISTER_URL } from '@/config';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { useWebSocket } from "@/context/websocketcontext"
+import { useWebSocket } from "@/context/websocketcontext";
 
 export const AuthContext = createContext();
 export const useAuth = () => {
   return useContext(AuthContext);
 };
 
+// ========== AuthProvider ==========
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
     if (typeof window !== "undefined") {
-      return JSON.parse(localStorage.getItem("accessToken")) || "";
+      return JSON.parse(localStorage.getItem("accessToken")) ||
+        JSON.parse(sessionStorage.getItem("accessToken")) || "";
     }
     return "";
   });
+  const [decodedToken, setDecodedToken] = useState(null);
 
-  const [decodedToken, setDecodedToken] = useState(() => {
-    if (token) return jwtDecode(token);
-    return null;
-  });
-
+  // ----- Otros Hooks -----
   const { connectWebSocket, closeWebSocket } = useWebSocket();
   const router = useRouter();
 
+  // ----- Decodificación del Token cuando cambia -----
   useEffect(() => {
     if (token) {
       const decoded = jwtDecode(token);
       setDecodedToken(decoded);
-      connectWebSocket();
     }
   }, [token]);
 
+  // ----- Conexión del WebSocket cuando el token y su decodificación están disponibles -----
+  const onlyOnce = useRef(false)
+  useEffect(() => {
+    if (!onlyOnce.current && token && decodedToken && decodedToken.id) {
+      connectWebSocket(decodedToken.id);
+      onlyOnce.current = true;
+    }
+  }, [decodedToken]);
 
+  // ----- Manejo del Login -----
   const handleLogin = async (data, rememberMe) => {
     try {
       const respuesta = await Login(LOGIN_URL, data);
-      await connectWebSocket();
       const username = await saveToken(respuesta.accessToken, rememberMe);
       router.push('/menu');
       toast.success(`¡Bienvenid@, ${username}!`);
@@ -51,33 +58,39 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // ----- Manejo del Registro -----
   const handleRegister = async (data) => {
     try {
       const respuesta = await Register(REGISTER_URL, data);
-      await connectWebSocket();
-      const username = await saveToken(respuesta.accessToken, rememberMe);
+      await saveToken(respuesta.accessToken);
       router.push('/menu');
-      toast.success(`Registro exitoso, bienvenid@, ${username}!`);
+      toast.success(`Registro exitoso, bienvenid@, ${respuesta.username}!`);
     } catch (error) {
       toast.error(error.message || "Ocurrió un error al registrarse");
       throw error;
     }
   };
 
-  const saveToken = async (newToken, rememberMe) => {
+  // ----- Guardar el Token y Actualizar Estados -----
+  const saveToken = (newToken, rememberMe) => {
     if (rememberMe) {
       localStorage.setItem("accessToken", JSON.stringify(newToken));
     } else {
       sessionStorage.setItem("accessToken", JSON.stringify(newToken));
     }
-    setToken(newToken);
+
+    window.dispatchEvent(new Event("storage"));
+
     const decoded = jwtDecode(newToken);
+    setToken(newToken);
     setDecodedToken(decoded);
+
     return decoded.name;
   };
 
+  // ----- Logout -----
   const logout = () => {
-    const username = decodedToken?.name || "Usuario";
+    const username = decodedToken ? decodedToken.name : "Usuario";
     localStorage.removeItem('accessToken');
     sessionStorage.removeItem('accessToken');
     setToken(null);
@@ -91,16 +104,19 @@ export const AuthProvider = ({ children }) => {
         fontSize: '16px',
         borderRadius: '8px',
         padding: '10px 20px',
-        border: '2px solid rgb(0, 153, 255)',
-        boxShadow: '0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6)',
+        border: '2px solid rgba(255, 140, 0)',
+        boxShadow: '0 0 10px rgba(255, 140, 0, 1), 0 0 15px rgba(255, 140, 0, 0.6)',
       }}>
         ¡Vuelve pronto, {username}!
       </div>
     );
   };
 
+  // ----- Valor del Contexto y Renderizado -----
   const contextValue = {
     token,
+    decodedToken,
+    setDecodedToken,
     saveToken,
     logout,
     handleLogin,

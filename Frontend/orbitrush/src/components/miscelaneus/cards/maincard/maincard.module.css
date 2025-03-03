@@ -1,0 +1,55 @@
+.mainCard {
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.5rem;
+  gap: 1.2rem;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.userInfo:hover {
+  transform: scale(1.1);
+}
+
+.userInfo:active {
+  transform: translateY(2px);
+  transition: all 0.2s ease;
+}
+
+.userImage {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  border: 2px solid rgb(0, 153, 255);
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+}
+
+/* Menú desplegable */
+.menu {
+  position: absolute;
+  background: linear-gradient(135deg, #1c2028, #151515);
+  border: 2px solid rgba(0, 153, 255);
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 153, 255, 1), 0 0 15px rgba(0, 153, 255, 0.6);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  font-family: var(--font-secondary);
+}
+
+.menu button {
+  padding: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.menu button:hover {
+  color: rgba(0, 153, 255, 0.7);
+  background: linear-gradient(135deg, #2a2f3a, #222222);
+}

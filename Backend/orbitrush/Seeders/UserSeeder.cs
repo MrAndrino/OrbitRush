@@ -21,7 +21,7 @@ public class UserSeeder
                 Name = "Mr. Utsugi",
                 Email = "utsugi@gmail.com",
                 HashPassword = PasswordHelper.Hash("Utsugi77"),
-                Image = "images/profiles/Mr_Utsugi.webp",
+                Image = "images/profiles/Utsugi.webp",
                 Role = "admin",
                 State = StateEnum.Disconnected
             },
@@ -32,6 +32,42 @@ public class UserSeeder
                 HashPassword = PasswordHelper.Hash("Ralowl21"),
                 Image = "images/profiles/Ralowl.webp",
                 Role = "user",
+                State = StateEnum.Disconnected
+            },
+            new User{
+                Id = 3,
+                Name = "Sayetsu",
+                Email = "sayetsu@gmail.com",
+                HashPassword = PasswordHelper.Hash("Sayetsu13"),
+                Image = "images/profiles/Sayetsu.webp",
+                Role = "user",
+                State = StateEnum.Disconnected
+            },
+            new User{
+                Id = 4,
+                Name = "Pixeladu",
+                Email = "pixeladu@gmail.com",
+                HashPassword = PasswordHelper.Hash("Pixeladu24"),
+                Image = "images/profiles/Mikel.jpg",
+                Role = "user",
+                State = StateEnum.Disconnected
+            },
+            new User{
+                Id = 5,
+                Name = "Fernando",
+                Email = "fernando@gmail.com",
+                HashPassword = PasswordHelper.Hash("Fernando3"),
+                Image = "images/profiles/Fernando.jpg",
+                Role = "user",
+                State = StateEnum.Disconnected
+            },
+            new User{
+                Id = 6,
+                Name = "OrbitAdmin",
+                Email = "admin@gmail.com",
+                HashPassword = PasswordHelper.Hash("Admin1"),
+                Image = "images/MatchBot.jpeg",
+                Role = "admin",
                 State = StateEnum.Disconnected
             }
         ];

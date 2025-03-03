@@ -1,0 +1,27 @@
+.fbContainer {
+  display: flex;
+  flex-direction: column;
+  height: 81vh;
+  border-right: 2px solid white;
+  box-shadow: 2px 0px 10px rgba(255, 140, 0, 0.8);
+  background: var(--background);
+}
+
+.searchBox input {
+  font-family: var(--font-secondary);
+  color: var(--foreground);
+  padding: 0.5rem;
+  border-bottom: 2px solid rgba(255, 140, 0, 0.7);
+  background-color: rgba(255, 140, 0, 0.2);
+  height: 2.55rem;
+  width: 100%;
+}
+
+.searchBox input:hover {
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.4), rgba(255, 140, 0, 0.7)),
+    linear-gradient(45deg, rgba(20, 20, 20, 0.7), rgba(50, 50, 50, 0.9));
+}
+
+.searchBox input:focus {
+  outline: none;
+}

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import Button from '../button/button';
+import Button from '../miscelaneus/button/button';
 import { useAuth } from '@/context/authcontext';
 import { toast } from 'react-hot-toast';
 
@@ -19,6 +19,11 @@ function RegisterForm() {
 
     if (!username.trim()) {
       toast.error("Por favor, ingresa un apodo.");
+      return;
+    }
+    
+    if (username.length > 10) {
+      toast.error("El apodo no puede tener más de 10 caracteres.");
       return;
     }
 
@@ -96,6 +101,7 @@ function RegisterForm() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="input-style form-container register"
+              maxLength={10}
             />
           </div>
           <div>

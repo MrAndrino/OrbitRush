@@ -1,0 +1,27 @@
+.lobbyBox {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100%;
+  background: linear-gradient(133deg, #0a0a0a 36%,
+      rgba(0, 153, 255, 0.8) 45%,
+      rgba(255, 255, 255, 0.8) 50%,
+      rgba(255, 140, 0, 0.8) 55%,
+      #151515 64%);
+  padding-right: 1.5rem;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rem;
+}
+
+.image {
+  border: 3px solid rgba(255, 255, 255);
+  box-shadow: 0 0 10px rgba(255, 255, 255), 0 0 15px rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  width: 12rem;
+}

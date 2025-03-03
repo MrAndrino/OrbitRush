@@ -1,0 +1,6 @@
+.userList {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  scrollbar-color: rgba(255, 140, 0, 0.7) #1e1e1e;
+}
