@@ -103,10 +103,20 @@ export const WebSocketProvider = ({ children }) => {
 
           case "leftGame":
             toast.success(data.Message || "Has salido de la partida.");
-            localStorage.removeItem("sessionId");
-
+            sessionStorage.removeItem("sessionId");
+            sessionStorage.removeItem("currentPlayer");
+            sessionStorage.removeItem("player1Id");
+            sessionStorage.removeItem("player2Id");
             router.push("/menu");
             break;
+
+          case "opponentLeft":
+            toast.success(data.Message || "Tu oponente ha abandonado partida.");
+            sessionStorage.removeItem("sessionId");
+            sessionStorage.removeItem("currentPlayer");
+            sessionStorage.removeItem("player1Id");
+            sessionStorage.removeItem("player2Id");
+            router.push("/menu");
 
           case "chatHistory":
             if (data.SessionId === sessionId) {
@@ -117,7 +127,7 @@ export const WebSocketProvider = ({ children }) => {
           case "gameStarted":
             setPlayer1Id(data.Player1Id);
             setPlayer2Id(data.Player2Id);
-            localStorage.setItem("sessionId", data.SessionId);
+            sessionStorage.setItem("sessionId", data.SessionId);
 
             setMatchData({
               matchId: data.SessionId,
@@ -516,7 +526,7 @@ export const WebSocketProvider = ({ children }) => {
       console.error("❌ WebSocket no conectado");
       return;
     }
-    const storedSessionId = localStorage.getItem("sessionId");
+    const storedSessionId = sessionStorage.getItem("sessionId");
 
     const mensaje = JSON.stringify({
       Action: "leaveGame",

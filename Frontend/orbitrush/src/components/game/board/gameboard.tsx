@@ -70,7 +70,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ userId }) => {
     }, [ws]);
 
     useEffect(() => {
-        const storedSessionId = localStorage.getItem("sessionId");
+        const storedSessionId = sessionStorage.getItem("sessionId");
         if (!sessionId && storedSessionId) {
             console.log(
                 "🔄 Restaurando sessionId desde localStorage:",
