@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import MatchFoundModal from "@/components/miscelaneus/modal/matchfound/matchfound";
 import GameOverModal from "@/components/miscelaneus/modal/gameover/gameover";
+import { jwtDecode } from "jwt-decode";
 
 const WebSocketContext = createContext();
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -125,19 +126,12 @@ export const WebSocketProvider = ({ children }) => {
             break;
 
           case "gameOver":
-            console.log("🏆 Mensaje gameOver recibido:", data);
-
-            if (!userId) {
-              console.warn("⚠️ userId aún no está definido, esperando...");
-              return;
-            }
-
             setGameOverData({
               winner: data.Winner,
               sessionId: data.SessionId,
             });
-            break;
 
+            break;
 
           case "lobbyCreated":
             console.log("✅ Lobby creado, redirigiendo...");
@@ -650,13 +644,17 @@ export const WebSocketProvider = ({ children }) => {
     }
   }, [currentPlayer]);
 
-
-
-  useEffect(() => {
-    if (gameOverData) {
-      console.log("📢 Se ha actualizado gameOverData:", gameOverData);
+  const getUserIdFromToken = () => {
+    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+    try {
+      const decoded = jwtDecode(token);
+      return decoded.id.toString();
+    } catch (error) {
+      console.error("❌ Error al decodificar el token:", error);
+      return null;
     }
-  }, [gameOverData]);
+  };
+
 
 
   // ----- Valor del contexto y renderizado-----
@@ -713,6 +711,7 @@ export const WebSocketProvider = ({ children }) => {
           onClose={() => setGameOverData(null)}
           winner={gameOverData.winner}
           sessionId={gameOverData.sessionId}
+          userId={getUserIdFromToken()}
         />
       )}
     </WebSocketContext.Provider>
