@@ -138,7 +138,7 @@ const UserProfile = ({ id }: UserProfileProps) => {
       >
         <div className="flex flex-col gap-12">
           <p className="text-2xl">
-            ¿Seguro que quieres eliminar a "{userProfile.name}" de tu lista de amigos?
+            ¿Seguro que quieres eliminar a &quot;{userProfile.name}&quot; de tu lista de amigos?
           </p>
           <div className="flex justify-center gap-[5rem] select-none">
             <Button color="red" onClick={handleRemoveFriend} className="w-[10rem] h-[4rem] text-2xl">

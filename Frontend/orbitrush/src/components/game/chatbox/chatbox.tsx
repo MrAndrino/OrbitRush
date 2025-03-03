@@ -11,13 +11,8 @@ interface ChatMessage {
     timestamp: string;
 }
 
-interface User {
-    id: string;
-    name: string;
-}
-
 const ChatBox = () => {
-    const { sendChatMessage, ws, requestChatHistory, chatMessages, sessionId } = useWebSocket();
+    const { ws, requestChatHistory, chatMessages, sessionId } = useWebSocket();
     const [message, setMessage] = useState("");
     const chatEndRef = useRef<HTMLDivElement | null>(null);
 

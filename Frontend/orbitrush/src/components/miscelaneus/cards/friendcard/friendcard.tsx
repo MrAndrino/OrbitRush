@@ -51,7 +51,7 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
       } else {
         toast.success(`Invitaste a ${user.name} a jugar.`);
       }
-    } catch (error) {
+    } catch {
       toast.error("Error al enviar la invitación.");
     }
   };
@@ -108,7 +108,7 @@ const FriendCard = ({ user, type, isExpanded, handleExpand }: FriendCardProps) =
       <Modal isOpen={isSecondModalOpen} closeModal={closeSecondModal} color="red" className="flex flexcol w-[40%] justify-center">
         <div className="flex flex-col gap-12">
           <p className="text-2xl">
-            Seguro que quieres eliminar a "{user.name}" de tu lista de amigos?
+            Seguro que quieres eliminar a &quot;{user.name}&quot; de tu lista de amigos?
           </p>
           <div className="flex justify-center gap-[5rem] select-none">
             <Button color="red" onClick={handleRemoveFriend} className="w-[10rem] h-[4rem] text-2xl">Eliminar</Button>

@@ -77,7 +77,7 @@ const AdminMenu = () => {
                 <Modal isOpen={isBanModalOpen} closeModal={closeBanModal} color={selectedUser.isBanned ? "orange" : "red"} className="flex flexcol w-[40%] justify-center">
                     <div className="flex flex-col gap-12">
                         <p className="text-2xl">
-                            ¿Seguro que quieres {selectedUser.isBanned ? "desbanear" : "banear"} a "{selectedUser.name}"?
+                            ¿Seguro que quieres {selectedUser.isBanned ? "desbanear" : "banear"} a &quot;{selectedUser.name}&quot;?
                         </p>
                         <div className="flex justify-center gap-[5rem] select-none">
                             <Button color={selectedUser.isBanned ? "orange" : "red"}

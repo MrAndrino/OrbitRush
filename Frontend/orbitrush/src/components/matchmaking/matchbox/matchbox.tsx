@@ -12,7 +12,7 @@ interface MatchBoxProps {
 }
 
 const MatchBox = ({ variant, isSearching }: MatchBoxProps) => {
-  const { playWithBot, queueForMatch, cancelMatchmaking, setIsSearching  } = useWebSocket();
+  const { playWithBot, queueForMatch, cancelMatchmaking } = useWebSocket();
   
   const images = {
     bot: "/images/MatchBot.jpeg",

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useWebSocket } from "@/context/websocketcontext";
 import Modal from "@/components/miscelaneus/modal/modal";
 import Button from "@/components/miscelaneus/button/button";
@@ -18,7 +17,6 @@ const MatchFoundModal = ({
   isOpen,
   onClose,
   matchId,
-  opponentId,
   sendResponse,
 }: MatchFoundModalProps) => {
   const [countdown, setCountdown] = useState<number>(7);
@@ -27,7 +25,6 @@ const MatchFoundModal = ({
   const [contentMessage, setContentMessage] = useState<string>("¡Se ha encontrado un rival! ¿Deseas jugar?");
 
   const { matchData, cancelMatchmaking, setIsSearching, leaveLobby } = useWebSocket();
-  const router = useRouter();
   const autoCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
