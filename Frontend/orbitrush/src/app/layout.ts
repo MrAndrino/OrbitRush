@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
+export const metadata = {
   title: "Orbit Rush!",
-  manifest: "/manifest.json",
-  themeColor: "#000000",
+  description: "Juego multijugador en tiempo real",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };

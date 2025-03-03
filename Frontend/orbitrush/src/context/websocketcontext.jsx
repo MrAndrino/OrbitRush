@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import MatchFoundModal from "@/components/miscelaneus/modal/matchfound/matchfound";
 import GameOverModal from "@/components/miscelaneus/modal/gameover/gameover";
 import { jwtDecode } from "jwt-decode";
+import {WS_URL} from "@/config"
 
 const WebSocketContext = createContext();
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -62,7 +63,7 @@ export const WebSocketProvider = ({ children }) => {
     }
 
     const socket = new WebSocket(
-      `wss://localhost:7203/socket?userId=${userId}`
+      `${WS_URL}/socket?userId=${userId}`
     );
 
     console.log("🔌 Conectando nuevo WebSocket para:", userId);
