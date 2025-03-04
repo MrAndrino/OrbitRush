@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --background: linear-gradient(135deg, #f1f1f1, #dadada);
-  --foreground: #171717;
-  --backgroundtoast: #f1f1f1;
+  --background: linear-gradient(135deg, #0a0a0a, #151515);
+    --foreground: #ededed;
+    --backgroundtoast: #0a0a0a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,3 +27,9 @@ body {
 .scrollbar-hidden {
   scrollbar-width: none;
 }
+
+/*Modo Claro para futuro
+  --background: linear-gradient(135deg, #f1f1f1, #dadada);
+  --foreground: #171717;
+  --backgroundtoast: #f1f1f1;
+*/
